@@ -18,7 +18,7 @@ namespace FoodApp.Repositories
         public IEnumerable<Recipe> GetRecipes(string nameFilter)
         {
             var sql = "SELECT * FROM recipe WHERE name LIKE @name ORDER BY id ASC;";
-            return DBConnector.QueryDatabase<Recipe>(sql, new { name = $"%{(nameFilter ?? string.Empty)}%" });
+            return DBConnector.QueryDatabase<Recipe>(sql, new { name = $"%{nameFilter}%" });
         }
 
         public Recipe? GetRecipeById(int id)

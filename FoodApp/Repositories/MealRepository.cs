@@ -26,7 +26,7 @@ namespace FoodApp.Repositories
                 sql += " AND id IN (SELECT mealId FROM recipe_meal WHERE recipeId = @recipeId)";
             }
             sql += " ORDER BY id ASC;";
-            return DBConnector.QueryDatabase<Meal>(sql, new { name = $"%{(nameFilter ?? string.Empty)}%", recipeId = recipeId });
+            return DBConnector.QueryDatabase<Meal>(sql, new { name = $"%{nameFilter}%", recipeId = recipeId });
         }
 
         public Meal? GetMealById(int id)

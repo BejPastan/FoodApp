@@ -55,7 +55,7 @@ namespace FoodApp.Repositories
             if (foodTypeId.HasValue) { sets.Add("foodTypeId = @foodType"); }
             if (sets.Count ==0) return null;
             var sql = $"UPDATE food SET {string.Join(", ", sets)} WHERE id = @id; SELECT * FROM food WHERE id = @id;";
-            return DBConnector.QueryDatabase<Food>(sql, new { id = id, name = name, foodType = foodTypeId }).FirstOrDefault();
+            return DBConnector.QueryDatabase<Food>(sql, new { id = id, name = $"%{name}%", foodType = foodTypeId }).FirstOrDefault();
         }
 
         public bool DeleteFood(int id)

@@ -18,7 +18,7 @@ namespace FoodApp.Repositories
         public IEnumerable<Unit> GetUnits(string nameFilter)
         {
             var sql = "SELECT * FROM units WHERE name LIKE @name ORDER BY name ASC;";
-            return DBConnector.QueryDatabase<Unit>(sql, new { name = $"%{(nameFilter ?? string.Empty)}%" });
+            return DBConnector.QueryDatabase<Unit>(sql, new { name = $"%{nameFilter}%" });
         }
 
         public Unit? GetUnitById(int id)

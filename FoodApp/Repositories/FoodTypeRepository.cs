@@ -40,7 +40,7 @@ namespace FoodApp.Repositories
         {
             if (name == null) return null;
             var sql = "UPDATE food_type SET name = @name WHERE id = @id; SELECT * FROM food_type WHERE id = @id;";
-            return DBConnector.QueryDatabase<FoodType>(sql, new { name = name, id = id }).FirstOrDefault();
+            return DBConnector.QueryDatabase<FoodType>(sql, new { name = $"%{name}%", id = id }).FirstOrDefault();
         }
 
         public bool DeleteFoodType(int id)

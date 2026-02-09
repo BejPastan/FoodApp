@@ -17,7 +17,7 @@ namespace FoodApp.Repositories
         public IEnumerable<Tag> GetTags(string nameFilter)
         {
             var sql = "SELECT * FROM tags WHERE name LIKE @name ORDER BY id ASC;";
-            return DBConnector.QueryDatabase<Tag>(sql, new { name = $"%{(nameFilter ?? string.Empty)}%" });
+            return DBConnector.QueryDatabase<Tag>(sql, new { name = $"%{nameFilter}%" });
         }
 
         public Tag? GetTagById(int id)
