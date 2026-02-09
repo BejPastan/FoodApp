@@ -2,7 +2,7 @@
 {
     public class SecretController
     {
-        static string serverName = "localhost\\SQLEXPRESS";
+        static string serverName = "host.docker.internal\\SQLEXPRESS,1443";
         static string userName = "FoodAppController";
         static string password = "Test@123";
 

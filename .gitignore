@@ -7,3 +7,6 @@
 /FoodApp/bin
 /FoodApp/obj
 /.vs/FoodApp/config
+/bin
+/obj
+launchSettings.json
