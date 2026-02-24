@@ -5,7 +5,7 @@ namespace FoodApp.Services
 {
     public interface IUnitService
     {
-        IEnumerable<Unit> GetUnits(string nameFilter);
+        IEnumerable<Unit> GetUnits(string nameFilter, int page = 1, int pageSize = 25);
         Unit? GetUnitById(int id);
         Unit CreateUnit(Unit request);
         Unit? UpdateUnit(Unit request);
@@ -17,7 +17,7 @@ namespace FoodApp.Services
         private readonly IUnitRepository _repo;
         public UnitService(IUnitRepository repo) { _repo = repo; }
 
-        public IEnumerable<Unit> GetUnits(string nameFilter) => _repo.GetUnits(nameFilter);
+        public IEnumerable<Unit> GetUnits(string nameFilter, int page = 1, int pageSize = 25) => _repo.GetUnits(nameFilter, page, pageSize);
         public Unit? GetUnitById(int id) => _repo.GetUnitById(id);
         public Unit CreateUnit(string name, decimal volumeEquivalent) => _repo.CreateUnit(name, volumeEquivalent);
         public Unit? UpdateUnit(Unit reques)

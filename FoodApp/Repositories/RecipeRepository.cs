@@ -5,7 +5,7 @@ namespace FoodApp.Repositories
 {
     public interface IRecipeRepository
     {
-        IEnumerable<Recipe> GetRecipes(string nameFilter);
+        IEnumerable<Recipe> GetRecipes(string nameFilter, int page = 1, int pageSize = 25);
         Recipe? GetRecipeById(int id);
         Recipe CreateRecipe(string name);
         Recipe? UpdateRecipe(int id, string? name);
@@ -15,10 +15,10 @@ namespace FoodApp.Repositories
 
     public class RecipeRepository : IRecipeRepository
     {
-        public IEnumerable<Recipe> GetRecipes(string nameFilter)
+        public IEnumerable<Recipe> GetRecipes(string nameFilter, int page = 1, int pageSize = 25)
         {
-            var sql = "SELECT * FROM recipe WHERE name LIKE @name ORDER BY id ASC;";
-            return DBConnector.QueryDatabase<Recipe>(sql, new { name = $"%{nameFilter}%" });
+            var sql = "SELECT * FROM recipe WHERE name LIKE @name ORDER BY id ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
+            return DBConnector.QueryDatabase<Recipe>(sql, new { name = $"%{nameFilter}%", offset = (page - 1) * pageSize, pageSize = pageSize });
         }
 
         public Recipe? GetRecipeById(int id)

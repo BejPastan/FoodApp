@@ -6,7 +6,7 @@ namespace FoodApp.Repositories
 {
     public interface IFoodRepository
     {
-        IEnumerable<Food> GetFoods(int? typeId, string nameFilter);
+        IEnumerable<Food> GetFoods(int? typeId, string nameFilter, int page = 1, int pageSize = 25);
         Food? GetFoodById(int id);
         Food CreateFood(string name, int foodTypeId);
         Food? UpdateFood(int id, string? name, int? foodTypeId);
@@ -15,7 +15,7 @@ namespace FoodApp.Repositories
 
     public class FoodRepository : IFoodRepository
     {
-        public IEnumerable<Food> GetFoods(int? typeId, string nameFilter)
+        public IEnumerable<Food> GetFoods(int? typeId, string nameFilter, int page = 1, int pageSize = 25)
         {
             string sql = "SELECT * FROM food WHERE 1=1";
             if(typeId.HasValue)
@@ -26,9 +26,9 @@ namespace FoodApp.Repositories
             {
                 sql += " AND name LIKE @name";
             }
-            sql += " ORDER BY name ASC;";
+            sql += " ORDER BY name ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
             Console.WriteLine("get food repo test");
-            return DBConnector.QueryDatabase<Food>(sql, new { typeId = typeId, name = $"%{nameFilter}%" });
+            return DBConnector.QueryDatabase<Food>(sql, new { typeId = typeId, name = $"%{nameFilter}%", offset = (page - 1) * pageSize, pageSize = pageSize });
         }
 
         public Food? GetFoodById(int id)

@@ -8,7 +8,7 @@ namespace FoodApp.Repositories
 {
     public interface IIngredientRepository
     {
-        IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId);
+        IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page, int pageSize);
         Ingredient? GetIngredientById(int id);
         Ingredient CreateIngredient(int foodId, int unitId, decimal unitAmount, int recipeId);
         Ingredient? UpdateIngredient(int id, int? foodId, int? unitId, decimal? unitAmount, int? recipeId);
@@ -17,15 +17,15 @@ namespace FoodApp.Repositories
 
     public class IngredientRepository : IIngredientRepository
     {
-        public IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId)
+        public IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page, int pageSize)
         {
             var sql = "SELECT * FROM ingredients WHERE 1=1";
             if (recipeId.HasValue) sql += " AND recipeId = @recipeId";
             if (foodId.HasValue) sql += " AND foodId = @foodId";
-            sql += " ORDER BY id ASC;";
-            return DBConnector.QueryDatabase<Ingredient>(sql, new { recipeId = recipeId, foodId = foodId });
+            sql += " ORDER BY id ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
+            return DBConnector.QueryDatabase<Ingredient>(sql, new { recipeId = recipeId, foodId = foodId, offset = (page - 1) * pageSize, pageSize = pageSize }).ToList();
         }
-
+        
         public Ingredient? GetIngredientById(int id)
         {
             var sql = "SELECT * FROM ingredients WHERE id = @id;";
@@ -34,8 +34,15 @@ namespace FoodApp.Repositories
 
         public Ingredient CreateIngredient(int foodId, int unitId, decimal unitAmount, int recipeId)
         {
-            var sql = "INSERT INTO ingredients (foodId, unitId, unitAmount, recipeId) OUTPUT INSERTED.* VALUES (@foodId, @unitId, @amt, @recipeId);";
-            var list = DBConnector.QueryDatabase<Ingredient>(sql, new { foodId = foodId, unitId = unitId, amt = unitAmount, recipeId = recipeId }).ToList();
+            var recipeStr = "";
+            if(recipeId>0)
+            {
+                recipeStr = ", recipeId";
+            }
+
+            var sql = $"INSERT INTO ingredients (foodId, unitId, unitAmount{recipeStr}) OUTPUT INSERTED.* VALUES (@foodId, @unitId, @amt {recipeStr});";
+            Console.WriteLine($"foodId: {foodId}, unitId {unitId}, amt: {unitAmount}, recipeId: {recipeId}");
+            var list = DBConnector.QueryDatabase<Ingredient>(sql, new { foodId, unitId, amt = unitAmount, recipeId }).ToList();
             if (list.Count > 0) return list[0];
             throw new Exception("Insert failed");
         }

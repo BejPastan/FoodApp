@@ -11,11 +11,11 @@ namespace FoodApp.Controllers
         public UnitController(IUnitService service) { _service = service; }
 
         [HttpGet("api/units")]
-        public IActionResult GetUnits([FromQuery] string name = "")
+        public IActionResult GetUnits([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
             try 
             { 
-                return Ok(_service.GetUnits(name)); 
+                return Ok(_service.GetUnits(name, page, perPage)); 
             }
             catch (Exception ex) 
             { 

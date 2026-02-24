@@ -5,7 +5,7 @@ namespace FoodApp.Repositories
 {
     public interface ITagRepository
     {
-        IEnumerable<Tag> GetTags(string nameFilter);
+        IEnumerable<Tag> GetTags(string nameFilter, int page, int pageSize);
         Tag? GetTagById(int id);
         Tag CreateTag(string name);
         Tag? UpdateTag(int id, string? name);
@@ -14,10 +14,10 @@ namespace FoodApp.Repositories
 
     public class TagRepository : ITagRepository
     {
-        public IEnumerable<Tag> GetTags(string nameFilter)
+        public IEnumerable<Tag> GetTags(string nameFilter, int page, int pageSize)
         {
-            var sql = "SELECT * FROM tags WHERE name LIKE @name ORDER BY id ASC;";
-            return DBConnector.QueryDatabase<Tag>(sql, new { name = $"%{nameFilter}%" });
+            var sql = "SELECT * FROM tags WHERE name LIKE @name ORDER BY id ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
+            return DBConnector.QueryDatabase<Tag>(sql, new { name = $"%{nameFilter}%", offset = (page - 1) * pageSize, pageSize = pageSize }).ToList();
         }
 
         public Tag? GetTagById(int id)

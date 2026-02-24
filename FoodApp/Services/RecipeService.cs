@@ -6,7 +6,7 @@ namespace FoodApp.Services
 {
     public interface IRecipeService
     {
-        IEnumerable<Recipe> GetRecipes(string nameFilter);
+        IEnumerable<Recipe> GetRecipes(string nameFilter, int page = 1, int pageSize = 25);
         Recipe? GetRecipeById(int id);
         Recipe? CreateRecipe(Recipe request);
         Recipe? UpdateRecipe(Recipe request);
@@ -31,9 +31,9 @@ namespace FoodApp.Services
             _recipeMealService = recipeMealService;
         }
 
-        public IEnumerable<Recipe> GetRecipes(string nameFilter)
+        public IEnumerable<Recipe> GetRecipes(string nameFilter, int page = 1, int pageSize = 25)
         {
-            Recipe[] recipes = _recipeRepo.GetRecipes(nameFilter).ToArray();
+            Recipe[] recipes = _recipeRepo.GetRecipes(nameFilter, page, pageSize).ToArray();
             for(int i = 0; i< recipes.Length; i++)
             {
                 FormatRecipe(recipes[i]);

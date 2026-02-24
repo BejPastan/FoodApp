@@ -33,6 +33,7 @@ builder.Services.AddScoped<FoodApp.Services.IUnitService, FoodApp.Services.UnitS
 builder.Services.AddScoped<FoodApp.Services.IRecipeMealService, FoodApp.Services.RecipeMealService>();
 builder.Services.AddScoped<FoodApp.Services.IRecipeTagService, FoodApp.Services.RecipeTagService>();
 builder.Services.AddScoped<FoodApp.Services.IUserMealService, FoodApp.Services.UserMealService>();
+builder.Services.AddScoped<FoodApp.Services.IUserService, FoodApp.Services.UserService>();
 builder.Services.AddScoped<FoodApp.Services.IFoodService, FoodApp.Services.FoodService>();
 builder.Services.AddScoped<FoodApp.Services.IFoodTypeService, FoodApp.Services.FoodTypeService>();
 builder.Services.AddScoped<FoodApp.Services.ITagService, FoodApp.Services.TagService>();

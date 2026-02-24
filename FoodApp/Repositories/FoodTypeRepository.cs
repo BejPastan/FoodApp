@@ -7,7 +7,7 @@ namespace FoodApp.Repositories
 {
     public interface IFoodTypeRepository
     {
-        IEnumerable<FoodType> GetFoodTypes(string nameFilter);
+        IEnumerable<FoodType> GetFoodTypes(string nameFilter, int page = 1, int pageSize = 25);
         FoodType? GetFoodTypeById(int id);
         FoodType CreateFoodType(string name);
         FoodType? UpdateFoodType(int id, string? name);
@@ -16,10 +16,10 @@ namespace FoodApp.Repositories
 
     public class FoodTypeRepository : IFoodTypeRepository
     {
-        public IEnumerable<FoodType> GetFoodTypes(string nameFilter)
+        public IEnumerable<FoodType> GetFoodTypes(string nameFilter, int page = 1, int pageSize = 25)
         {
-            var sql = "SELECT * FROM food_type WHERE name LIKE @name ORDER BY name ASC;";
-            return DBConnector.QueryDatabase<FoodType>(sql, new { name = $"%{(nameFilter ?? string.Empty)}%" });
+            var sql = "SELECT * FROM food_type WHERE name LIKE @name ORDER BY name ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
+            return DBConnector.QueryDatabase<FoodType>(sql, new { name = $"%{(nameFilter ?? string.Empty)}%", offset = (page - 1) * pageSize, pageSize = pageSize });
         }
 
         public FoodType? GetFoodTypeById(int id)

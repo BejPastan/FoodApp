@@ -16,9 +16,24 @@ This document provides comprehensive documentation for all API endpoints in the 
 10. [Tag Management](#tag-management)
 11. [Unit Management](#unit-management)
 12. [User Management](#user-management)
-13. [User-Meal Tracking](#user-meal-tracking)
+13. [Current User](#current-user)
+14. [User-Meal Tracking](#user-meal-tracking)
 
 ## Authentication
+
+### Authentication Headers
+
+All authenticated endpoints require a valid JWT token in the Authorization header. The token must be included in the following format:
+
+```
+Authorization: Bearer <your-auth-token>
+```
+
+**Important Notes:**
+- The token must be a valid JWT token obtained from the login endpoint
+- The token never expired
+- If the token is missing or invalid the API will return a 401 Unauthorized response
+- The token should be included in the header for all subsequent requests after login
 
 ### User Signup
 - **Endpoint**: `POST /api/users/signup`
@@ -47,6 +62,24 @@ This document provides comprehensive documentation for all API endpoints in the 
 }
 ```
 
+### Example Authentication Flow
+
+1. **Signup Request:**
+```
+POST /api/users/signup?email=user@example.com&password=securepassword&name=JohnDoe
+```
+
+2. **Login Request:**
+```
+POST /api/users/login?email=user@example.com&password=securepassword
+```
+
+3. **Authenticated Request:**
+```
+GET /auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
 ## Food Management
 
 ### Search Foods
@@ -54,7 +87,9 @@ This document provides comprehensive documentation for all API endpoints in the 
 - **Optional Parameters**:
   - `typeId` (query parameter) - Filter by food type ID
   - `name` (query parameter) - Filter by food name (partial match)
-- **Description**: Searches for foods based on type and/or name criteria.
+  - `page` (query parameter, default: 1) - Page number for pagination
+  - `perPage` (query parameter, default: 10) - Number of items per page
+- **Description**: Searches for foods based on type and/or name criteria with pagination support.
 - **Success Response Structure**:
 ```json
 [
@@ -145,7 +180,9 @@ This document provides comprehensive documentation for all API endpoints in the 
 - **Endpoint**: `GET /api/food_type`
 - **Optional Parameters**:
   - `name` (query parameter) - Filter by food type name (partial match)
-- **Description**: Retrieves all food types, optionally filtered by name.
+  - `page` (query parameter, default: 25) - Page number for pagination
+  - `perPage` (query parameter, default: 25) - Number of items per page
+- **Description**: Retrieves all food types, optionally filtered by name with pagination support.
 - **Success Response Structure**:
 ```json
 [
@@ -216,7 +253,9 @@ This document provides comprehensive documentation for all API endpoints in the 
 - **Optional Parameters**:
   - `recipeId` (query parameter) - Filter by recipe ID
   - `foodId` (query parameter) - Filter by food ID
-- **Description**: Retrieves ingredients, optionally filtered by recipe or food.
+  - `page` (query parameter, default: 25) - Page number for pagination
+  - `perPage` (query parameter, default: 25) - Number of items per page
+- **Description**: Retrieves ingredients, optionally filtered by recipe or food with pagination support.
 - **Success Response Structure**:
 ```json
 [
@@ -353,7 +392,9 @@ This document provides comprehensive documentation for all API endpoints in the 
 - **Endpoint**: `GET /api/meals`
 - **Optional Parameters**:
   - `name` (query parameter) - Filter by meal name (partial match)
-- **Description**: Retrieves all meals, optionally filtered by name.
+  - `page` (query parameter, default: 25) - Page number for pagination
+  - `perPage` (query parameter, default: 25) - Number of items per page
+- **Description**: Retrieves all meals, optionally filtered by name with pagination support.
 - **Success Response Structure**:
 ```json
 [
@@ -422,7 +463,9 @@ This document provides comprehensive documentation for all API endpoints in the 
 - **Endpoint**: `GET /api/recipes`
 - **Optional Parameters**:
   - `name` (query parameter) - Filter by recipe name (partial match)
-- **Description**: Retrieves all recipes, optionally filtered by name.
+  - `page` (query parameter, default: 25) - Page number for pagination
+  - `perPage` (query parameter, default: 25) - Number of items per page
+- **Description**: Retrieves all recipes, optionally filtered by name with pagination support.
 - **Success Response Structure**:
 ```json
 [
@@ -694,7 +737,9 @@ This document provides comprehensive documentation for all API endpoints in the 
 - **Endpoint**: `GET /api/steps`
 - **Optional Parameters**:
   - `recipeId` (query parameter) - Filter by recipe ID
-- **Description**: Retrieves steps, optionally filtered by recipe.
+  - `page` (query parameter, default: 25) - Page number for pagination
+  - `perPage` (query parameter, default: 25) - Number of items per page
+- **Description**: Retrieves steps, optionally filtered by recipe with pagination support.
 - **Success Response Structure**:
 ```json
 [
@@ -771,7 +816,9 @@ This document provides comprehensive documentation for all API endpoints in the 
 - **Endpoint**: `GET /api/tags`
 - **Optional Parameters**:
   - `name` (query parameter) - Filter by tag name (partial match)
-- **Description**: Retrieves all tags, optionally filtered by name.
+  - `page` (query parameter, default: 25) - Page number for pagination
+  - `perPage` (query parameter, default: 25) - Number of items per page
+- **Description**: Retrieves all tags, optionally filtered by name with pagination support.
 - **Success Response Structure**:
 ```json
 [
@@ -840,7 +887,9 @@ This document provides comprehensive documentation for all API endpoints in the 
 - **Endpoint**: `GET /api/units`
 - **Optional Parameters**:
   - `name` (query parameter) - Filter by unit name (partial match)
-- **Description**: Retrieves all units, optionally filtered by name.
+  - `page` (query parameter, default: 25) - Page number for pagination
+  - `perPage` (query parameter, default: 25) - Number of items per page
+- **Description**: Retrieves all units, optionally filtered by name with pagination support.
 - **Success Response Structure**:
 ```json
 [
@@ -904,6 +953,29 @@ This document provides comprehensive documentation for all API endpoints in the 
 ```json
 {
   "deleted": true
+}
+```
+
+## Current User
+
+### Get Current User Profile
+- **Endpoint**: `GET /auth/me`
+- **Required Headers**:
+  - `Authorization: Bearer <your-jwt-token>` - Valid JWT token from login
+- **Description**: Retrieves the current authenticated user's profile information. The response includes user details but excludes the password for security.
+- **Success Response Structure**:
+```json
+{
+  "id": 1,
+  "name": "JohnDoe",
+  "email": "user@example.com",
+  "last_login": "2023-01-01T12:00:00"
+}
+```
+- **Error Response Examples**:
+```json
+{
+  "error": "Invalid authorization header or token"
 }
 ```
 
@@ -1003,6 +1075,35 @@ This document provides comprehensive documentation for all API endpoints in the 
 }
 ```
 
+## Pagination
+
+Most GET endpoints support pagination to handle large datasets efficiently. When pagination is supported, the following query parameters are available:
+
+### Pagination Parameters
+
+- `page` (query parameter) - Page number (default: 1, minimum: 1)
+- `perPage` (query parameter) - Number of items per page (default: varies by endpoint, minimum: 1, maximum: 100)
+
+### Pagination Examples
+
+```bash
+# Get first page with 10 items per page
+GET /api/food?page=1&perPage=10
+
+# Get third page with 25 items per page
+GET /api/recipes?page=3&perPage=25
+
+# Get all food types with default pagination (page 25, 25 items per page)
+GET /api/food_type
+```
+
+### Pagination Best Practices
+
+- Use appropriate `perPage` values based on your needs (smaller values for mobile, larger for desktop)
+- Implement client-side caching to reduce API calls
+- Handle pagination errors gracefully (invalid page numbers, negative values)
+- Consider using cursor-based pagination for real-time applications
+
 ## Error Handling
 
 The API returns standard HTTP status codes:
@@ -1014,3 +1115,9 @@ The API returns standard HTTP status codes:
 - `500` - Internal Server Error
 
 Error responses include a JSON object with an `error` field containing a descriptive message.
+
+```json
+{
+  "error": "Invalid page number. Page must be greater than 0."
+}
+```

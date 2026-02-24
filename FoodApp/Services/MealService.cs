@@ -5,7 +5,7 @@ namespace FoodApp.Services
 {
     public interface IMealService
     {
-        Meal[] GetMeals(string? nameFilter, int? recipeId);
+        Meal[] GetMeals(string? nameFilter, int? recipeId, int page = 1, int pageSize = 25);
         Meal? GetMealById(int id);
         Meal CreateMeal(Meal name);
         Meal? UpdateMeal(int id, string? name);
@@ -20,9 +20,9 @@ namespace FoodApp.Services
             _mealRepo = mealRepo;
         }
 
-        public Meal[] GetMeals(string? nameFilter, int? recipeId)
+        public Meal[] GetMeals(string? nameFilter, int? recipeId, int page = 1, int pageSize = 25)
         {
-            return _mealRepo.GetMeals(nameFilter, recipeId).ToArray();
+            return _mealRepo.GetMeals(nameFilter, recipeId, page, pageSize).ToArray();
         }
 
         public Meal? GetMealById(int id) => _mealRepo.GetMealById(id);

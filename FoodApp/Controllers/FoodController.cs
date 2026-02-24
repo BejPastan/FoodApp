@@ -16,12 +16,14 @@ namespace FoodApp.Controllers
         [HttpGet("api/food")]
         public IActionResult SearchFood(
             [FromQuery] int? typeId,
-            [FromQuery] string name = ""
+            [FromQuery] string name = "",
+            [FromQuery] int page = 1,
+            [FromQuery] int perPage = 10
         )
         {
             try
             {
-                var foods = _service.GetFoods(typeId, name);
+                var foods = _service.GetFoods(typeId, name, page, perPage);
                 return Ok(foods);
             }
             catch (System.Exception ex)
@@ -49,6 +51,7 @@ namespace FoodApp.Controllers
         [HttpPost("api/food")]
         public IActionResult PostFood([FromBody] Food request)
         {
+            Console.WriteLine(request);
             try
             {
                 if(request.foodTypeId ==0 && (request.foodType == null || string.IsNullOrEmpty(request.foodType.name)))

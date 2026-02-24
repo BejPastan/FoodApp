@@ -6,7 +6,7 @@ namespace FoodApp.Repositories
 {
     public interface IUnitRepository
     {
-        IEnumerable<Unit> GetUnits(string nameFilter);
+        IEnumerable<Unit> GetUnits(string nameFilter, int page = 1, int pageSize = 25);
         Unit? GetUnitById(int id);
         Unit CreateUnit(string name, decimal volumeEquivalent);
         Unit? UpdateUnit(int id, string? name, decimal? volumeEquivalent);
@@ -15,10 +15,10 @@ namespace FoodApp.Repositories
 
     public class UnitRepository : IUnitRepository
     {
-        public IEnumerable<Unit> GetUnits(string nameFilter)
+        public IEnumerable<Unit> GetUnits(string nameFilter, int page = 1, int pageSize = 25)
         {
-            var sql = "SELECT * FROM units WHERE name LIKE @name ORDER BY name ASC;";
-            return DBConnector.QueryDatabase<Unit>(sql, new { name = $"%{nameFilter}%" });
+            var sql = "SELECT * FROM units WHERE name LIKE @name ORDER BY name ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
+            return DBConnector.QueryDatabase<Unit>(sql, new { name = $"%{nameFilter}%", offset = (page - 1) * pageSize, pageSize = pageSize });
         }
 
         public Unit? GetUnitById(int id)

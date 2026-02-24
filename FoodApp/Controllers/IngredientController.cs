@@ -14,11 +14,11 @@ namespace FoodApp.Controllers
         }
 
         [HttpGet("api/ingredients")]
-        public IActionResult GetIngredients([FromQuery] int? recipeId = null, [FromQuery] int? foodId = null)
+        public IActionResult GetIngredients([FromQuery] int? recipeId = null, [FromQuery] int? foodId = null, [FromQuery] int page = 1, [FromQuery]int perPage = 25)
         {
             try
             {
-                Ingredient[] ingredients = _service.GetIngredients(recipeId, foodId).ToArray();
+                Ingredient[] ingredients = _service.GetIngredients(recipeId, foodId,page, perPage).ToArray();
                 return Ok(ingredients);
             }
             catch (Exception ex)
@@ -48,6 +48,7 @@ namespace FoodApp.Controllers
         [HttpPost("api/ingredients")]
         public IActionResult PostIngredient([FromBody] Ingredient request)
         {
+            Console.WriteLine("test");
             try 
             { 
                 var created = _service.CreateIngredient(request); 

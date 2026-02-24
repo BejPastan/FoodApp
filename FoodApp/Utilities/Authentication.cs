@@ -42,6 +42,32 @@ namespace FoodApp.Utilities
         {
             return BCrypt.Net.BCrypt.EnhancedVerify(password, hash, HashType.SHA384);
         }
+
+        public static int? GetUserIdFromToken(string token)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(secretKey);
+                
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "userId").Value);
+                return userId;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
 

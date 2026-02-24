@@ -5,7 +5,7 @@ namespace FoodApp.Repositories
 {
     public interface IMealRepository
     {
-        IEnumerable<Meal> GetMeals(string? nameFilter, int? recipeId);
+        IEnumerable<Meal> GetMeals(string? nameFilter, int? recipeId, int page = 1, int pageSize = 25);
         Meal? GetMealById(int id);
         Meal CreateMeal(Meal name);
         Meal? UpdateMeal(int id, string? name);
@@ -14,7 +14,7 @@ namespace FoodApp.Repositories
 
     public class MealRepository : IMealRepository
     {
-        public IEnumerable<Meal> GetMeals(string? nameFilter, int? recipeId)
+        public IEnumerable<Meal> GetMeals(string? nameFilter, int? recipeId, int page = 1, int pageSize = 25)
         {
             string sql = "SELECT * FROM meal WHERE 1=1";
             if (!string.IsNullOrEmpty(nameFilter))
@@ -25,8 +25,8 @@ namespace FoodApp.Repositories
             {
                 sql += " AND id IN (SELECT mealId FROM recipe_meal WHERE recipeId = @recipeId)";
             }
-            sql += " ORDER BY id ASC;";
-            return DBConnector.QueryDatabase<Meal>(sql, new { name = $"%{nameFilter}%", recipeId = recipeId });
+            sql += " ORDER BY id ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
+            return DBConnector.QueryDatabase<Meal>(sql, new { name = $"%{nameFilter}%", recipeId = recipeId, offset = (page - 1) * pageSize, pageSize = pageSize });
         }
 
         public Meal? GetMealById(int id)

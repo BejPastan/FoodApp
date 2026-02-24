@@ -1,3 +1,4 @@
+using Azure;
 using FoodApp.Models;
 using FoodApp.Repositories;
 
@@ -5,7 +6,7 @@ namespace FoodApp.Services
 {
     public interface ITagService
     {
-        IEnumerable<Tag> GetTags(string nameFilter);
+        IEnumerable<Tag> GetTags(string nameFilter, int page = 1, int perPage = 25);
         Tag? GetTagById(int id);
         Tag CreateTag(Tag tagRequest);
         Tag? UpdateTag(Tag request);
@@ -17,7 +18,10 @@ namespace FoodApp.Services
         private readonly ITagRepository _repo;
         public TagService(ITagRepository repo) { _repo = repo; }
 
-        public IEnumerable<Tag> GetTags(string nameFilter) => _repo.GetTags(nameFilter);
+        public IEnumerable<Tag> GetTags(string nameFilter, int page = 1, int perPage = 25)
+        {
+            return _repo.GetTags(nameFilter, page, perPage);
+        }
         public Tag? GetTagById(int id) => _repo.GetTagById(id);
         public Tag CreateTag(Tag name)
         {

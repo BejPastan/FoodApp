@@ -11,12 +11,12 @@ namespace FoodApp.Controllers
         public MealController(IMealService service) { _service = service; }
 
         [HttpGet("api/meals")]
-        public IActionResult GetMeals([FromQuery] string name="")
+        public IActionResult GetMeals([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
             Console.WriteLine("Get call");
             try
             {
-                var response = _service.GetMeals(name, null);
+                var response = _service.GetMeals(name, null, page, perPage);
                 Console.WriteLine(response.Length);
                 return Ok(response);
             }

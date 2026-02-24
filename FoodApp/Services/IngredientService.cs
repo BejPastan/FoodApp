@@ -6,7 +6,7 @@ namespace FoodApp.Services
 {
     public interface IIngredientService
     {
-        IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId);
+        IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page = 1, int perPage = 25);
         Ingredient? GetIngredientById(int id);
         Ingredient CreateIngredient(Ingredient request);
         Ingredient? UpdateIngredient(Ingredient request);
@@ -25,9 +25,9 @@ namespace FoodApp.Services
             _unitServ = unitServ;
         }
 
-        public IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId)
+        public IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page = 1, int perPage = 25)
         {
-            Ingredient[] ingredients = _repo.GetIngredients(recipeId, foodId).ToArray();
+            Ingredient[] ingredients = _repo.GetIngredients(recipeId, foodId, page, perPage).ToArray();
             foreach (var ingredient in ingredients)
             {
                 FormatIngridient(ingredient);

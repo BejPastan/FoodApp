@@ -17,12 +17,12 @@ namespace FoodApp.Controllers
         }
 
         [HttpGet("api/recipes")]
-        public IActionResult GetRecipesAPI([FromQuery] string name = "")
+        public IActionResult GetRecipesAPI([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
             Console.WriteLine($"searching recipes with name {name}");
             try
             {
-                return Ok(_service.GetRecipes(name));
+                return Ok(_service.GetRecipes(name, page, perPage));
             }
             catch (Exception ex)
             {

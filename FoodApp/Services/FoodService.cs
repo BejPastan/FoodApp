@@ -5,7 +5,7 @@ namespace FoodApp.Services
 {
     public interface IFoodService
     {
-        IEnumerable<Food> GetFoods(int? typeId, string nameFilter);
+        IEnumerable<Food> GetFoods(int? typeId, string nameFilter, int page = 1, int pageSize = 25);
         Food? GetFoodById(int id);
         Food CreateFood(Food request);
         Food? UpdateFood(Food request);
@@ -21,9 +21,9 @@ namespace FoodApp.Services
             _repo = repo;
             _foodTypeRepo = foodTypeRepo;
         }
-        public IEnumerable<Food> GetFoods(int? typeId, string nameFilter)
+        public IEnumerable<Food> GetFoods(int? typeId, string nameFilter, int page = 1, int pageSize = 25)
         {
-            return _repo.GetFoods(typeId, nameFilter);
+            return _repo.GetFoods(typeId, nameFilter, page, pageSize);
         }
         public Food? GetFoodById(int id) => _repo.GetFoodById(id);
 

@@ -8,7 +8,7 @@ namespace FoodApp.Repositories
 {
     public interface IStepRepository
     {
-        IEnumerable<Step> GetSteps(int? recipeId);
+        IEnumerable<Step> GetSteps(int? recipeId, int page = 1, int pageSize = 25);
         Step? GetStepById(int id);
         Step CreateStep(int recipeId, string instruction, int stepNumber);
         Step? UpdateStep(int id, int? recipeId, string? instruction, int? stepNumber);
@@ -17,12 +17,12 @@ namespace FoodApp.Repositories
 
     public class StepRepository : IStepRepository
     {
-        public IEnumerable<Step> GetSteps(int? recipeId)
+        public IEnumerable<Step> GetSteps(int? recipeId, int page = 1, int pageSize = 25)
         {
             var sql = "SELECT * FROM steps WHERE 1=1";
             if (recipeId.HasValue) sql += " AND recipeId = @recipeId";
-            sql += " ORDER BY id ASC;";
-            return DBConnector.QueryDatabase<Step>(sql, new { recipeId = recipeId });
+            sql += " ORDER BY id ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
+            return DBConnector.QueryDatabase<Step>(sql, new { recipeId = recipeId, offset = (page - 1) * pageSize, pageSize = pageSize });
         }
 
         public Step? GetStepById(int id)

@@ -15,11 +15,11 @@ namespace FoodApp.Controllers
         }
 
         [HttpGet("api/food_type")]
-        public IActionResult GetFoodTypes([FromQuery] string name = "")
+        public IActionResult GetFoodTypes([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
             try
             {
-                var foodTypes = _service.GetFoodTypes(name);
+                var foodTypes = _service.GetFoodTypes(name, page, perPage);
                 return Ok(foodTypes);
             }
             catch (Exception ex)

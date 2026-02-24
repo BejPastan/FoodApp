@@ -11,11 +11,11 @@ namespace FoodApp.Controllers
         public StepController(IStepService service) { _service = service; }
 
         [HttpGet("api/steps")]
-        public IActionResult GetStepsAPI([FromQuery] int? recipeId = null)
+        public IActionResult GetStepsAPI([FromQuery] int? recipeId = null, [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
             try 
             { 
-                return Ok(_service.GetSteps(recipeId)); 
+                return Ok(_service.GetSteps(recipeId, page, perPage)); 
             }
             catch (Exception ex) 
             { 

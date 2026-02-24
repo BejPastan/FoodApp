@@ -5,7 +5,7 @@ namespace FoodApp.Services
 {
     public interface IStepService
     {
-        IEnumerable<Step> GetSteps(int? recipeId);
+        IEnumerable<Step> GetSteps(int? recipeId, int page = 1, int pageSize = 25);
         Step? GetStepById(int id);
         Step CreateStep(Step request);
         Step? UpdateStep(Step request);
@@ -20,9 +20,9 @@ namespace FoodApp.Services
             _stepRepo = stepRepo;
         }
 
-        public IEnumerable<Step> GetSteps(int? recipeId)
+        public IEnumerable<Step> GetSteps(int? recipeId, int page = 1, int pageSize = 25)
         {
-            return _stepRepo.GetSteps(recipeId);
+            return _stepRepo.GetSteps(recipeId, page, pageSize);
         }
 
         public Step? GetStepById(int id) => _stepRepo.GetStepById(id);
