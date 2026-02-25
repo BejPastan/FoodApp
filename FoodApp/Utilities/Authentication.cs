@@ -26,7 +26,7 @@ namespace FoodApp.Utilities
             JwtPayload payload = new()
             {
                 { "userId", userId },
-                { "expiry", DateTimeOffset.Now.AddMinutes(tokenExpiryMinutes).ToUnixTimeSeconds() }
+                { JwtRegisteredClaimNames.Exp, DateTimeOffset.UtcNow.AddMinutes(tokenExpiryMinutes).ToUnixTimeSeconds() }
             };
 
             var token = new JwtSecurityToken(header, payload);
@@ -60,11 +60,13 @@ namespace FoodApp.Utilities
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
+                Console.WriteLine($"jwt token:{jwtToken}");
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "userId").Value);
                 return userId;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return null;
             }
         }

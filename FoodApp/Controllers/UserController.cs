@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+using FoodApp.Models;
 using FoodApp.Repositories;
-using FoodApp.Utilities;
 using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FoodApp.Controllers
 {
@@ -15,20 +16,20 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/users/signup")]
-        public IActionResult SignUp([FromQuery] string email, [FromQuery] string password, [FromQuery] string name)
+        public IActionResult SignUp([FromBody] SignUpRequest request)
         {
+            
+
+            Console.WriteLine($"email: {request.email}, password: {request.password}, name:{request.name}");
             try
             {
-                var token = _service.SignUpUser(name, email, password);
-                return Ok(new { token });
+                var token = _service.SignUpUser(request.name, request.email, request.password);
+                Console.WriteLine($"token {new {token = token}}");
+                return Ok(new { token = token });
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -37,12 +38,13 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/users/login")]
-        public IActionResult Login([FromQuery] string email, [FromQuery] string password)
+        public IActionResult Login([FromBody] LoginRequest request)
         {
             try
             {
-                var token = _service.LoginUser(email, password);
-                return Ok(new { token });
+                var token = _service.LoginUser(request.email, request.password);
+                Console.WriteLine($"token {new { token = token }}");
+                return Ok(new { token = token });
             }
             catch (ArgumentException ex)
             {
@@ -58,9 +60,11 @@ namespace FoodApp.Controllers
             }
         }
 
-        [HttpGet("auth/me")]
+        [HttpGet("api/auth/me")]
         public IActionResult GetCurrentUser([FromHeader(Name = "Authorization")] string authorization)
         {
+            Console.WriteLine(authorization);
+
             try
             {
                 var user = _service.GetCurrentUser(authorization);
@@ -68,6 +72,7 @@ namespace FoodApp.Controllers
                 {
                     return Unauthorized(new { error = "Invalid authorization header or token" });
                 }
+                Console.WriteLine(user);
                 return Ok(user);
             }
             catch (Exception ex)

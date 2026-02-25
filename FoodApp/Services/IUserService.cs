@@ -28,6 +28,7 @@ namespace FoodApp.Services
 
             var token = authorization.Substring(7); // Remove "Bearer " prefix
             var userId = Authentication.GetUserIdFromToken(token);
+            Console.WriteLine($"userId: {userId}");
             
             if (userId == null)
             {
