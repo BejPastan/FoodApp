@@ -7,8 +7,8 @@ namespace FoodApp.Repositories
     {
         IEnumerable<Recipe> GetRecipes(string nameFilter, int page = 1, int pageSize = 25);
         Recipe? GetRecipeById(int id);
-        Recipe CreateRecipe(string name);
-        Recipe? UpdateRecipe(int id, string? name);
+        Recipe CreateRecipe(string name, int portion, int prepTime);
+        Recipe? UpdateRecipe(int id, string? name, int? portion, int? prepTime);
         bool DeleteRecipe(int id);
         Recipe[] GetRecipesToChoose(int userId, int mealId, int excludedWeeks);
     }
@@ -17,7 +17,7 @@ namespace FoodApp.Repositories
     {
         public IEnumerable<Recipe> GetRecipes(string nameFilter, int page = 1, int pageSize = 25)
         {
-            var sql = "SELECT * FROM recipe WHERE name LIKE @name ORDER BY id ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
+            var sql = "SELECT * FROM recipe WHERE name LIKE @name ORDER BY name ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
             return DBConnector.QueryDatabase<Recipe>(sql, new { name = $"%{nameFilter}%", offset = (page - 1) * pageSize, pageSize = pageSize });
         }
 
@@ -28,17 +28,30 @@ namespace FoodApp.Repositories
             return result;
         }
 
-        public Recipe CreateRecipe(string name)
+        public Recipe CreateRecipe(string name, int portion, int prepTime)
         {
-            string sql = "INSERT INTO recipe (name) OUTPUT INSERTED.* VALUES (@name);";
-            return DBConnector.QueryDatabase<Recipe>(sql, new { name = name ?? string.Empty }).First();
+            string sql = "INSERT INTO recipe (name, time, portion) OUTPUT INSERTED.* VALUES (@name, @prepTime, @portion);";
+            return DBConnector.QueryDatabase<Recipe>(sql, new { name = name, time = prepTime, portion = portion }).First();
         }
 
-        public Recipe? UpdateRecipe(int id, string? name)
+        public Recipe? UpdateRecipe(int id, string? name, int? portion, int? prepTime)
         {
-            if (name == null) return null;
-            string sql = "UPDATE recipe OUTPUT INSERTED.* SET name = @name WHERE id = @id; SELECT * FROM recipe WHERE id = @id;";
-            return DBConnector.QueryDatabase<Recipe>(sql, new { id = id, name = name }).FirstOrDefault();
+            string sql = "UPDATE recipe OUTPUT INSERTED.* SET ";
+            if (name != null)
+            {
+                sql.Concat(" name = @name,");
+            }
+            if(portion != null)
+            {
+                sql.Concat(" portion = @portion,");
+            }
+            if(prepTime != null)
+            {
+                sql.Concat(" time = @prepTime,");
+            }
+            sql = sql.Substring(0, sql.Length - 2);
+            sql.Concat(" WHERE id = @id; SELECT * FROM recipe WHERE id = @id;");
+            return DBConnector.QueryDatabase<Recipe>(sql, new { id = id, name = name, time = prepTime, portion = portion }).FirstOrDefault();
         }
 
         public bool DeleteRecipe(int id)

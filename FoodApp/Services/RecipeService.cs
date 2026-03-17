@@ -50,7 +50,7 @@ namespace FoodApp.Services
 
         public Recipe? CreateRecipe(Recipe request)
         {
-            Recipe created = _recipeRepo.CreateRecipe(request.name);
+            Recipe created = _recipeRepo.CreateRecipe(request.name, request.portion, request.time);
             int recipeId = created.id;
             foreach(var step in request.steps)
             {
@@ -146,7 +146,7 @@ namespace FoodApp.Services
                 _recipeMealService.CreateRecipeMeal(recipeMeal);
             }
 
-            var updated = _recipeRepo.UpdateRecipe(request.id, request.name);
+            var updated = _recipeRepo.UpdateRecipe(request.id, request.name, request.portion, request.time);
 
             return FormatRecipe(updated);
         }

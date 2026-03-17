@@ -6,6 +6,8 @@ namespace FoodApp.Models
     {
         public int id { get; set; }
         public string name { get; set; } = string.Empty;
+        public int time { get; set; }
+        public int portion { get; set; }
         public Ingredient[] ingredients { get; set; } = Array.Empty<Ingredient>();
         public Step[] steps { get; set; } = Array.Empty<Step>();
         public Meal[] meals { get; set; } = Array.Empty<Meal>();
@@ -27,7 +29,7 @@ namespace FoodApp.Models
             {
                 mealsStr += $"    {meal.ToString()}\n";
             }
-            return $"id = {id}, name = {name}, ingredients = [\n{ingredientsStr}\n], steps = [\n{stepsStr}\n], meals = [\n{mealsStr}\n]";
+            return $"id = {id}, name = {name}, portions = {portion}, preparation time = {time}, ingredients = [\n{ingredientsStr}\n], steps = [\n{stepsStr}\n], meals = [\n{mealsStr}\n]";
         }
     }
 }
