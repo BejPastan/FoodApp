@@ -44,7 +44,6 @@ namespace FoodApp.Services
         public Recipe? GetRecipeById(int id)
         {
             var recipe = _recipeRepo.GetRecipeById(id);
-            Console.WriteLine();
             if (recipe == null) return null;
             return FormatRecipe(recipe);
         }
@@ -160,35 +159,12 @@ namespace FoodApp.Services
         public Recipe[] GetRecipeToChoose(int mealId, int userId, int excludedWeeks, int choosSize)
         {
             int currentExcludedWeeks = excludedWeeks;
-            List<Recipe> recipes = new();
-            while (recipes.Count <= choosSize)
+            List<Recipe> recipes = _recipeRepo.GetRecipesToChoose(userId, mealId, currentExcludedWeeks).ToList();
+            Console.WriteLine($"recipe count: {recipes.Count}");
+            foreach(var recipe in recipes)
             {
-                recipes = _recipeRepo.GetRecipesToChoose(userId, mealId, currentExcludedWeeks).ToList();
-                currentExcludedWeeks--;
-                if(currentExcludedWeeks < 0) break;
+                FormatRecipe(recipe, FormatMode.inspect);
             }
-
-            Recipe[] selected = new Recipe[choosSize];
-            Random random = new Random();
-            if (recipes.Count > choosSize)
-            {
-                for(int i = 0; i < choosSize; i++)
-                {
-                    int index = random.Next(0, recipes.Count);
-                    selected[i] = recipes[index];
-                    recipes.RemoveAt(index);
-                }
-            }
-            else
-            {
-                selected = recipes.ToArray();
-            }
-
-            foreach(var recipe in selected)
-            {
-                FormatRecipe(recipe);
-            }
-
             return recipes.ToArray();
         }
 

@@ -34,7 +34,15 @@ namespace FoodApp.Services
             }
             return ingredients;
         }
-        public Ingredient? GetIngredientById(int id) => _repo.GetIngredientById(id);
+        public Ingredient? GetIngredientById(int id)
+        {
+            var ingredient = _repo.GetIngredientById(id);
+            if (ingredient == null)
+            {
+                return null;
+            }
+            return FormatIngridient(ingredient, FormatMode.full);
+        }
 
         public Ingredient CreateIngredient(Ingredient request)
         {
