@@ -26,4 +26,14 @@
         public string email { get; set; }
         public string password { get; set; }
     }
+
+    public class ExtendedUser: User
+    {
+        Role userRole { get; set; }
+
+        public override string ToString()
+        {
+            return $"User: {name} (ID: {id}, Email: {email}, Last Login: {last_login}), role: ({userRole.ToString})";
+        }
+    }
 }

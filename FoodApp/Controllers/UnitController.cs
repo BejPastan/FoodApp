@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using FoodApp.Services;
 using FoodApp.Models;
+using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FoodApp.Controllers
 {
@@ -8,7 +9,13 @@ namespace FoodApp.Controllers
     public class UnitController : Controller
     {
         private readonly IUnitService _service;
-        public UnitController(IUnitService service) { _service = service; }
+        private readonly IAuthService _auth;
+        public UnitController(IUnitService service, IAuthService auth) 
+        {
+            _service = service;
+            _auth = auth;
+        }
+
 
         [HttpGet("api/units")]
         public IActionResult GetUnits([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
@@ -38,8 +45,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/units")]
-        public IActionResult PostUnit([FromBody] Unit request)
+        public IActionResult PostUnit([FromBody] Unit request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try 
             { 
                 var created = _service.CreateUnit(request);
@@ -52,8 +61,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpPatch("api/units/{id}")]
-        public IActionResult PatchUnit(int id, [FromBody] Unit request)
+        public IActionResult PatchUnit(int id, [FromBody] Unit request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try 
             { 
                 var updated = _service.UpdateUnit(request); 
@@ -70,8 +81,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpDelete("api/units/{id}")]
-        public IActionResult DeleteUnit(int id)
+        public IActionResult DeleteUnit(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try 
             {
                 _service.DeleteUnit(id); 

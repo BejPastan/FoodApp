@@ -10,7 +10,7 @@ namespace FoodApp.Repositories
         Recipe CreateRecipe(string name);
         Recipe? UpdateRecipe(int id, string? name);
         bool DeleteRecipe(int id);
-        Recipe[] GetRecipesToChoose(int userId, int mealId, int[] excluded, int excludedWeeks);
+        Recipe[] GetRecipesToChoose(int userId, int mealId, int excludedWeeks);
     }
 
     public class RecipeRepository : IRecipeRepository
@@ -56,15 +56,12 @@ namespace FoodApp.Repositories
         /// <param name="excluded"></param>
         /// <param name="excludedWeeks"></param>
         /// <returns></returns>
-        public Recipe[] GetRecipesToChoose(int userId, int mealId, int[] excluded, int excludedWeeks)
+        public Recipe[] GetRecipesToChoose(int userId, int mealId, int excludedWeeks)
         {
             DateTime cutOffDate = DateTime.Now.AddDays(-excludedWeeks * 7);
-            string sql = "SELECT * FROM recipe WHERE recipe.id NOT IN @excluded AND recipe.id NOT IN (SELECT recipeId FROM user_meals WHERE mealDate>@cutDate) AND recipe.id IN (SELECT recipeId FROM recipe_meal WHERE id=@mealId);";
-            if(excluded.Length == 0)
-            {
-                excluded = new int[] { -1 };
-            }
-            return DBConnector.QueryDatabase<Recipe>(sql, new { excluded = excluded, cutDate = cutOffDate, mealId = mealId }).ToArray();
+            string sql = "With recipe_usage AS (Select rm.recipeId, COUNT(um.recipeId) eaten from recipe_meal rm JOIN meal ON meal.id = rm.mealId LEFT JOIN user_meals um ON um.recipeId = rm.recipeId AND um.mealDate > @cutDate WHERE meal.id = @mealId GROUP BY rm.recipeId) SELECT TOP(3) ROW_NUMBER() OVER(ORDER BY ru.eaten asc, NEWID()) as rank_order, ru.recipeId, ru.eaten FROM recipe_usage ru;";
+            //this is not done yet
+            return DBConnector.QueryDatabase<Recipe>(sql, new {cutDate = cutOffDate, mealId = mealId }).ToArray();
         }
     }
 }

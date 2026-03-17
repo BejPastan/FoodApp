@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using FoodApp.Services;
 using FoodApp.Models;
+using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FoodApp.Controllers
 {
@@ -8,7 +9,12 @@ namespace FoodApp.Controllers
     public class MealController : Controller
     {
         private readonly IMealService _service;
-        public MealController(IMealService service) { _service = service; }
+        private readonly IAuthService _auth;
+        public MealController(IMealService service, IAuthService auth)
+        {
+            _service = service;
+            _auth = auth;
+        }
 
         [HttpGet("api/meals")]
         public IActionResult GetMeals([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
@@ -45,22 +51,25 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/meals")]
-        public IActionResult PostMeal([FromBody] Meal mealRequest)
+        public IActionResult PostMeal([FromBody] Meal mealRequest, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
             try { var created = _service.CreateMeal(mealRequest); return Ok(created); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }
 
         [HttpPatch("api/meals/{id}")]
-        public IActionResult PatchMeal(int id, [FromQuery] string? name = null)
+        public IActionResult PatchMeal(int id, [FromHeader(Name = "Authorization")] string authorization, [FromQuery] string? name = null)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
             try { var updated = _service.UpdateMeal(id, name); if (updated == null) return BadRequest(new { error = "No fields or not found" }); return Ok(updated); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }
 
         [HttpDelete("api/meals/{id}")]
-        public IActionResult DeleteMeal(int id)
+        public IActionResult DeleteMeal(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
             try { _service.DeleteMeal(id); return Ok(new { deleted = true }); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }

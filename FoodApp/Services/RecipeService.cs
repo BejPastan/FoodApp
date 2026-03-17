@@ -163,7 +163,7 @@ namespace FoodApp.Services
             List<Recipe> recipes = new();
             while (recipes.Count <= choosSize)
             {
-                recipes = _recipeRepo.GetRecipesToChoose(mealId, userId, new int[0], currentExcludedWeeks).ToList();
+                recipes = _recipeRepo.GetRecipesToChoose(userId, mealId, currentExcludedWeeks).ToList();
                 currentExcludedWeeks--;
                 if(currentExcludedWeeks < 0) break;
             }

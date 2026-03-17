@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using FoodApp.Services;
 using FoodApp.Models;
+using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FoodApp.Controllers
 {
@@ -8,9 +9,11 @@ namespace FoodApp.Controllers
     public class IngredientController : Controller
     {
         private readonly IIngredientService _service;
-        public IngredientController(IIngredientService service)
+        private readonly IAuthService _auth;
+        public IngredientController(IIngredientService service, IAuthService auth)
         {
             _service = service;
+            _auth = auth;
         }
 
         [HttpGet("api/ingredients")]
@@ -46,9 +49,9 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/ingredients")]
-        public IActionResult PostIngredient([FromBody] Ingredient request)
+        public IActionResult PostIngredient([FromBody] Ingredient request, [FromHeader(Name = "Authorization")] string authorization)
         {
-            Console.WriteLine("test");
+            _auth.CheckPermissions(authorization, [Roles.admin]);
             try 
             { 
                 var created = _service.CreateIngredient(request); 
@@ -61,8 +64,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpPatch("api/ingredients/{id}")]
-        public IActionResult PatchIngredient(int id, [FromBody] Ingredient ingredient)
+        public IActionResult PatchIngredient(int id, [FromBody] Ingredient ingredient, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try 
             {
                 var updated = _service.UpdateIngredient(ingredient);
@@ -76,8 +81,9 @@ namespace FoodApp.Controllers
         }
 
         [HttpDelete("api/ingredients/{id}")]
-        public IActionResult DeleteIngredient(int id)
+        public IActionResult DeleteIngredient(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
             try { _service.DeleteIngredient(id); return Ok(new { deleted = true }); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }

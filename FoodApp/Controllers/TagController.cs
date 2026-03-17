@@ -1,6 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using FoodApp.Services;
 using FoodApp.Models;
+using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace FoodApp.Controllers
 {
@@ -8,7 +10,12 @@ namespace FoodApp.Controllers
     public class TagController : Controller
     {
         private readonly ITagService _service;
-        public TagController(ITagService service) { _service = service; }
+        private readonly IAuthService _auth;
+        public TagController(ITagService service, IAuthService auth) 
+        {
+            _service = service;
+            _auth = auth;
+        }
 
         [HttpGet("api/tags")]
         public IActionResult GetTags([FromQuery] string name = "")
@@ -25,8 +32,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/tags")]
-        public IActionResult PostTag([FromBody] Tag tagRequest)
+        public IActionResult PostTag([FromBody] Tag tagRequest, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try 
             {
                 var created = _service.CreateTag(tagRequest); 
@@ -39,8 +48,11 @@ namespace FoodApp.Controllers
         }
 
         [HttpPatch("api/tags/{id}")]
-        public IActionResult PatchTag(int id, [FromBody] Tag request)
+        public IActionResult PatchTag(int id, [FromBody] Tag request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
+
             try 
             { 
                 var updated = _service.UpdateTag(request);
@@ -56,8 +68,9 @@ namespace FoodApp.Controllers
         }
 
         [HttpDelete("api/tags/{id}")]
-        public IActionResult DeleteTag(int id)
+        public IActionResult DeleteTag(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
             try { _service.DeleteTag(id); return Ok(new { deleted = true }); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }

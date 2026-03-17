@@ -1,6 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using FoodApp.Services;
 using FoodApp.Models;
+using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace FoodApp.Controllers
 {
@@ -11,9 +13,12 @@ namespace FoodApp.Controllers
 
 
         private readonly IRecipeService _service;
-        public RecipeController(IRecipeService service)
+        private readonly IAuthService _auth;
+
+        public RecipeController(IRecipeService service, IAuthService auth)
         {
             _service = service;
+            _auth = auth;
         }
 
         [HttpGet("api/recipes")]
@@ -50,8 +55,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/recipes")]
-        public IActionResult PostRecipe([FromBody] Recipe request)
+        public IActionResult PostRecipe([FromBody] Recipe request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try 
             { 
                 var created = _service.CreateRecipe(request); return Ok(created); 
@@ -63,8 +70,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpPatch("api/recipes/{id}")]
-        public IActionResult PatchRecipe(int id, [FromBody] Recipe request)
+        public IActionResult PatchRecipe(int id, [FromBody] Recipe request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try 
             { 
                 var updated = _service.UpdateRecipe(request);
@@ -78,8 +87,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpDelete("api/recipes/{id}")]
-        public IActionResult DeleteRecipe(int id)
+        public IActionResult DeleteRecipe(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try { _service.DeleteRecipe(id); return Ok(new { deleted = true }); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }

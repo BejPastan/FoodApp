@@ -15,4 +15,10 @@
         full,
         inspect
     }
+
+    public enum Roles
+    {
+        user,
+        admin
+    }
 }

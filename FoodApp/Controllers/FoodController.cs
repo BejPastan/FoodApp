@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FoodApp.Models;
 using FoodApp.Services;
-using FoodApp.Models;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace FoodApp.Controllers
 {
@@ -8,6 +10,7 @@ namespace FoodApp.Controllers
     public class FoodController : Controller
     {
         private readonly IFoodService _service;
+        private readonly IAuthService _auth;
         public FoodController(IFoodService service)
         {
             _service = service;
@@ -49,9 +52,11 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/food")]
-        public IActionResult PostFood([FromBody] Food request)
+        public IActionResult PostFood([FromBody] Food request, [FromHeader(Name = "Authorization")] string authorization)
         {
-            Console.WriteLine(request);
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
+
             try
             {
                 if(request.foodTypeId ==0 && (request.foodType == null || string.IsNullOrEmpty(request.foodType.name)))
@@ -71,9 +76,12 @@ namespace FoodApp.Controllers
         [HttpPatch("api/food/{id}")]
         public IActionResult PatchFood(
             int id,
-            [FromBody] Food food
+            [FromBody] Food food,
+            [FromHeader(Name = "Authorization")] string authorization
         )
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try
             {
                 food.id = id;
@@ -88,8 +96,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpDelete("api/food/{id}")]
-        public IActionResult DeleteFood(int id)
+        public IActionResult DeleteFood(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try
             {
                 var ok = _service.DeleteFood(id);

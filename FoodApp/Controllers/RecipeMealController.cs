@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using FoodApp.Services;
 using FoodApp.Models;
+using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FoodApp.Controllers
 {
@@ -8,7 +9,12 @@ namespace FoodApp.Controllers
     public class RecipeMealController : Controller
     {
         private readonly IRecipeMealService _service;
-        public RecipeMealController(IRecipeMealService service) { _service = service; }
+        private readonly IAuthService _auth;
+        public RecipeMealController(IRecipeMealService service, IAuthService auth)
+        { 
+            _service = service;
+            _auth = auth;
+        }
 
         [HttpGet("api/recipe_meals")]
         public IActionResult GetRecipeMeals([FromQuery] int? recipeId = null, [FromQuery] int? mealId = null)
@@ -25,15 +31,19 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/recipe_meals")]
-        public IActionResult PostRecipeMeal([FromBody] RecipeMeal request)
+        public IActionResult PostRecipeMeal([FromBody] RecipeMeal request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try { var created = _service.CreateRecipeMeal(request); return Ok(created); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }
 
         [HttpDelete("api/recipe_meals/{id}")]
-        public IActionResult DeleteRecipeMeal(int id)
+        public IActionResult DeleteRecipeMeal(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try { _service.DeleteRecipeMeal(id); return Ok(new { deleted = true }); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }

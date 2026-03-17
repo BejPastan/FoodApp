@@ -1,6 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using FoodApp.Services;
 using FoodApp.Models;
+using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace FoodApp.Controllers
 {
@@ -8,10 +10,12 @@ namespace FoodApp.Controllers
     public class FoodTypeController : Controller
     {
         private readonly IFoodTypeService _service;
+        private readonly IAuthService _auth;
 
-        public FoodTypeController(IFoodTypeService service)
+        public FoodTypeController(IFoodTypeService service, IAuthService auth)
         {
             _service = service;
+            _auth = auth;
         }
 
         [HttpGet("api/food_type")]
@@ -44,8 +48,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/food_type")]
-        public IActionResult PostFoodType([FromBody] FoodType request)
+        public IActionResult PostFoodType([FromBody] FoodType request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try
             {
                 if (string.IsNullOrWhiteSpace(request.name))
@@ -63,8 +69,10 @@ namespace FoodApp.Controllers
         
 
         [HttpPatch("api/food_type/{id}")]
-        public IActionResult PatchFoodType(int id, [FromBody] FoodType request)
+        public IActionResult PatchFoodType(int id, [FromBody] FoodType request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try
             {
                 if (request.name == null) return BadRequest(new { error = "No fields provided to update." });
@@ -79,8 +87,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpDelete("api/food_type/{id}")]
-        public IActionResult DeleteFoodType(int id)
+        public IActionResult DeleteFoodType(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
+            _auth.CheckPermissions(authorization, [Roles.admin]);
+
             try
             {
                 var ok = _service.DeleteFoodType(id);

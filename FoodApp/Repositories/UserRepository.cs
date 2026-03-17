@@ -9,6 +9,7 @@ namespace FoodApp.Repositories
         User? GetUserByEmail(string email);
         User LoginUser(int userId);
         User? GetUserDataById(int id);
+        bool DeleteUser(int id);
     }
 
     public class UserRepository : IUserRepository
@@ -17,7 +18,7 @@ namespace FoodApp.Repositories
         {
             var sql = "INSERT INTO users (name, password, email) OUTPUT INSERTED.* VALUES (@Username, @Password, @Email);";
             var list = DBConnector.QueryDatabase<User>(sql, new { Username = username, Password = hashedPassword, Email = email }).ToList();
-            if (list.Count >0)
+            if (list.Count > 0)
             {
                 var inserted = list[0];
                 return new User
@@ -43,11 +44,11 @@ namespace FoodApp.Repositories
             var updateSql = "UPDATE users SET last_login = @last_login WHERE id = @id;";
             try
             {
-                DBConnector.QueryDatabase<int>(updateSql + " SELECT1;", new { last_login = DateTime.Now, id = userId }).ToList();
+                DBConnector.QueryDatabase<int>(updateSql, new { last_login = DateTime.Now, id = userId }).ToList();
             }
             catch
             {
-                // ignore update errors but proceed to attempt to fetch current user state
+                Console.WriteLine("error updating last login");
             }
 
             var fetchSql = "SELECT id, name, email, last_login FROM users WHERE id = @id;";
@@ -68,6 +69,13 @@ namespace FoodApp.Repositories
             user.password = string.Empty;
             user.last_login = null;
             return user;
+        }
+
+        public bool DeleteUser(int id)
+        {
+            var sql = "DELETE FROM users WHERE user_id = @userId";
+            DBConnector.QueryDatabase<int>(sql, new {userId = id}).FirstOrDefault();
+            return true;
         }
     }
 }

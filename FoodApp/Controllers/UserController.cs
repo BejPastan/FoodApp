@@ -43,8 +43,9 @@ namespace FoodApp.Controllers
             try
             {
                 var token = _service.LoginUser(request.email, request.password);
-                Console.WriteLine($"token {new { token = token }}");
-                return Ok(new { token = token });
+                var tokenObj = new { token = token };
+                Console.WriteLine($"token {tokenObj}");
+                return Ok(tokenObj);
             }
             catch (ArgumentException ex)
             {
@@ -63,8 +64,6 @@ namespace FoodApp.Controllers
         [HttpGet("api/auth/me")]
         public IActionResult GetCurrentUser([FromHeader(Name = "Authorization")] string authorization)
         {
-            Console.WriteLine(authorization);
-
             try
             {
                 var user = _service.GetCurrentUser(authorization);

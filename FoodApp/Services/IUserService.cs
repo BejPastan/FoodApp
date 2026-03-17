@@ -15,6 +15,7 @@ namespace FoodApp.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _repo;
+        private readonly IRoleRepository _roleRepository;
         public UserService(IUserRepository repo) { _repo = repo; }
         
         public User? GetUserDataById(int id) => _repo.GetUserDataById(id);
@@ -28,7 +29,6 @@ namespace FoodApp.Services
 
             var token = authorization.Substring(7); // Remove "Bearer " prefix
             var userId = Authentication.GetUserIdFromToken(token);
-            Console.WriteLine($"userId: {userId}");
             
             if (userId == null)
             {
@@ -51,6 +51,8 @@ namespace FoodApp.Services
                 throw new UnauthorizedAccessException("invalid email or password");
             }
             
+
+
             user = _repo.LoginUser(user.id);
             var token = Authentication.CreateAuthToken(user.id);
             return token;
@@ -65,6 +67,18 @@ namespace FoodApp.Services
             
             var hashed = Authentication.HashPassword(password);
             var user = _repo.SignUpUser(name, hashed, email);
+
+            try
+            {
+                _roleRepository.AddRoleToUser(user.id, Roles.user);
+            }
+            catch (Exception ex)
+            {
+                //delete user
+                _repo.DeleteUser(user.id);
+                throw ex;
+            }
+
             var token = Authentication.CreateAuthToken(user.id);
             return token;
         }

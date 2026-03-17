@@ -29,8 +29,6 @@ namespace FoodApp.Services
 
         public Food CreateFood(Food request)
         {
-            Console.WriteLine("Service: Creating Food record");
-
             int? foodTypeId = request.foodTypeId;
 
             if ((foodTypeId == null || foodTypeId <=0) && request.foodType != null)
