@@ -11,6 +11,7 @@ namespace FoodApp.Controllers
         public UserMealController(IUserMealService service) { _service = service; }
 
         [HttpGet("api/user_meals")]
+        
         public IActionResult GetUserMeals([FromQuery] int userId, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
         {
             try { return Ok(_service.GetUserMeals(userId, startDate, endDate)); }

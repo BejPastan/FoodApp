@@ -13,4 +13,19 @@
             return $"UserMeal {{ id = {id}, userId = {userId}, recipeId = {recipeId}, mealId = {mealId}, mealDate = {mealDate} }}";
         }
     }
+
+    public class UserMealWithData
+    {
+        public int recipeId { get; set; }//recipeId
+        public string name { get; set; }
+        public int time { get; set; }
+        public int portion { get; set; }
+        public string meal { get; set; }
+        public DateTime mealDate { get; set; }
+
+        public override string ToString()
+        {
+            return $"User meal with data racipeId = {recipeId}, recipe name = {name}, time={time}, portions= {portion}, meal= {meal}, meal Day= {mealDate}";
+        }
+    }
 }

@@ -5,7 +5,7 @@ namespace FoodApp.Services
 {
     public interface IUserMealService
     {
-        IEnumerable<UserMeal> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate);
+        IEnumerable<UserMealWithData> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate);
         UserMeal? GetUserMealById(int id);
         UserMeal CreateUserMeal(UserMeal toCreate);
         bool DeleteUserMeal(int id);
@@ -15,7 +15,7 @@ namespace FoodApp.Services
     {
         private readonly IUserMealRepository _repo;
         public UserMealService(IUserMealRepository repo) { _repo = repo; }
-        public IEnumerable<UserMeal> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate) => _repo.GetUserMeals(userId, startDate, endDate);
+        public IEnumerable<UserMealWithData> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate) => _repo.GetUserMeals(userId, startDate, endDate);
         public UserMeal? GetUserMealById(int id) => _repo.GetUserMealById(id);
         public UserMeal CreateUserMeal(UserMeal toCreate)
         {

@@ -5,7 +5,7 @@ namespace FoodApp.Repositories
 {
     public interface IUserMealRepository
     {
-        IEnumerable<UserMeal> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate);
+        IEnumerable<UserMealWithData> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate);
         UserMeal? GetUserMealById(int id);
         UserMeal CreateUserMeal(int userId, int recipeId, int mealId, DateTime date);
         bool DeleteUserMeal(int id);
@@ -13,13 +13,13 @@ namespace FoodApp.Repositories
 
     public class UserMealRepository : IUserMealRepository
     {
-        public IEnumerable<UserMeal> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate)
+        public IEnumerable<UserMealWithData> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate)
         {
-            string sql = "SELECT * FROM user_meals WHERE userId = @userId";
+            string sql = "SELECT us.mealDate, recipe.name, recipe.time, recipe.portion, recipe.id as recipeId, meal.name as meal FROM user_meals us LEFT JOIN recipe  ON recipe.id = recipeId LEFT JOIN meal ON meal.id = mealId WHERE userId = @userId ";
             if (startDate.HasValue) sql += " AND mealDate >= @startDate";
             if (endDate.HasValue) sql += " AND mealDate <= @endDate";
-            sql += " ORDER BY date ASC;";
-            return DBConnector.QueryDatabase<UserMeal>(sql, new { userId = userId, startDate = startDate, endDate = endDate });
+            sql += " ORDER BY mealDate ASC;";
+            return DBConnector.QueryDatabase<UserMealWithData>(sql, new { userId = userId, startDate = startDate, endDate = endDate });
         }
 
         public UserMeal? GetUserMealById(int id)
