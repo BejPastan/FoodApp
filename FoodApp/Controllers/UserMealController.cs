@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using FoodApp.Services;
 using FoodApp.Models;
+using FoodApp.Services;
+using FoodApp.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FoodApp.Controllers
 {
@@ -14,20 +15,35 @@ namespace FoodApp.Controllers
         
         public IActionResult GetUserMeals([FromQuery] int userId, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
         {
+            Console.WriteLine(startDate);
+            Console.WriteLine(endDate);
+
             try { return Ok(_service.GetUserMeals(userId, startDate, endDate)); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }
 
         [HttpGet("api/user_meals/{id}")]
-        public IActionResult GetUserMeal(int id)
+        public IActionResult GetUserMeal([FromHeader(Name = "Authorization")] string authorization)
         {
+            var userId = Authentication.GetUserIdFromHeader(authorization);
+            if (userId == null)
+            {
+                throw new Exception("You don't have permission to do this");
+            }
+            int id = userId.Value;
             try { var item = _service.GetUserMealById(id); if (item == null) return NotFound(); return Ok(item); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }
 
         [HttpPost("api/user_meals")]
-        public IActionResult PostUserMeal([FromBody] UserMeal request)
+        public IActionResult PostUserMeal([FromBody] UserMeal request, [FromHeader(Name = "Authorization")] string authorization)
         {
+            var userId = Authentication.GetUserIdFromHeader(authorization);
+            if(userId==null)
+            {
+                throw new Exception("You don't have permission to do this");
+            }
+            request.userId = userId.Value;
             try { var created = _service.CreateUserMeal(request); return Ok(created); }
             catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
         }

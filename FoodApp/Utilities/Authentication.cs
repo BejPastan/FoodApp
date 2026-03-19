@@ -1,5 +1,6 @@
 ﻿using BCrypt.Net;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -69,6 +70,18 @@ namespace FoodApp.Utilities
                 Console.WriteLine(ex.Message);
                 return null;
             }
+        }
+    
+        public static int? GetUserIdFromHeader(string header)
+        {
+            if (string.IsNullOrWhiteSpace(header) || !header.StartsWith("Bearer "))
+            {
+                throw new UnauthorizedAccessException("You don't have permission to do this");
+            }
+
+            header = header.Substring(7); // Remove "Bearer " prefix
+            var userId = Authentication.GetUserIdFromToken(header);
+            return userId;
         }
     }
 }

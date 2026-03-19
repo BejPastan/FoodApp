@@ -56,9 +56,8 @@ builder.Services.AddScoped<IIngredientService, IngredientService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 
 var app = builder.Build();
-
-app.UseCors("AllowAll");
-
 Swagger.UseSwaggerDocumentation(ref app);
+app.UseRouting();
+app.UseCors("AllowAll");
 app.MapControllers();
 app.Run();
