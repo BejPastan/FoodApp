@@ -4,8 +4,9 @@ using FoodApp.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// connecting to database
 
+SecretController.LoadSecrets(ref builder);
+// connecting to database
 DBConnector.SetConnectionString(SecretController.GetDatabaseCredentials());
 Authentication.Initialize(SecretController.GetAuthSecretKey(), 129600);//3 months
 DBConnector.Open();
@@ -21,6 +22,12 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
+});
+
+// Add global exception filter
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<GlobalExceptionFilter>();
 });
 
 #region adding repositories
@@ -39,7 +46,7 @@ builder.Services.AddScoped<IRecipeMealRepository, RecipeMealRepository>();
 builder.Services.AddScoped<IUserMealRepository, UserMealRepository>();
 #endregion
 
-// services
+#region services
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMealService, MealService>();
@@ -54,6 +61,7 @@ builder.Services.AddScoped<IFoodTypeService, FoodTypeService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IIngredientService, IngredientService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
+#endregion
 
 var app = builder.Build();
 Swagger.UseSwaggerDocumentation(ref app);

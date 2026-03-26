@@ -11,6 +11,7 @@ namespace FoodApp.Repositories
         Unit CreateUnit(string name, decimal volumeEquivalent);
         Unit? UpdateUnit(int id, string? name, decimal? volumeEquivalent);
         bool DeleteUnit(int id);
+        UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount);
     }
 
     public class UnitRepository : IUnitRepository
@@ -52,6 +53,20 @@ namespace FoodApp.Repositories
             var sql = "DELETE FROM units WHERE id = @id;";
             DBConnector.QueryDatabase<int>(sql, new { id = id }).ToList();
             return true;
+        }
+
+        public UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount)
+        {
+            var sql  = "SELECT org.volumeEquivalent / toConv.volumeEquivalent newUnitAmount, toConv.* FROM units org JOIN units toConv ON toConv.id = @newId WHERE org.id = @oldId";
+            var resp = DBConnector.QueryDatabase<UnitConvertResp>(sql, new { newId = newUnitId, oldId = oldUnitId });
+            if (resp.FirstOrDefault() == null)
+            {
+                throw new InvalidOperationException("Conversion failed, check unit ids");
+            }
+            var newUnit = resp.FirstOrDefault();
+            newUnit.newUnitAmount *= originalAmount;
+
+            return newUnit;
         }
     }
 }

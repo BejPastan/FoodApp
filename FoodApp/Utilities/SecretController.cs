@@ -2,16 +2,26 @@
 {
     public class SecretController
     {
-        static string serverName = "host.docker.internal\\SQLEXPRESS,1443";
-        static string userName = "FoodAppController";
-        static string password = "Test@123";
+        static string serverName = "";
+        static string userName = "";
+        static string password = "";
+
+        public static void LoadSecrets(ref WebApplicationBuilder builder)
+        {
+            serverName = builder.Configuration["ConnectionStrings:ServerName"] ?? throw new InvalidOperationException("DB_SERVER configuration is missing.");
+            userName = builder.Configuration["ConnectionStrings:UserId"] ?? throw new InvalidOperationException("DB_USER configuration is missing.");
+            password = builder.Configuration["ConnectionStrings:Password"] ?? throw new InvalidOperationException("DB_PASSWORD configuration is missing.");
+            authSecret = builder.Configuration["Auth:SecretKey"] ?? throw new InvalidOperationException("AUTH_SECRET_KEY configuration is missing.");
+            tokenExpiryMinutes = int.TryParse(builder.Configuration["Auth:TokenExpirationMinutes"], out int minutes) ? minutes : tokenExpiryMinutes;
+        }
 
         public static string GetDatabaseCredentials()
         {
-            return $"Data Source={serverName};Persist Security Info=False;User ID={userName};Password={password};Pooling=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Application Name=\"SQL Server Management Studio\";Command Timeout=0";
+            return $"Data Source={serverName};Persist Security Info=False;Database=foodApp;User ID={userName};Password={password};Pooling=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Application Name=\"SQL Server Management Studio\";Command Timeout=0";
         }
 
         static string authSecret = "This is a very secret key for authentication";
+        static int tokenExpiryMinutes = 43200;
 
         public static string GetAuthSecretKey()
         {

@@ -7,7 +7,7 @@ namespace FoodApp.Services
     public interface IUserService
     {
         User? GetUserDataById(int id);
-        User? GetCurrentUser(string authorization);
+        ExtendedUser? GetCurrentUser(int userId);
         string LoginUser(string email, string password);
         string SignUpUser(string name, string email, string password);
     }
@@ -16,26 +16,17 @@ namespace FoodApp.Services
     {
         private readonly IUserRepository _repo;
         private readonly IRoleRepository _roleRepository;
-        public UserService(IUserRepository repo) { _repo = repo; }
+        public UserService(IUserRepository repo, IRoleRepository roleRepo) 
+        { 
+            _repo = repo;
+            _roleRepository = roleRepo;
+        }
         
         public User? GetUserDataById(int id) => _repo.GetUserDataById(id);
         
-        public User? GetCurrentUser(string authorization)
+        public ExtendedUser? GetCurrentUser(int userId)
         {
-            if (string.IsNullOrWhiteSpace(authorization) || !authorization.StartsWith("Bearer "))
-            {
-                return null;
-            }
-
-            var token = authorization.Substring(7); // Remove "Bearer " prefix
-            var userId = Authentication.GetUserIdFromToken(token);
-            
-            if (userId == null)
-            {
-                return null;
-            }
-
-            return _repo.GetUserDataById(userId.Value);
+            return _repo.GetExtendedUserDataById(userId);
         }
 
         public string LoginUser(string email, string password)
@@ -76,7 +67,6 @@ namespace FoodApp.Services
             {
                 //delete user
                 _repo.DeleteUser(user.id);
-                throw ex;
             }
 
             var token = Authentication.CreateAuthToken(user.id);

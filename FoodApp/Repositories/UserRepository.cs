@@ -1,5 +1,7 @@
 ﻿using FoodApp.Utilities;
 using FoodApp.Models;
+using System.Security.Authentication.ExtendedProtection;
+using Microsoft.OpenApi.Extensions;
 
 namespace FoodApp.Repositories
 {
@@ -9,6 +11,7 @@ namespace FoodApp.Repositories
         User? GetUserByEmail(string email);
         User LoginUser(int userId);
         User? GetUserDataById(int id);
+        ExtendedUser? GetExtendedUserDataById(int id);
         bool DeleteUser(int id);
     }
 
@@ -76,6 +79,16 @@ namespace FoodApp.Repositories
             var sql = "DELETE FROM users WHERE user_id = @userId";
             DBConnector.QueryDatabase<int>(sql, new {userId = id}).FirstOrDefault();
             return true;
+        }
+
+        public ExtendedUser? GetExtendedUserDataById(int id)
+        {
+            var sql = "SELECT users.*, r.name as role FROM users LEFT JOIN user_roles ur ON ur.user_id = users.id LEFT JOIN role r ON r.id = ur.role_id;";
+            var user = DBConnector.QueryDatabase<ExtendedUser>(sql, new { id = id }).FirstOrDefault();
+            user.roleName = user.role.GetDisplayName();
+            if (user == null) return null;
+            user.password = string.Empty;
+            return user;
         }
     }
 }

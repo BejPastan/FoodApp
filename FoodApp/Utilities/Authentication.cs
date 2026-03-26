@@ -1,7 +1,6 @@
-﻿using BCrypt.Net;
+﻿using Azure.Core;
+using BCrypt.Net;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
@@ -44,7 +43,7 @@ namespace FoodApp.Utilities
             return BCrypt.Net.BCrypt.EnhancedVerify(password, hash, HashType.SHA384);
         }
 
-        public static int? GetUserIdFromToken(string token)
+        private static int? GetUserIdFromToken(string token)
         {
             try
             {
@@ -67,20 +66,49 @@ namespace FoodApp.Utilities
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return null;
+                throw new UnauthorizedAccessException("You don't have permission to do this");
             }
         }
     
-        public static int? GetUserIdFromHeader(string header)
+        public static void ValidateToken(HttpRequest request)
         {
-            if (string.IsNullOrWhiteSpace(header) || !header.StartsWith("Bearer "))
+            try
+            {
+                var token = request.Headers["Authorization"].FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(token) || !token.StartsWith("Bearer "))
+                {
+                    throw new UnauthorizedAccessException("You don't have permission to do this");
+                }
+                token = token.Substring(7);
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(secretKey);
+                
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+            }
+            catch (Exception ex)
+            {
+                throw new UnauthorizedAccessException("You don't have permission to do this");
+            }
+        }
+
+        public static int? GetUserIdFromHeader(HttpRequest request)
+        {
+            var token = request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(token) || !token.StartsWith("Bearer "))
             {
                 throw new UnauthorizedAccessException("You don't have permission to do this");
             }
 
-            header = header.Substring(7); // Remove "Bearer " prefix
-            var userId = Authentication.GetUserIdFromToken(header);
+            token = token.Substring(7); // Remove "Bearer " prefix
+            var userId = GetUserIdFromToken(token);
+            
             return userId;
         }
     }

@@ -2,7 +2,6 @@ using FoodApp.Models;
 using FoodApp.Services;
 using FoodApp.Utilities;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace FoodApp.Controllers
 {
@@ -11,68 +10,54 @@ namespace FoodApp.Controllers
     {
         private readonly ITagService _service;
         private readonly IAuthService _auth;
-        public TagController(ITagService service, IAuthService auth) 
+        public TagController(ITagService service, IAuthService authService)
         {
             _service = service;
-            _auth = auth;
+            _auth = authService;
         }
 
         [HttpGet("api/tags")]
         public IActionResult GetTags([FromQuery] string name = "")
         {
-            try { return Ok(_service.GetTags(name)); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+            Authentication.ValidateToken(Request);
+            return Ok(_service.GetTags(name));
         }
 
         [HttpGet("api/tags/{id}")]
         public IActionResult GetTag(int id)
         {
-            try { var item = _service.GetTagById(id); if (item == null) return NotFound(); return Ok(item); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+            Authentication.ValidateToken(Request);
+            var item = _service.GetTagById(id);
+            if (item == null) return NotFound();
+            return Ok(item);
         }
 
         [HttpPost("api/tags")]
-        public IActionResult PostTag([FromBody] Tag tagRequest, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult PostTag([FromBody] Tag tagRequest)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-
-            try 
-            {
-                var created = _service.CreateTag(tagRequest); 
-                return Ok(created); 
-            }
-            catch (Exception ex) 
-            { 
-                return StatusCode(500, new { error = ex.Message }); 
-            }
+            var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+            var created = _service.CreateTag(tagRequest);
+            return Ok(created);
         }
 
         [HttpPatch("api/tags/{id}")]
         public IActionResult PatchTag(int id, [FromBody] Tag request, [FromHeader(Name = "Authorization")] string authorization)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-
-
-            try 
-            { 
-                var updated = _service.UpdateTag(request);
-                if (updated == null)
-                {
-                    return BadRequest(new { error = "No fields or not found" });
-                }
-                return Ok(updated); 
+            var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+            var updated = _service.UpdateTag(request);
+            if (updated == null)
+            {
+                return BadRequest(new { error = "No fields or not found" });
             }
-            catch (Exception ex) 
-            { 
-                return StatusCode(500, new { error = ex.Message }); }
+            return Ok(updated);
         }
 
         [HttpDelete("api/tags/{id}")]
         public IActionResult DeleteTag(int id, [FromHeader(Name = "Authorization")] string authorization)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-            try { _service.DeleteTag(id); return Ok(new { deleted = true }); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+            var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+            _service.DeleteTag(id);
+            return Ok(new { deleted = true });
         }
     }
 }

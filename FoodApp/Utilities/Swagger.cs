@@ -1,4 +1,8 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using FoodApp.Models;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace FoodApp.Utilities
 {
@@ -15,7 +19,36 @@ namespace FoodApp.Utilities
                     Title = "FoodApp API",
                     Version = "v1"
                 });
+
+                var jwtSecurityScheme = new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
+                };
+
+                c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, jwtSecurityScheme);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = JwtBearerDefaults.AuthenticationScheme
+                            }
+                        },
+                        new string[]{}
+                    } 
+                });
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
+
         }
 
         public static void UseSwaggerDocumentation(ref WebApplication app)

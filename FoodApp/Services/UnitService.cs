@@ -10,6 +10,7 @@ namespace FoodApp.Services
         Unit CreateUnit(Unit request);
         Unit? UpdateUnit(Unit request);
         bool DeleteUnit(int id);
+        UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount);
     }
 
     public class UnitService : IUnitService
@@ -29,6 +30,11 @@ namespace FoodApp.Services
         public Unit CreateUnit(Unit request)
         {
             return _repo.CreateUnit(request.name, request.volumeEquivalent);
+        }
+
+        public UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount)
+        {
+            return _repo.ConvertUnit(oldUnitId, newUnitId, originalAmount);
         }
     }
 }

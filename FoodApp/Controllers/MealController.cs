@@ -10,68 +10,56 @@ namespace FoodApp.Controllers
     {
         private readonly IMealService _service;
         private readonly IAuthService _auth;
-        public MealController(IMealService service, IAuthService auth)
+        public MealController(IMealService service, IAuthService authService)
         {
             _service = service;
-            _auth = auth;
+            _auth = authService;
         }
 
         [HttpGet("api/meals")]
         public IActionResult GetMeals([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
-            Console.WriteLine("Get call");
-            try
-            {
+                Authentication.ValidateToken(Request);
                 var response = _service.GetMeals(name, null, page, perPage);
                 Console.WriteLine(response.Length);
                 return Ok(response);
-            }
-            catch (Exception ex) 
-            { 
-                return StatusCode(500, new { error = ex.Message }); 
-            }
         }
 
         [HttpGet("api/meals/{id}")]
         public IActionResult GetMeal(int id)
         {
-            try 
-            { 
+            Authentication.ValidateToken(Request);
                 var item = _service.GetMealById(id);
                 if (item == null)
                 {
                     return NotFound();
                 }
                 return Ok(item); 
-            }
-            catch (Exception ex) 
-            { 
-                return StatusCode(500, new { error = ex.Message }); 
-            }
         }
 
         [HttpPost("api/meals")]
-        public IActionResult PostMeal([FromBody] Meal mealRequest, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult PostMeal([FromBody] Meal mealRequest)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-            try { var created = _service.CreateMeal(mealRequest); return Ok(created); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+                _auth.CheckPermissions(Request, [Roles.admin]);
+                var created = _service.CreateMeal(mealRequest);
+                return Ok(created);
         }
 
         [HttpPatch("api/meals/{id}")]
-        public IActionResult PatchMeal(int id, [FromHeader(Name = "Authorization")] string authorization, [FromQuery] string? name = null)
+        public IActionResult PatchMeal(int id, [FromQuery] string? name = null)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-            try { var updated = _service.UpdateMeal(id, name); if (updated == null) return BadRequest(new { error = "No fields or not found" }); return Ok(updated); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+                var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+                var updated = _service.UpdateMeal(id, name);
+                if (updated == null) return BadRequest(new { error = "No fields or not found" });
+                return Ok(updated);
         }
 
         [HttpDelete("api/meals/{id}")]
-        public IActionResult DeleteMeal(int id, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult DeleteMeal(int id)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-            try { _service.DeleteMeal(id); return Ok(new { deleted = true }); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+                var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+                _service.DeleteMeal(id);
+                return Ok(new { deleted = true });
         }
     }
 }

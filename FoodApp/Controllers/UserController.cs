@@ -3,6 +3,7 @@ using FoodApp.Repositories;
 using FoodApp.Services;
 using FoodApp.Utilities;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace FoodApp.Controllers
 {
@@ -10,74 +11,51 @@ namespace FoodApp.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _service;
-        public UserController(IUserService service)
+        private readonly IAuthService _auth;
+        public UserController(IUserService service, IAuthService authService)
         {
             _service = service;
+            _auth = authService;
         }
 
+
+        /// <summary>
+        /// create new user and return auth token
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Create new user and return token
+        /// </remarks>
+        /// <response code="200">Success</response>
         [HttpPost("api/users/signup")]
         public IActionResult SignUp([FromBody] SignUpRequest request)
         {
-            
-
-            Console.WriteLine($"email: {request.email}, password: {request.password}, name:{request.name}");
-            try
-            {
-                var token = _service.SignUpUser(request.name, request.email, request.password);
-                Console.WriteLine($"token {new {token = token}}");
-                return Ok(new { token = token });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
+            var token = _service.SignUpUser(request.name, request.email, request.password);
+            AuthenticationResponse resp = new AuthenticationResponse(token);
+            return Ok(resp);
         }
 
         [HttpPost("api/users/login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            try
-            {
-                var token = _service.LoginUser(request.email, request.password);
-                var tokenObj = new { token = token };
-                Console.WriteLine($"token {tokenObj}");
-                return Ok(tokenObj);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
+            var token = _service.LoginUser(request.email, request.password);
+            AuthenticationResponse resp = new AuthenticationResponse(token);
+            return Ok(resp);
         }
 
         [HttpGet("api/auth/me")]
-        public IActionResult GetCurrentUser([FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult GetCurrentUser()
         {
-            try
+            int? userId = Authentication.GetUserIdFromHeader(Request);
+
+            if (userId == null)
             {
-                var user = _service.GetCurrentUser(authorization);
-                if (user == null)
-                {
-                    return Unauthorized(new { error = "Invalid authorization header or token" });
-                }
-                Console.WriteLine(user);
-                return Ok(user);
+                throw new UnauthorizedAccessException("You don't have permission to do this");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
+
+            ExtendedUser user = _service.GetCurrentUser(userId.Value);
+            return Ok(user);
         }
     }
 }

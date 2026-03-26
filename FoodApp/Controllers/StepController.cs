@@ -10,65 +10,54 @@ namespace FoodApp.Controllers
     {
         private readonly IStepService _service;
         private readonly IAuthService _auth;
-        
-        public StepController(IStepService service, IAuthService auth) 
+        public StepController(IStepService service, IAuthService authService)
         {
             _service = service;
-            _auth = auth;
+            _auth = authService;
         }
 
         [HttpGet("api/steps")]
         public IActionResult GetSteps([FromQuery] int? recipeId = null, [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
-            try 
-            { 
-                return Ok(_service.GetSteps(recipeId, page, perPage)); 
-            }
-            catch (Exception ex) 
-            { 
-                return StatusCode(500, new { error = ex.Message }); 
-            }
+            Authentication.ValidateToken(Request);
+            return Ok(_service.GetSteps(recipeId, page, perPage));
         }
 
         [HttpGet("api/steps/{id}")]
         public IActionResult GetStep(int id)
         {
-            try { var item = _service.GetStepById(id); if (item == null) return NotFound(); return Ok(item); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+            Authentication.ValidateToken(Request);
+            var item = _service.GetStepById(id);
+            if (item == null) return NotFound();
+            return Ok(item);
         }
 
         [HttpPost("api/steps")]
-        public IActionResult PostStep([FromBody] Step request, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult PostStep([FromBody] Step request)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-
-            try { var created = _service.CreateStep(request); return Ok(created); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+            var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+            var created = _service.CreateStep(request);
+            return Ok(created);
         }
 
         [HttpPatch("api/steps/{id}")]
-        public IActionResult PatchStep(int id, [FromBody] Step stepRequest, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult PatchStep(int id, [FromBody] Step stepRequest)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-
-            try 
-            { 
-                var updated = _service.UpdateStep(stepRequest); 
-                if (updated == null)
-                {
-                    return BadRequest(new { error = "No fields or not found" });
-                } 
-                return Ok(updated); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+            var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+            var updated = _service.UpdateStep(stepRequest);
+            if (updated == null)
+            {
+                return BadRequest(new { error = "No fields or not found" });
+            }
+            return Ok(updated);
         }
 
         [HttpDelete("api/steps/{id}")]
-        public IActionResult DeleteStep(int id, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult DeleteStep(int id)
         {
-            _auth.CheckPermissions(authorization, [Roles.admin]);
-
-            try { _service.DeleteStep(id); return Ok(new { deleted = true }); }
-            catch (Exception ex) { return StatusCode(500, new { error = ex.Message }); }
+            var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+            _service.DeleteStep(id);
+            return Ok(new { deleted = true });
         }
     }
 }

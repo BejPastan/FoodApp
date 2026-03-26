@@ -11,4 +11,10 @@ namespace FoodApp.Models
             return $"{name} (id: {id}, volumeEquivalent: {volumeEquivalent})";
         }
     }
+
+    public class UnitConvertResp
+    {
+        public Unit unit { get; set; }
+        public float newUnitAmount { get; set; }
+    }
 }
