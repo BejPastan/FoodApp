@@ -3,12 +3,20 @@ using Dapper;
 
 namespace FoodApp.Utilities
 {
+    /// <summary>
+    /// Utility class for managing database connections and executing queries using Dapper.
+    /// </summary>
     public class DBConnector
     {
         //private static SqlConnection? _connection;
         private static string _connectionString ="";
 
 
+        /// <summary>
+        /// method for setting the connection string for the database.
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <exception cref="ArgumentException"></exception>
         public static void SetConnectionString(string connectionString)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
@@ -27,7 +35,13 @@ namespace FoodApp.Utilities
             return connection;
         }
 
-        //send query using Dapper
+        /// <summary>
+        /// Sendingquery to database and return result as list of T, if error occurs return empty list and log the error.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         public static IEnumerable<T> QueryDatabase<T>(string sql, object? parameters = null)
         {
             SqlConnection connection = Open();

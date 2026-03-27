@@ -44,6 +44,11 @@ namespace FoodApp.Controllers
             return Ok(resp);
         }
 
+        /// <summary>
+        /// get user belonging to token, and return new token with extended expiry time
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("api/auth/me")]
         public IActionResult GetCurrentUser()
         {
@@ -55,6 +60,8 @@ namespace FoodApp.Controllers
             }
 
             ExtendedUser user = _service.GetCurrentUser(userId.Value);
+            string token = Authentication.CreateAuthToken(userId.Value);
+            Response.Headers.Add("new-token", token);
             return Ok(user);
         }
     }

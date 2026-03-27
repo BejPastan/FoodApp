@@ -58,7 +58,13 @@ namespace FoodApp.Services
             int unitId = request.unitId;
             if ((unitId == 0) && request.unit != null)
             {
-                var createdUnit = _unitServ.CreateUnit(request.unit);
+                UnitCreateRequest toCreate = new UnitCreateRequest
+                {
+                    name = request.unit.name,
+                    volumeEquivalent = request.unit.volumeEquivalent,
+                    desc = request.unit.desc
+                };
+                var createdUnit = _unitServ.CreateUnit(toCreate);
                 unitId = createdUnit.id;
             }
 
@@ -78,7 +84,13 @@ namespace FoodApp.Services
             int? unitId = request.unitId;
             if ((unitId == 0) && request.unit != null)
             {
-                var createdUnit = _unitServ.CreateUnit(request.unit);
+                UnitCreateRequest toCreate = new UnitCreateRequest
+                {
+                    name = request.unit.name,
+                    volumeEquivalent = request.unit.volumeEquivalent,
+                    desc = request.unit.desc
+                };
+                var createdUnit = _unitServ.CreateUnit(toCreate);
                 unitId = createdUnit.id;
             }
 

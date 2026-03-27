@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FoodApp.Controllers
 {
+    /// <summary>
+    /// Controller to mamange ingredients, which are used to link foods and recipes together
+    /// </summary>
     [ApiController]
     public class IngredientController : Controller
     {

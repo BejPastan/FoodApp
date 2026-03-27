@@ -1,8 +1,6 @@
 using Dapper;
 using FoodApp.Models;
 using FoodApp.Utilities;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace FoodApp.Repositories
 {

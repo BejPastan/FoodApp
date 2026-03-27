@@ -8,14 +8,20 @@ namespace FoodApp.Services
         IEnumerable<FoodType> GetFoodTypes(string nameFilter, int page = 1, int pageSize = 25);
         FoodType? GetFoodTypeById(int id);
         FoodType CreateFoodType(FoodType request);
-        FoodType? UpdateFoodType(FoodType request);
+
+        /// <summary>
+        /// Patch food type
+        /// </summary>
+        /// <param name="id">id of food type to patch</param>
+        /// <param name="request">Food type object with data to patch</param>
+        /// <returns></returns>
+        FoodType? UpdateFoodType(int id, FoodTypeUpdateRequest request);
         bool DeleteFoodType(int id);
     }
 
-    public class FoodTypeService : IFoodTypeService
+    public class FoodTypeService(IFoodTypeRepository repo) : IFoodTypeService
     {
-        private readonly IFoodTypeRepository _repo;
-        public FoodTypeService(IFoodTypeRepository repo) { _repo = repo; }
+        private readonly IFoodTypeRepository _repo = repo;
 
         public IEnumerable<FoodType> GetFoodTypes(string nameFilter, int page = 1, int pageSize = 25) => _repo.GetFoodTypes(nameFilter, page, pageSize);
         public FoodType? GetFoodTypeById(int id) => _repo.GetFoodTypeById(id);
@@ -23,9 +29,16 @@ namespace FoodApp.Services
         {
             return _repo.CreateFoodType(request.name);
         }
-        public FoodType? UpdateFoodType(FoodType request)
+
+        /// <summary>
+        /// Patch food type
+        /// </summary>
+        /// <param name="id">id of food type to patch</param>
+        /// <param name="request">Food type object with data to patch</param>
+        /// <returns></returns>
+        public FoodType? UpdateFoodType(int id, FoodTypeUpdateRequest request)
         {
-            return _repo.UpdateFoodType(request.id, request.name);
+            return _repo.UpdateFoodType(id, request.name);
         }
         public bool DeleteFoodType(int id) => _repo.DeleteFoodType(id);
     }

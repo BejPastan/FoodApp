@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FoodApp.Controllers
 {
+    /// <summary>
+    /// API group for managing food items, including searching, retrieving, creating, updating, and deleting food records.
+    /// </summary>
     [ApiController]
     public class FoodController : Controller
     {
@@ -29,6 +32,11 @@ namespace FoodApp.Controllers
                 return Ok(foods);
         }
 
+        /// <summary>
+        /// Return food record based on given id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("api/food/{id}")]
         public IActionResult GetFood(int id)
         {
@@ -38,6 +46,12 @@ namespace FoodApp.Controllers
                 return Ok(food);
         }
 
+        /// <summary>
+        /// Crete new food record. Required admin role
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         [HttpPost("api/food")]
         public IActionResult PostFood([FromBody] Food request)
         {
@@ -50,7 +64,12 @@ namespace FoodApp.Controllers
                 return Ok(created);
         }
 
-
+        /// <summary>
+        /// Update food record
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="food"></param>
+        /// <returns></returns>
         [HttpPatch("api/food/{id}")]
         public IActionResult PatchFood(
             int id,

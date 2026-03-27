@@ -40,9 +40,9 @@ namespace FoodApp.Repositories
         public Food CreateFood(string name, int foodTypeId)
         {
             var sql = @"INSERT INTO food 
- (name, foodTypeId) 
- OUTPUT INSERTED.* 
- VALUES (@name, @foodType);";
+                 (name, foodTypeId) 
+                 OUTPUT INSERTED.* 
+                 VALUES (@name, @foodType);";
             var list = DBConnector.QueryDatabase<Food>(sql, new { name = name ?? string.Empty, foodType = foodTypeId }).ToList();
             if (list.Count >0) return list[0];
             throw new Exception("Insert failed for food");
@@ -51,8 +51,14 @@ namespace FoodApp.Repositories
         public Food? UpdateFood(int id, string? name, int? foodTypeId)
         {
             var sets = new List<string>();
-            if (name != null) { sets.Add("name = @name"); }
-            if (foodTypeId.HasValue) { sets.Add("foodTypeId = @foodType"); }
+            if (name != null) 
+            { 
+                sets.Add("name = @name"); 
+            }
+            if (foodTypeId.HasValue) 
+            {
+                sets.Add("foodTypeId = @foodType"); 
+            }
             if (sets.Count ==0) return null;
             var sql = $"UPDATE food SET {string.Join(", ", sets)} WHERE id = @id; SELECT * FROM food WHERE id = @id;";
             return DBConnector.QueryDatabase<Food>(sql, new { id = id, name = $"%{name}%", foodType = foodTypeId }).FirstOrDefault();

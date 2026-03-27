@@ -6,42 +6,93 @@ namespace FoodApp.Repositories
 {
     public interface IUnitRepository
     {
-        IEnumerable<Unit> GetUnits(string nameFilter, int page = 1, int pageSize = 25);
+        /// <summary>
+        /// return units
+        /// </summary>
+        /// <param name="searchFilter">search filter, for name and desc</param>
+        /// <param name="unitIds">ids of units in which we could search, if empty, skip this parameter</param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        IEnumerable<Unit> GetUnits(string? searchFilter, int[]? unitIds, int page = 1, int pageSize = 25);
         Unit? GetUnitById(int id);
-        Unit CreateUnit(string name, decimal volumeEquivalent);
-        Unit? UpdateUnit(int id, string? name, decimal? volumeEquivalent);
+        Unit CreateUnit(string name, decimal volumeEquivalent, string? desc);
+        Unit? UpdateUnit(int id, string? name, decimal? volumeEquivalent, string? desc);
         bool DeleteUnit(int id);
         UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount);
     }
 
     public class UnitRepository : IUnitRepository
     {
-        public IEnumerable<Unit> GetUnits(string nameFilter, int page = 1, int pageSize = 25)
+        /// <summary>
+        /// return units
+        /// </summary>
+        /// <param name="searchFilter">search filter, for name and desc</param>
+        /// <param name="unitIds">ids of units in which we could search, if empty, skip this parameter</param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public IEnumerable<Unit> GetUnits(string? searchFilter, int[]? unitIds, int page = 1, int pageSize = 25)
         {
-            var sql = "SELECT * FROM units WHERE name LIKE @name ORDER BY name ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
-            return DBConnector.QueryDatabase<Unit>(sql, new { name = $"%{nameFilter}%", offset = (page - 1) * pageSize, pageSize = pageSize });
+            Console.WriteLine(unitIds.Length);
+            DynamicParameters param = new();
+            param.Add("@offset", (page - 1) * pageSize);
+            param.Add("@pageSize", pageSize);
+            var sql = "SELECT * FROM units WHERE  1=1";
+
+            if (searchFilter != null)
+            {
+                sql+=(" AND (name LIKE @name OR [desc] LIKE @name)");
+                param.Add("@name", $"%{searchFilter}%");
+
+            }
+            if (unitIds.Length>0)
+            {
+                sql+=(" AND id IN @ids");
+                param.Add("@ids", unitIds);
+            }
+            sql += (" ORDER BY name ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;");
+            return DBConnector.QueryDatabase<Unit>(sql, param);
         }
 
         public Unit? GetUnitById(int id)
         {
             var sql = "SELECT * FROM units WHERE id = @id;";
-            return DBConnector.QueryDatabase<Unit>(sql, new { id = id }).FirstOrDefault();
+            return DBConnector.QueryDatabase<Unit>(sql, new { id }).FirstOrDefault();
         }
 
-        public Unit CreateUnit(string name, decimal volumeEquivalent)
+        public Unit CreateUnit(string name, decimal volumeEquivalent, string desc)
         {
-            var sql = "INSERT INTO units (name, volumeEquivalent) OUTPUT INSERTED.* VALUES (@name, @vol);";
-            var list = DBConnector.QueryDatabase<Unit>(sql, new { name = name ?? string.Empty, vol = volumeEquivalent }).ToList();
+            var sql = "INSERT INTO units (name, volumeEquivalent. [desc]) OUTPUT INSERTED.* VALUES (@name, @vol, @desc);";
+            var list = DBConnector.QueryDatabase<Unit>(sql, new { name, vol = volumeEquivalent, desc}).ToList();
             if (list.Count > 0) return list[0];
             throw new Exception("Insert failed");
         }
 
-        public Unit? UpdateUnit(int id, string? name, decimal? volumeEquivalent)
+        /// <summary>
+        /// update unit records with given data
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="volumeEquivalent"></param>
+        /// <param name="desc"></param>
+        /// <returns></returns>
+        public Unit? UpdateUnit(int id, string? name, decimal? volumeEquivalent, string? desc)
         {
             var sets = new List<string>();
             var parameters = new DynamicParameters();
-            if (name != null) { sets.Add("name = @name"); parameters.Add("name", name); }
-            if (volumeEquivalent.HasValue) { sets.Add("volumeEquivalent = @vol"); parameters.Add("vol", volumeEquivalent.Value); }
+            if (name != null) 
+            { 
+                sets.Add("name = @name"); parameters.Add("name", name); 
+            }
+            if (volumeEquivalent.HasValue) 
+            { 
+                sets.Add("volumeEquivalent = @vol"); parameters.Add("vol", volumeEquivalent.Value);
+            }
+            if(desc != null)
+            {
+                sets.Add("[desc] = @desc"); parameters.Add("desc", desc);
+            }
             if (sets.Count == 0) return null;
             var sql = $"UPDATE units SET {string.Join(", ", sets)} WHERE id = @id; SELECT * FROM units WHERE id = @id;";
             parameters.Add("id", id);
@@ -51,10 +102,18 @@ namespace FoodApp.Repositories
         public bool DeleteUnit(int id)
         {
             var sql = "DELETE FROM units WHERE id = @id;";
-            DBConnector.QueryDatabase<int>(sql, new { id = id }).ToList();
+            DBConnector.QueryDatabase<int>(sql, new { id });
             return true;
         }
 
+        /// <summary>
+        /// Convert amount between units
+        /// </summary>
+        /// <param name="oldUnitId">id of reviouse unit</param>
+        /// <param name="newUnitId">id of new unit</param>
+        /// <param name="originalAmount">amount in old unit</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount)
         {
             var sql  = "SELECT org.volumeEquivalent / toConv.volumeEquivalent newUnitAmount, toConv.* FROM units org JOIN units toConv ON toConv.id = @newId WHERE org.id = @oldId";

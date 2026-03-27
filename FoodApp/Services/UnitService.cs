@@ -5,31 +5,38 @@ namespace FoodApp.Services
 {
     public interface IUnitService
     {
-        IEnumerable<Unit> GetUnits(string nameFilter, int page = 1, int pageSize = 25);
+        IEnumerable<Unit> GetUnits(string nameFilter, int[] ids, int page = 1, int pageSize = 25);
         Unit? GetUnitById(int id);
-        Unit CreateUnit(Unit request);
-        Unit? UpdateUnit(Unit request);
+        Unit CreateUnit(UnitCreateRequest request);
+        Unit? UpdateUnit(int id, UnitUpdateRequest request);
         bool DeleteUnit(int id);
         UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount);
     }
 
-    public class UnitService : IUnitService
+    /// <summary>
+    /// Serviceto manage units, andconvert them
+    /// </summary>
+    /// <param name="repo"></param>
+    public class UnitService(IUnitRepository repo) : IUnitService
     {
-        private readonly IUnitRepository _repo;
-        public UnitService(IUnitRepository repo) { _repo = repo; }
+        private readonly IUnitRepository _repo = repo;
 
-        public IEnumerable<Unit> GetUnits(string nameFilter, int page = 1, int pageSize = 25) => _repo.GetUnits(nameFilter, page, pageSize);
-        public Unit? GetUnitById(int id) => _repo.GetUnitById(id);
-        public Unit CreateUnit(string name, decimal volumeEquivalent) => _repo.CreateUnit(name, volumeEquivalent);
-        public Unit? UpdateUnit(Unit reques)
+        public IEnumerable<Unit> GetUnits(string nameFilter, int[] ids, int page = 1, int pageSize = 25)
         {
-            return _repo.UpdateUnit(reques.id, reques.name, reques.volumeEquivalent);
+            Console.WriteLine(ids.Length);
+            return _repo.GetUnits(nameFilter, ids, page, pageSize);
+        }
+        public Unit? GetUnitById(int id) => _repo.GetUnitById(id);
+        
+        public Unit? UpdateUnit(int id, UnitUpdateRequest request)
+        {
+            return _repo.UpdateUnit(id, request.name, request.volumeEquivalent, request.desc);
         }
         public bool DeleteUnit(int id) => _repo.DeleteUnit(id);
 
-        public Unit CreateUnit(Unit request)
+        public Unit CreateUnit(UnitCreateRequest request)
         {
-            return _repo.CreateUnit(request.name, request.volumeEquivalent);
+            return _repo.CreateUnit(request.name, request.volumeEquivalent, request.desc);
         }
 
         public UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount)

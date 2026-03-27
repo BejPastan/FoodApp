@@ -78,6 +78,13 @@ namespace FoodApp.Controllers
 
         }
 
+        /// <summary>
+        /// Return recipes from which user could choose for given meal
+        /// </summary>
+        /// <param name="mealId">id of meal for which will this recipe be</param>
+        /// <param name="excludeWeeks">number of weeks from which recipes shouldn't repeat</param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("api/recipes/choices")]
         public IActionResult GetRecipeToChoose([FromQuery] int mealId, [FromQuery] int excludeWeeks)
         {
@@ -87,7 +94,7 @@ namespace FoodApp.Controllers
                 {
                     throw new UnauthorizedAccessException("You are not authorized to do this");
                 }
-                Recipe[] items = _service.GetRecipeToChoose(mealId, userId.Value, excludeWeeks, CHOOSE_SIZE);
+                RecipeRecord[] items = _service.GetRecipeToChoose(mealId, userId.Value, excludeWeeks, CHOOSE_SIZE);
                 return Ok(items);
 
         }

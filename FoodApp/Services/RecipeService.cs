@@ -6,12 +6,12 @@ namespace FoodApp.Services
 {
     public interface IRecipeService
     {
-        IEnumerable<Recipe> GetRecipes(string nameFilter, int page = 1, int pageSize = 25);
+        IEnumerable<RecipeRecord> GetRecipes(string nameFilter, int page = 1, int pageSize = 25);
         Recipe? GetRecipeById(int id);
         Recipe? CreateRecipe(Recipe request);
         Recipe? UpdateRecipe(Recipe request);
         bool DeleteRecipe(int id);
-        Recipe[] GetRecipeToChoose(int mealId, int userId, int excludedWeeks, int chooseSize);
+        RecipeRecord[] GetRecipeToChoose(int mealId, int userId, int excludedWeeks, int chooseSize);
     }
 
     public class RecipeService : IRecipeService
@@ -31,13 +31,9 @@ namespace FoodApp.Services
             _recipeMealService = recipeMealService;
         }
 
-        public IEnumerable<Recipe> GetRecipes(string nameFilter, int page = 1, int pageSize = 25)
+        public IEnumerable<RecipeRecord> GetRecipes(string nameFilter, int page = 1, int pageSize = 25)
         {
-            Recipe[] recipes = _recipeRepo.GetRecipes(nameFilter, page, pageSize).ToArray();
-            for(int i = 0; i< recipes.Length; i++)
-            {
-                FormatRecipe(recipes[i]);
-            }
+            RecipeRecord[] recipes = _recipeRepo.GetRecipes(nameFilter, page, pageSize).ToArray();
             return recipes;
         }
 
@@ -156,15 +152,11 @@ namespace FoodApp.Services
             return _recipeRepo.DeleteRecipe(id);
         }
 
-        public Recipe[] GetRecipeToChoose(int mealId, int userId, int excludedWeeks, int choosSize)
+        public RecipeRecord[] GetRecipeToChoose(int mealId, int userId, int excludedWeeks, int choosSize)
         {
             int currentExcludedWeeks = excludedWeeks;
-            List<Recipe> recipes = _recipeRepo.GetRecipesToChoose(userId, mealId, currentExcludedWeeks).ToList();
+            List<RecipeRecord> recipes = _recipeRepo.GetRecipesToChoose(userId, mealId, currentExcludedWeeks).ToList();
             Console.WriteLine($"recipe count: {recipes.Count}");
-            foreach(var recipe in recipes)
-            {
-                FormatRecipe(recipe, FormatMode.inspect);
-            }
             return recipes.ToArray();
         }
 
@@ -190,6 +182,19 @@ namespace FoodApp.Services
                     }
             }
             return toFormat;
+        }
+
+        private Recipe? FormatRecipe(RecipeRecord? toFormat, FormatMode mode = FormatMode.inspect)
+        {
+            if (toFormat == null) return null;
+            Recipe toReturn = new Recipe
+            {
+                id = toFormat.id,
+                name = toFormat.name,
+                portion = toFormat.portion,
+                time = toFormat.time
+            };
+            return FormatRecipe(toReturn, mode);
         }
     }
 }

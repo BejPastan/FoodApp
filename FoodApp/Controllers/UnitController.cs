@@ -7,22 +7,26 @@ using System.Net;
 namespace FoodApp.Controllers
 {
     [ApiController]
-    public class UnitController : Controller
+    public class UnitController(IUnitService service, IAuthService auth) : Controller
     {
-        private readonly IUnitService _service;
-        private readonly IAuthService _auth;
-        public UnitController(IUnitService service, IAuthService auth)
-        {
-            _service = service;
-            _auth = auth;
-        }
+        private readonly IUnitService _service = service;
+        private readonly IAuthService _auth = auth;
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ids">ids filter, if given will return only Units withthis Ids</param>
+        /// <param name="search">search filter</param>
+        /// <param name="page"></param>
+        /// <param name="perPage"></param>
+        /// <returns>return unit objects</returns>
         [HttpGet("api/units")]
-        public IActionResult GetUnits([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
+        public IActionResult GetUnits([FromQuery] int[] ids, [FromQuery] string search = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
             _auth.CheckPermissions(Request, [Roles.user, Roles.admin]);
-            return Ok(_service.GetUnits(name, page, perPage));
+            Console.WriteLine(ids.Length);
+            return Ok(_service.GetUnits(search, ids, page, perPage));
         }
 
         [HttpGet("api/units/{id}")]
@@ -38,7 +42,7 @@ namespace FoodApp.Controllers
         }
 
         [HttpPost("api/units")]
-        public IActionResult PostUnit([FromBody] Unit request)
+        public IActionResult PostUnit([FromBody] UnitCreateRequest request)
         {
             _auth.CheckPermissions(Request, [Roles.admin]);
             var created = _service.CreateUnit(request);
@@ -46,10 +50,10 @@ namespace FoodApp.Controllers
         }
 
         [HttpPatch("api/units/{id}")]
-        public IActionResult PatchUnit(int id, [FromBody] Unit request)
+        public IActionResult PatchUnit(int id, [FromBody] UnitUpdateRequest request)
         {
             _auth.CheckPermissions(Request, [Roles.admin]);
-            var updated = _service.UpdateUnit(request);
+            var updated = _service.UpdateUnit(id, request);
             if (updated == null)
             {
                 return BadRequest(new { error = "No fields or not found" });
