@@ -9,7 +9,7 @@ namespace FoodApp.Utilities
     public class DBConnector
     {
         //private static SqlConnection? _connection;
-        private static string _connectionString ="";
+        private static string _connectionString = "";
 
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace FoodApp.Utilities
         /// </summary>
         public static SqlConnection Open()
         {
-            SqlConnection connection = new SqlConnection(_connectionString);
+            SqlConnection connection = new(_connectionString);
             connection.Open();
             Console.WriteLine(connection.State);
             return connection;
@@ -47,8 +47,27 @@ namespace FoodApp.Utilities
             SqlConnection connection = Open();
             try
             {
-                Console.WriteLine($"Executing Dapper query. {sql}");
                 return connection.Query<T>(sql, parameters);
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine($"SQL error ({ex.Number}): {ex.Message}");
+                return [];
+            }
+            finally
+            {
+                connection.Close();
+                connection.Dispose();
+            }
+        }
+
+        public static IEnumerable<T> QueryNested<T, T2>(string sql, string[] column, object? parameters = null)
+        {
+            SqlConnection connection = Open();
+            try
+            {
+
+                return [];
             }
             catch (SqlException ex)
             {

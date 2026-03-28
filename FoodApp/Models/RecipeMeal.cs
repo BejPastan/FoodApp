@@ -11,4 +11,10 @@
             return $"RecipeMeal {{ id = {id}, recipeId = {recipeId}, mealId = {mealId} }}";
         }
     }
+
+    public class CreateRecipeMeal
+    {
+        public int recipeId { get; set; }
+        public int mealId { get; set; }
+    }
 }
