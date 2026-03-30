@@ -10,4 +10,14 @@ namespace FoodApp.Models
             return $"Tag {{ id: {id}, name: \"{name}\" }}";
         }
     }
+
+    public class TagCreateRequest
+    {
+        public string name { get; set; } = string.Empty;
+    }
+
+    public class TagUpdateRequest
+    {
+        public string? name { get; set; }
+    }
 }

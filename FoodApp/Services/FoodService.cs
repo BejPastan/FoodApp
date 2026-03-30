@@ -7,8 +7,8 @@ namespace FoodApp.Services
     {
         IEnumerable<Food> GetFoods(int? typeId, string nameFilter, int page = 1, int pageSize = 25);
         Food? GetFoodById(int id);
-        Food CreateFood(Food request);
-        Food? UpdateFood(Food request);
+        Food CreateFood(CreteFoodRequest request);
+        Food? UpdateFood(int id, UpdateFoodRequest request);
         bool DeleteFood(int id);
     }
 
@@ -25,9 +25,15 @@ namespace FoodApp.Services
         {
             return _repo.GetFoods(typeId, nameFilter, page, pageSize);
         }
-        public Food? GetFoodById(int id) => _repo.GetFoodById(id);
+        public Food? GetFoodById(int id)
+        {
+            var food = _repo.GetFoodById(id);
+            var foodType = food != null ? _foodTypeRepo.GetFoodTypeById(food.foodTypeId) : null;
+            food!.foodType = foodType;
+            return food;
+        }
 
-        public Food CreateFood(Food request)
+        public Food CreateFood(CreteFoodRequest request)
         {
             int? foodTypeId = request.foodTypeId;
 
@@ -41,17 +47,22 @@ namespace FoodApp.Services
             return result;
         }
 
-        public Food? UpdateFood(Food request)
+        public Food? UpdateFood(int id, UpdateFoodRequest request)
         {
             int? foodTypeId = request.foodTypeId;
-
-            if ((foodTypeId == null || foodTypeId <=0) && request.foodType != null)
+            Console.WriteLine(foodTypeId);
+            if ((!foodTypeId.HasValue || foodTypeId.Value <=0) && request.foodType != null)
             {
                 var createdType = _foodTypeRepo.CreateFoodType(request.foodType.name);
                 foodTypeId = createdType.id;
             }
 
-            var updated = _repo.UpdateFood(request.id, request.name, foodTypeId);
+            if(foodTypeId==0)
+            {
+                foodTypeId = null;
+            }
+
+            var updated = _repo.UpdateFood(id, request.name, foodTypeId);
             return updated;
         }
 

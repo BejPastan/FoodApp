@@ -62,7 +62,7 @@ namespace FoodApp.Controllers
         /// Duplicate associations (same recipe and tag combination) are not allowed.
         /// </remarks>
         [HttpPost("api/recipe_tags")]
-        public IActionResult PostRecipeTag([FromBody] RecipeTag request)
+        public IActionResult PostRecipeTag([FromBody] RecipeTagCreateRequest request)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             var created = _service.CreateRecipeTag(request);

@@ -89,7 +89,7 @@ namespace FoodApp.Controllers
         /// must exist in the database. The unitAmount must be a positive decimal value.
         /// </remarks>
         [HttpPost("api/ingredients")]
-        public IActionResult PostIngredient([FromBody] Ingredient request, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult PostIngredient([FromBody] IngredientCreateRequest request)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 var created = _service.CreateIngredient(request);
@@ -113,10 +113,10 @@ namespace FoodApp.Controllers
         /// All referenced IDs must remain valid after the update.
         /// </remarks>
         [HttpPatch("api/ingredients/{id}")]
-        public IActionResult PatchIngredient(int id, [FromBody] Ingredient ingredient, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult PatchIngredient(int id, [FromBody] IngredientUpdateRequest ingredient)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
-                var updated = _service.UpdateIngredient(ingredient);
+                var updated = _service.UpdateIngredient(id,ingredient);
                 if (updated == null)
                 {
                     return BadRequest(new { error = "No fields or not found" });
@@ -138,7 +138,7 @@ namespace FoodApp.Controllers
         /// This breaks the link between the food item and recipe. The associated food item and recipe remain in the system.
         /// </remarks>
         [HttpDelete("api/ingredients/{id}")]
-        public IActionResult DeleteIngredient(int id, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult DeleteIngredient(int id)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 _service.DeleteIngredient(id);

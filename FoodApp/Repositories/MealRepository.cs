@@ -7,7 +7,7 @@ namespace FoodApp.Repositories
     {
         IEnumerable<Meal> GetMeals(string? nameFilter, int? recipeId, int page = 1, int pageSize = 25);
         Meal? GetMealById(int id);
-        Meal CreateMeal(Meal name);
+        Meal CreateMeal(string name);
         Meal? UpdateMeal(int id, string? name);
         bool DeleteMeal(int id);
     }
@@ -35,10 +35,10 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<Meal>(sql, new { id = id }).FirstOrDefault();
         }
 
-        public Meal CreateMeal(Meal mealRequest)
+        public Meal CreateMeal(string name)
         {
             var sql = "INSERT INTO meal (name) OUTPUT INSERTED.* VALUES (@name);";
-            var list = DBConnector.QueryDatabase<Meal>(sql, new { name = mealRequest.name ?? string.Empty }).ToList();
+            var list = DBConnector.QueryDatabase<Meal>(sql, new { name }).ToList();
             if (list.Count > 0) return list[0];
             throw new Exception("Insert failed for meal");
         }

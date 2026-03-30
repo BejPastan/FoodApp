@@ -70,7 +70,7 @@ namespace FoodApp.Controllers
         /// Food type names are trimmed of whitespace and validated for minimum length.
         /// </remarks>
         [HttpPost("api/food_type")]
-        public IActionResult PostFoodType([FromBody] FoodType request)
+        public IActionResult PostFoodType([FromBody] FoodTypeCreateRequest request)
         {
                 _auth.CheckPermissions(Request, [Roles.admin]);
                 if (string.IsNullOrWhiteSpace(request.name))

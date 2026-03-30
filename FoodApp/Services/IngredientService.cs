@@ -8,8 +8,8 @@ namespace FoodApp.Services
     {
         IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page = 1, int perPage = 25);
         Ingredient? GetIngredientById(int id);
-        Ingredient CreateIngredient(Ingredient request);
-        Ingredient? UpdateIngredient(Ingredient request);
+        Ingredient CreateIngredient(IngredientCreateRequest request);
+        Ingredient? UpdateIngredient(int id, IngredientUpdateRequest request);
         bool DeleteIngredient(int id);
     }
 
@@ -44,60 +44,92 @@ namespace FoodApp.Services
             return FormatIngridient(ingredient, FormatMode.full);
         }
 
-        public Ingredient CreateIngredient(Ingredient request)
+        public Ingredient CreateIngredient(IngredientCreateRequest request)
         {
+            if(!request.recipeId.HasValue)
+            {
+                throw new ArgumentException("recipeId is required to create an ingredient");
+            }
+
             // Ensure food exists
-            int foodId = request.foodId;
-            if ((foodId == 0) && request.food != null)
+            int foodId = 0;
+            if ((!request.foodId.HasValue || request.foodId.Value<=0) && request.food != null)
             {
                 var createdFood = _foodServ.CreateFood(request.food);
                 foodId = createdFood.id;
+            }else if(request.foodId.HasValue && request.foodId.Value > 0)
+            {
+                foodId = request.foodId.Value;
+            }
+            else
+            {
+                throw new ArgumentException("Either foodId must be provided and greater than 0, or food details must be provided to create a new food.");
             }
 
             // Ensure unit exists
-            int unitId = request.unitId;
-            if ((unitId == 0) && request.unit != null)
+            int unitId = 0;
+            if ((!request.unitId.HasValue || request.unitId <= 0) && request.unit != null)
             {
-                UnitCreateRequest toCreate = new UnitCreateRequest
-                {
-                    name = request.unit.name,
-                    volumeEquivalent = request.unit.volumeEquivalent,
-                    desc = request.unit.desc
-                };
-                var createdUnit = _unitServ.CreateUnit(toCreate);
+                var createdUnit = _unitServ.CreateUnit(request.unit);
                 unitId = createdUnit.id;
             }
+            else if (request.unitId.HasValue && request.unitId.Value > 0)
+            {
+                unitId = request.unitId.Value;
+            }
+            else
+            {
+                throw new ArgumentException("Either unitId must be provided and greater than 0, or unit details must be provided to create a new unit.");
+            }
 
-            var created = _repo.CreateIngredient(foodId, unitId, request.unitAmount, request.recipeId);
+            var created = _repo.CreateIngredient(foodId, unitId, request.unitAmount, request.recipeId.Value);
             return created;
         }
 
-        public Ingredient? UpdateIngredient(Ingredient request)
+        /// <summary>
+        /// Update ingredient record, based on request
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">happen when request contain both id and crete request for food or unit</exception>
+        public Ingredient? UpdateIngredient(int id, IngredientUpdateRequest request)
         {
             int? foodId = request.foodId;
-            if ((foodId == 0) && request.food != null)
+            int? unitId = request.unitId;
+            if ((foodId.HasValue && foodId.Value >= 0) && request.food != null)
+            {
+                throw new ArgumentException("You could provide only food id or food create request");
+            }
+
+            if ((unitId.HasValue && unitId.Value <= 0) && request.unit != null)
+            {
+                throw new ArgumentException("You could provide only unit id or unit create request");
+            }
+
+            if ((!foodId.HasValue || foodId.Value <= 0) && request.food != null)
             {
                 var createdFood = _foodServ.CreateFood(request.food);
                 foodId = createdFood.id;
             }
 
-            int? unitId = request.unitId;
-            if ((unitId == 0) && request.unit != null)
+
+            if ((!unitId.HasValue || unitId.Value <= 0) && request.unit != null)
             {
-                UnitCreateRequest toCreate = new UnitCreateRequest
-                {
-                    name = request.unit.name,
-                    volumeEquivalent = request.unit.volumeEquivalent,
-                    desc = request.unit.desc
-                };
-                var createdUnit = _unitServ.CreateUnit(toCreate);
+                var createdUnit = _unitServ.CreateUnit(request.unit);
                 unitId = createdUnit.id;
             }
 
-            var updated = _repo.UpdateIngredient(request.id, foodId, unitId, request.unitAmount, request.recipeId);
+
+            var updated = _repo.UpdateIngredient(id, foodId, unitId, request.unitAmount, request.recipeId);
             return updated;
         }
 
+        /// <summary>
+        /// Delete ingredient record
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public bool DeleteIngredient(int id) => _repo.DeleteIngredient(id);
 
         public Ingredient FormatIngridient(Ingredient toFormat, FormatMode mode = FormatMode.inspect)

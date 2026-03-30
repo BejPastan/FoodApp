@@ -7,8 +7,8 @@ namespace FoodApp.Services
     {
         Meal[] GetMeals(string? nameFilter, int? recipeId, int page = 1, int pageSize = 25);
         Meal? GetMealById(int id);
-        Meal CreateMeal(Meal name);
-        Meal? UpdateMeal(int id, string? name);
+        Meal CreateMeal(MealCreateRequest request);
+        Meal? UpdateMeal(int id, MealUpdateRequest request);
         bool DeleteMeal(int id);
     }
 
@@ -27,9 +27,9 @@ namespace FoodApp.Services
 
         public Meal? GetMealById(int id) => _mealRepo.GetMealById(id);
 
-        public Meal CreateMeal(Meal name) => _mealRepo.CreateMeal(name);
+        public Meal CreateMeal(MealCreateRequest request) => _mealRepo.CreateMeal(request.name);
 
-        public Meal? UpdateMeal(int id, string? name) => _mealRepo.UpdateMeal(id, name);
+        public Meal? UpdateMeal(int id, MealUpdateRequest request) => _mealRepo.UpdateMeal(id, request.name);
 
         public bool DeleteMeal(int id) => _mealRepo.DeleteMeal(id);
     }

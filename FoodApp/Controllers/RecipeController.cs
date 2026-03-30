@@ -99,7 +99,7 @@ namespace FoodApp.Controllers
         /// All referenced IDs must exist in the database.
         /// </remarks>
         [HttpPost("api/recipes")]
-        public IActionResult PostRecipe([FromBody] Recipe request)
+        public IActionResult PostRecipe([FromBody] RecipeCreateRequest request)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 var created = _service.CreateRecipe(request);
@@ -127,10 +127,10 @@ namespace FoodApp.Controllers
         /// All referenced IDs must remain valid after the update.
         /// </remarks>
         [HttpPatch("api/recipes/{id}")]
-        public IActionResult PatchRecipe(int id, [FromBody] Recipe request)
+        public IActionResult PatchRecipe(int id, [FromBody] RecipeUpdateRequest request)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
-                var updated = _service.UpdateRecipe(request);
+                var updated = _service.UpdateRecipe(id, request);
                 if (updated == null)
                 {
                     return BadRequest(new { error = "No fields or not found" });

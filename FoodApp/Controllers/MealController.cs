@@ -87,7 +87,7 @@ namespace FoodApp.Controllers
         /// Common meal types include Breakfast, Lunch, Dinner, Snack, but custom types are supported.
         /// </remarks>
         [HttpPost("api/meals")]
-        public IActionResult PostMeal([FromBody] Meal mealRequest)
+        public IActionResult PostMeal([FromBody] MealCreateRequest mealRequest)
         {
                 _auth.CheckPermissions(Request, [Roles.admin]);
                 var created = _service.CreateMeal(mealRequest);
@@ -98,7 +98,7 @@ namespace FoodApp.Controllers
         /// Updates an existing meal record.
         /// </summary>
         /// <param name="id">The ID of the meal to update.</param>
-        /// <param name="name">The updated meal name. If null, the name will not be changed.</param>
+        /// <param name="request">Meal Update Request object</param>
         /// <returns>The updated meal, or 400 Bad Request if no valid fields to update or meal not found.</returns>
         /// <response code="200">Returns the updated meal.</response>
         /// <response code="400">Bad Request - no valid fields provided for update or meal not found.</response>
@@ -110,10 +110,10 @@ namespace FoodApp.Controllers
         /// Returns 400 if no fields are provided for update.
         /// </remarks>
         [HttpPatch("api/meals/{id}")]
-        public IActionResult PatchMeal(int id, [FromQuery] string? name = null)
+        public IActionResult PatchMeal(int id, [FromQuery] MealUpdateRequest request)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
-                var updated = _service.UpdateMeal(id, name);
+                var updated = _service.UpdateMeal(id, request);
                 if (updated == null) return BadRequest(new { error = "No fields or not found" });
                 return Ok(updated);
         }

@@ -84,15 +84,14 @@ namespace FoodApp.Controllers
         /// This endpoint is used for meal planning and scheduling functionality.
         /// </remarks>
         [HttpPost("api/user_meals")]
-        public IActionResult PostUserMeal([FromBody] UserMeal request)
+        public IActionResult PostUserMeal([FromBody] UserMealCreateRequest request)
         {
                 var userId = Authentication.GetUserIdFromHeader(Request);
                 if(userId==null)
                 {
                     return Unauthorized(new { error = "You don't have permission to do this" });
                 }
-                request.userId = userId.Value;
-                var created = _service.CreateUserMeal(request); 
+                var created = _service.CreateUserMeal(request, userId.Value); 
                 return Ok(created);
         }
 

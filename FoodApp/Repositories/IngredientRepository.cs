@@ -34,13 +34,7 @@ namespace FoodApp.Repositories
 
         public Ingredient CreateIngredient(int foodId, int unitId, decimal unitAmount, int recipeId)
         {
-            var recipeStr = "";
-            if(recipeId>0)
-            {
-                recipeStr = ", recipeId";
-            }
-
-            var sql = $"INSERT INTO ingredients (foodId, unitId, unitAmount{recipeStr}) OUTPUT INSERTED.* VALUES (@foodId, @unitId, @amt {recipeStr});";
+            var sql = $"INSERT INTO ingredients (foodId, unitId, unitAmount, recipeId) OUTPUT INSERTED.* VALUES (@foodId, @unitId, @amt, @recipeId);";
             Console.WriteLine($"foodId: {foodId}, unitId {unitId}, amt: {unitAmount}, recipeId: {recipeId}");
             var list = DBConnector.QueryDatabase<Ingredient>(sql, new { foodId, unitId, amt = unitAmount, recipeId }).ToList();
             if (list.Count > 0) return list[0];

@@ -36,4 +36,27 @@ namespace FoodApp.Models
         public int time { get; set; }
         public int portion { get; set; }
     }
+
+    public class RecipeCreateRequest
+    {
+        public string name { get; set; } = string.Empty;
+        public int time { get; set; }
+        public int portion { get; set; }
+        public int[] ingredientIds { get; set; } = Array.Empty<int>();
+        public int[] stepIds { get; set; } = Array.Empty<int>();
+        public int[] mealIds { get; set; } = Array.Empty<int>();
+        public IngredientCreateRequest[] ingredients { get; set; } = Array.Empty<IngredientCreateRequest>();
+        public StepCreateRequest[] steps { get; set; } = Array.Empty<StepCreateRequest>();
+    }
+
+    public class RecipeUpdateRequest
+    {
+        public string? name { get; set; }
+        public int? time { get; set; }
+        public int? portion { get; set; }
+        //public int[]? stepIds { get; set; }
+        public int[]? mealIds { get; set; } = [];
+        public IngredientCreateRequest[] ingredients { get; set; } = [];
+        public StepCreateRequest[] steps { get; set; } = [];
+    }
 }

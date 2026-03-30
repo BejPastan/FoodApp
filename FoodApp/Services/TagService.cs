@@ -8,8 +8,8 @@ namespace FoodApp.Services
     {
         IEnumerable<Tag> GetTags(string nameFilter, int page = 1, int perPage = 25);
         Tag? GetTagById(int id);
-        Tag CreateTag(Tag tagRequest);
-        Tag? UpdateTag(Tag request);
+        Tag CreateTag(TagCreateRequest tagRequest);
+        Tag? UpdateTag(int id, TagUpdateRequest request);
         bool DeleteTag(int id);
     }
 
@@ -23,13 +23,13 @@ namespace FoodApp.Services
             return _repo.GetTags(nameFilter, page, perPage);
         }
         public Tag? GetTagById(int id) => _repo.GetTagById(id);
-        public Tag CreateTag(Tag name)
+        public Tag CreateTag(TagCreateRequest request)
         {
-            return _repo.CreateTag(name.name);
+            return _repo.CreateTag(request.name);
         }
-        public Tag? UpdateTag(Tag request)
+        public Tag? UpdateTag(int id, TagUpdateRequest request)
         {
-            return _repo.UpdateTag(request.id, request.name);
+            return _repo.UpdateTag(id, request.name);
         }
         public bool DeleteTag(int id) => _repo.DeleteTag(id);
     }

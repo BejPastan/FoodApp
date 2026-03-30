@@ -39,4 +39,10 @@ namespace FoodApp.Models
             return $"User: {name} (ID: {id}, Email: {email}, Last Login: {last_login}), role: ({role})";
         }
     }
+
+    public class UserUpdateRequest
+    {
+        public string? name { get; set; }
+        public string? email { get; set; }
+    }
 }

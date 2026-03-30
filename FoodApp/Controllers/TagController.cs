@@ -84,7 +84,7 @@ namespace FoodApp.Controllers
         /// cuisine types, or any other meaningful classification system.
         /// </remarks>
         [HttpPost("api/tags")]
-        public IActionResult PostTag([FromBody] Tag tagRequest)
+        public IActionResult PostTag([FromBody] TagCreateRequest tagRequest)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             var created = _service.CreateTag(tagRequest);
@@ -107,10 +107,10 @@ namespace FoodApp.Controllers
         /// The updated name must be unique within the system. Returns 400 if no fields are provided for update.
         /// </remarks>
         [HttpPatch("api/tags/{id}")]
-        public IActionResult PatchTag(int id, [FromBody] Tag request, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult PatchTag(int id, [FromBody] TagUpdateRequest request, [FromHeader(Name = "Authorization")] string authorization)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
-            var updated = _service.UpdateTag(request);
+            var updated = _service.UpdateTag(id, request);
             if (updated == null)
             {
                 return BadRequest(new { error = "No fields or not found" });

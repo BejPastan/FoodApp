@@ -7,7 +7,7 @@ namespace FoodApp.Services
     {
         IEnumerable<FoodType> GetFoodTypes(string nameFilter, int page = 1, int pageSize = 25);
         FoodType? GetFoodTypeById(int id);
-        FoodType CreateFoodType(FoodType request);
+        FoodType CreateFoodType(FoodTypeCreateRequest request);
 
         /// <summary>
         /// Patch food type
@@ -25,7 +25,7 @@ namespace FoodApp.Services
 
         public IEnumerable<FoodType> GetFoodTypes(string nameFilter, int page = 1, int pageSize = 25) => _repo.GetFoodTypes(nameFilter, page, pageSize);
         public FoodType? GetFoodTypeById(int id) => _repo.GetFoodTypeById(id);
-        public FoodType CreateFoodType(FoodType request)
+        public FoodType CreateFoodType(FoodTypeCreateRequest request)
         {
             return _repo.CreateFoodType(request.name);
         }

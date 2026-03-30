@@ -8,8 +8,8 @@ namespace FoodApp.Services
     {
         IEnumerable<RecipeRecord> GetRecipes(string nameFilter, int page = 1, int pageSize = 25);
         Recipe? GetRecipeById(int id);
-        Recipe? CreateRecipe(Recipe request);
-        Recipe? UpdateRecipe(Recipe request);
+        Recipe? CreateRecipe(RecipeCreateRequest request);
+        Recipe? UpdateRecipe(int recipeId, RecipeUpdateRequest request);
         bool DeleteRecipe(int id);
         RecipeRecord[] GetRecipeToChoose(int mealId, int userId, int excludedWeeks, int chooseSize);
     }
@@ -44,7 +44,7 @@ namespace FoodApp.Services
             return FormatRecipe(recipe);
         }
 
-        public Recipe? CreateRecipe(Recipe request)
+        public Recipe? CreateRecipe(RecipeCreateRequest request)
         {
             Recipe created = _recipeRepo.CreateRecipe(request.name, request.portion, request.time);
             int recipeId = created.id;
@@ -56,28 +56,17 @@ namespace FoodApp.Services
 
             foreach(var ingredient in request.ingredients)
             {
-                if(ingredient.id != 0)
-                {
-                    if(ingredient.recipeId == recipeId)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        ingredient.recipeId = recipeId;
-                        _ingredientServ.UpdateIngredient(ingredient);
-                        continue;
-                    }
-                }
                 ingredient.recipeId = recipeId;
                 _ingredientServ.CreateIngredient(ingredient);
             }
 
-            foreach (var meal in request.meals)
+            foreach (var mealIds in request.mealIds)
             {
-                RecipeMeal recipeMeal = new();
-                recipeMeal.recipeId = recipeId;
-                recipeMeal.mealId = meal.id;
+                CreateRecipeMealRequest recipeMeal = new CreateRecipeMealRequest
+                {
+                    mealId = mealIds,
+                    recipeId = recipeId
+                };
 
                 _recipeMealService.CreateRecipeMeal(recipeMeal);
             }
@@ -85,64 +74,30 @@ namespace FoodApp.Services
             return FormatRecipe(_recipeRepo.GetRecipeById(recipeId), FormatMode.full);
         }
 
-        public Recipe? UpdateRecipe(Recipe request)
+        public Recipe? UpdateRecipe(int recipeId, RecipeUpdateRequest request)
         {
-            var recipeToUpdate = _recipeRepo.GetRecipeById(request.id);
-            //steps
-            int[] stepsToRemove = recipeToUpdate.steps.Where(s => !request.steps.Any(rs => rs.id == s.id)).Select(s => s.id).ToArray();
-            Step[] stepsToAdd = recipeToUpdate.steps.Where(s=> s.id == 0).ToArray();
-            Step[] stepsToChange = request.steps.Where(s => s.id != 0 && recipeToUpdate.steps.Any(rs => rs.id == s.id)).ToArray();
-
-            foreach(int stepId in stepsToRemove)
+            foreach (var step in request.steps)
             {
-                _stepService.DeleteStep(stepId);
-            }
-            foreach (var step in stepsToAdd)
-            {
-                step.recipeId = request.id;
+                step.recipeId = recipeId;
                 _stepService.CreateStep(step);
             }
-            foreach (var step in stepsToChange)
-            {
-                step.recipeId = request.id;
-                _stepService.UpdateStep(step);
-            }
 
-            //ingredients
-            int[] ingredientsToRemove = recipeToUpdate.ingredients.Where(i => !request.ingredients.Any(ri => ri.id == i.id)).Select(i => i.id).ToArray();
-            Ingredient[] ingredientsToAdd = request.ingredients.Where(i => i.id == 0).ToArray();
-            Ingredient[] ingredientsToChange = request.ingredients.Where(i => i.id != 0 && recipeToUpdate.ingredients.Any(ri => ri.id == i.id)).ToArray();
-
-            foreach (int ingredientId in ingredientsToRemove)
+            foreach(var ingredient in request.ingredients)
             {
-                _ingredientServ.DeleteIngredient(ingredientId);
-            }
-            foreach(var ingredient in ingredientsToAdd)
-            {
-                ingredient.recipeId = request.id;
+                ingredient.recipeId = recipeId;
                 _ingredientServ.CreateIngredient(ingredient);
             }
-            foreach(var ingredient in ingredientsToChange)
-            {
-                _ingredientServ.UpdateIngredient(ingredient);
-            }
 
-            //meals
-            int[] mealToRemove = recipeToUpdate.meals.Where(m=>recipeToUpdate.meals.Any(mId=>mId.id==m.id)).Select(i=> i.id).ToArray();
-            Meal[] mealToAdd = request.meals.Where(m => !recipeToUpdate.meals.Any(mId => mId.id == m.id)).ToArray();
-            foreach(int mealId in mealToRemove)
+
+            foreach(var meal in request.mealIds)
             {
-                _recipeMealService.DeleteRecipeMeal(request.id, mealId);
-            }
-            foreach(var meal in mealToAdd)
-            {
-                RecipeMeal recipeMeal = new();
-                recipeMeal.mealId = meal.id;
-                recipeMeal.recipeId = request.id;
+                CreateRecipeMealRequest recipeMeal = new();
+                recipeMeal.mealId = meal;
+                recipeMeal.recipeId = recipeId;
                 _recipeMealService.CreateRecipeMeal(recipeMeal);
             }
 
-            var updated = _recipeRepo.UpdateRecipe(request.id, request.name, request.portion, request.time);
+            var updated = _recipeRepo.UpdateRecipe(recipeId, request.name, request.portion, request.time);
 
             return FormatRecipe(updated);
         }

@@ -12,4 +12,14 @@ namespace FoodApp.Models
             return $"id: {id}, name: {name}";
         }
     }
+
+    public class RoleCreateRequest
+    {
+        public Roles name { get; set; } = Roles.user;
+    }
+
+    public class RoleUpdateRequest
+    {
+        public Roles? name { get; set; }
+    }
 }

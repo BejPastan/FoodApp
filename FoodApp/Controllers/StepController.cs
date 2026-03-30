@@ -85,7 +85,7 @@ namespace FoodApp.Controllers
         /// clear and detailed enough for users to follow.
         /// </remarks>
         [HttpPost("api/steps")]
-        public IActionResult PostStep([FromBody] Step request)
+        public IActionResult PostStep([FromBody] StepCreateRequest request)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             var created = _service.CreateStep(request);
@@ -109,10 +109,10 @@ namespace FoodApp.Controllers
         /// All referenced IDs must remain valid after the update.
         /// </remarks>
         [HttpPatch("api/steps/{id}")]
-        public IActionResult PatchStep(int id, [FromBody] Step stepRequest)
+        public IActionResult PatchStep(int id, [FromBody] StepUpdateRequest stepRequest)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
-            var updated = _service.UpdateStep(stepRequest);
+            var updated = _service.UpdateStep(id, stepRequest);
             if (updated == null)
             {
                 return BadRequest(new { error = "No fields or not found" });

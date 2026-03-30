@@ -7,8 +7,8 @@ namespace FoodApp.Services
     {
         IEnumerable<Step> GetSteps(int? recipeId, int page = 1, int pageSize = 25);
         Step? GetStepById(int id);
-        Step CreateStep(Step request);
-        Step? UpdateStep(Step request);
+        Step CreateStep(StepCreateRequest request);
+        Step? UpdateStep(int id, StepUpdateRequest request);
         bool DeleteStep(int id);
     }
 
@@ -27,14 +27,18 @@ namespace FoodApp.Services
 
         public Step? GetStepById(int id) => _stepRepo.GetStepById(id);
 
-        public Step CreateStep(Step request)
+        public Step CreateStep(StepCreateRequest request)
         {
-            return _stepRepo.CreateStep(request.recipeId, request.instruction, request.stepNumber);
+            if (!request.recipeId.HasValue)
+            {
+                throw new ArgumentException("recipeId is required");
+            }
+            return _stepRepo.CreateStep(request.recipeId.Value, request.instruction, request.stepNumber);
         }
 
-        public Step? UpdateStep(Step request)
+        public Step? UpdateStep(int id, StepUpdateRequest request)
         {
-            return _stepRepo.UpdateStep(request.id, request.recipeId, request.instruction, request.stepNumber);
+            return _stepRepo.UpdateStep(id, request.recipeId, request.instruction, request.stepNumber);
         }
 
         public bool DeleteStep(int id) => _stepRepo.DeleteStep(id);

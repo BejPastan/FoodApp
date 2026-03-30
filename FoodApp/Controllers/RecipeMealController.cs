@@ -83,7 +83,7 @@ namespace FoodApp.Controllers
         /// Duplicate associations (same recipe and meal combination) are not allowed.
         /// </remarks>
         [HttpPost("api/recipe_meals")]
-        public IActionResult PostRecipeMeal([FromBody] RecipeMeal request)
+        public IActionResult PostRecipeMeal([FromBody] CreateRecipeMealRequest request)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             var created = _service.CreateRecipeMeal(request);

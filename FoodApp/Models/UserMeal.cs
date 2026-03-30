@@ -28,4 +28,18 @@
             return $"User meal with data racipeId = {recipeId}, recipe name = {name}, time={time}, portions= {portion}, meal= {meal}, meal Day= {mealDate}";
         }
     }
+
+    public class UserMealCreateRequest
+    {
+        public int recipeId { get; set; }
+        public int mealId { get; set; }
+        public DateTime mealDate { get; set; }
+    }
+
+    public class UserMealUpdateRequest
+    {
+        public int? recipeId { get; set; }
+        public int? mealId { get; set; }
+        public DateTime? mealDate { get; set; }
+    }
 }

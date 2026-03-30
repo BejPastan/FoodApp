@@ -12,9 +12,15 @@
         }
     }
 
-    public class CreateRecipeMeal
+    public class CreateRecipeMealRequest
     {
         public int recipeId { get; set; }
         public int mealId { get; set; }
+    }
+
+    public class RecipeMealUpdateRequest
+    {
+        public int? recipeId { get; set; }
+        public int? mealId { get; set; }
     }
 }

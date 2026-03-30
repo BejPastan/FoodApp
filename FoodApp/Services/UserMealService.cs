@@ -8,7 +8,7 @@ namespace FoodApp.Services
     {
         IEnumerable<UserMealWithData> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate);
         UserMeal? GetUserMealById(int id);
-        UserMeal CreateUserMeal(UserMeal toCreate);
+        UserMeal CreateUserMeal(UserMealCreateRequest toCreate, int userId);
         bool DeleteUserMeal(int id);
     }
 
@@ -22,17 +22,17 @@ namespace FoodApp.Services
             return response;
         }
         public UserMeal? GetUserMealById(int id) => _repo.GetUserMealById(id);
-        public UserMeal CreateUserMeal(UserMeal toCreate)
+        public UserMeal CreateUserMeal(UserMealCreateRequest toCreate, int userId)
         {
-            int id =_repo.FindUserMealId(toCreate.userId, toCreate.mealId, toCreate.mealDate);
+            int id =_repo.FindUserMealId(userId, toCreate.mealId, toCreate.mealDate);
 
             if(id!=-1)
             {
-                return _repo.UpdateUserMeal(id, toCreate.userId, toCreate.mealId, toCreate.mealDate);
+                return _repo.UpdateUserMeal(id, userId, toCreate.mealId, toCreate.mealDate);
             }
             else
             {
-                return _repo.CreateUserMeal(toCreate.userId, toCreate.recipeId, toCreate.mealId, toCreate.mealDate);
+                return _repo.CreateUserMeal(userId, toCreate.recipeId, toCreate.mealId, toCreate.mealDate);
             }
         }
         public bool DeleteUserMeal(int id) => _repo.DeleteUserMeal(id);

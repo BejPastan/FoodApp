@@ -88,7 +88,7 @@ namespace FoodApp.Controllers
         /// </remarks>
         /// <exception cref="Exception">Thrown when neither foodTypeId nor foodType.name is provided.</exception>
         [HttpPost("api/food")]
-        public IActionResult PostFood([FromBody] Food request)
+        public IActionResult PostFood([FromBody] CreteFoodRequest request)
         {
                 var userId = _auth.CheckPermissions(Request,  [Roles.admin]);
                 if(request.foodTypeId ==0 && (request.foodType == null || string.IsNullOrEmpty(request.foodType.name)))
@@ -116,12 +116,11 @@ namespace FoodApp.Controllers
         [HttpPatch("api/food/{id}")]
         public IActionResult PatchFood(
             int id,
-            [FromBody] Food food
+            [FromBody] UpdateFoodRequest food
         )
         {
                 var userId = _auth.CheckPermissions(Request,  [Roles.admin]);
-                food.id = id;
-                var updated = _service.UpdateFood(food);
+                var updated = _service.UpdateFood(id, food);
                 if (updated == null) return BadRequest(new { error = "No fields or not found" });
                 return Ok(updated);
         }

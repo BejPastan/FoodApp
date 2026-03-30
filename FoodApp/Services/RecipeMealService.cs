@@ -7,7 +7,7 @@ namespace FoodApp.Services
     {
         IEnumerable<RecipeMeal> GetRecipeMeals(int? recipeId, int? mealId);
         RecipeMeal? GetRecipeMealById(int id);
-        RecipeMeal? CreateRecipeMeal(RecipeMeal request);
+        RecipeMeal? CreateRecipeMeal(CreateRecipeMealRequest request);
         bool DeleteRecipeMeal(int id);
         bool DeleteRecipeMeal(int recipeId, int mealId);
     }
@@ -19,7 +19,7 @@ namespace FoodApp.Services
 
         public IEnumerable<RecipeMeal> GetRecipeMeals(int? recipeId, int? mealId) => _repo.GetRecipeMeals(recipeId, mealId);
         public RecipeMeal? GetRecipeMealById(int id) => _repo.GetRecipeMealById(id);
-        public RecipeMeal? CreateRecipeMeal(RecipeMeal request)
+        public RecipeMeal? CreateRecipeMeal(CreateRecipeMealRequest request)
         {
             return _repo.CreateRecipeMeal(request.recipeId, request.mealId);
         }

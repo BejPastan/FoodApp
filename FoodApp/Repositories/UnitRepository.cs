@@ -63,7 +63,7 @@ namespace FoodApp.Repositories
 
         public Unit CreateUnit(string name, decimal volumeEquivalent, string desc)
         {
-            var sql = "INSERT INTO units (name, volumeEquivalent. [desc]) OUTPUT INSERTED.* VALUES (@name, @vol, @desc);";
+            var sql = "INSERT INTO units (name, volumeEquivalent, [desc]) OUTPUT INSERTED.* VALUES (@name, @vol, @desc);";
             var list = DBConnector.QueryDatabase<Unit>(sql, new { name, vol = volumeEquivalent, desc}).ToList();
             if (list.Count > 0) return list[0];
             throw new Exception("Insert failed");
