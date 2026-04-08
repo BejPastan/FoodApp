@@ -10,6 +10,7 @@ namespace FoodApp.Services
         RecipeMeal? CreateRecipeMeal(CreateRecipeMealRequest request);
         bool DeleteRecipeMeal(int id);
         bool DeleteRecipeMeal(int recipeId, int mealId);
+        bool DeleteRecipesMeal(int recipeId);
     }
 
     public class RecipeMealService : IRecipeMealService
@@ -25,5 +26,16 @@ namespace FoodApp.Services
         }
         public bool DeleteRecipeMeal(int id) => _repo.DeleteRecipeMeal(id);
         public bool DeleteRecipeMeal(int recipeId, int mealId) => _repo.DeleteRecipeMeal(recipeId, mealId);
+
+
+        /// <summary>
+        /// Delete all meals for single recipe
+        /// </summary>
+        /// <param name="recipeId"></param>
+        /// <returns></returns>
+        public bool DeleteRecipesMeal(int recipeId)
+        {
+            return _repo.DeleteRecipesMeal(recipeId);
+        }
     }
 }

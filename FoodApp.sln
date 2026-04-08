@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodApp", "FoodApp\FoodApp.
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodApp.Test", "..\FoodApp.Test\FoodApp.Test.csproj", "{6A554829-F309-4C86-8F2B-566FBAB9ECB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodAppTests", "..\FoodAppTests\FoodAppTests.csproj", "{ED016634-252A-4A86-B540-EA9B292C8DDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6A554829-F309-4C86-8F2B-566FBAB9ECB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6A554829-F309-4C86-8F2B-566FBAB9ECB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A554829-F309-4C86-8F2B-566FBAB9ECB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6A554829-F309-4C86-8F2B-566FBAB9ECB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED016634-252A-4A86-B540-EA9B292C8DDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED016634-252A-4A86-B540-EA9B292C8DDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED016634-252A-4A86-B540-EA9B292C8DDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED016634-252A-4A86-B540-EA9B292C8DDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

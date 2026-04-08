@@ -7,6 +7,7 @@ namespace FoodApp.Models
         public Ingredient[] ingredients { get; set; } = Array.Empty<Ingredient>();
         public Step[] steps { get; set; } = Array.Empty<Step>();
         public Meal[] meals { get; set; } = Array.Empty<Meal>();
+        public Tag[] tags { get; set; } = Array.Empty<Tag>();
 
         public override string ToString()
         {
@@ -43,20 +44,25 @@ namespace FoodApp.Models
         public int time { get; set; }
         public int portion { get; set; }
         public int[] ingredientIds { get; set; } = Array.Empty<int>();
-        public int[] stepIds { get; set; } = Array.Empty<int>();
         public int[] mealIds { get; set; } = Array.Empty<int>();
+        public int[] tagIds { get; set; } = Array.Empty<int>();
         public IngredientCreateRequest[] ingredients { get; set; } = Array.Empty<IngredientCreateRequest>();
         public StepCreateRequest[] steps { get; set; } = Array.Empty<StepCreateRequest>();
     }
 
+    /// <summary>
+    /// mealIds and tagIds are treated as PUT, they are updated to be in state as in request
+    /// Ingredients are treated as inputs, they are added, nothing is removed
+    /// Steps are treated treated as current state, if they have id, they are updated, if not, they are added to recipe
+    /// </summary>
     public class RecipeUpdateRequest
     {
         public string? name { get; set; }
         public int? time { get; set; }
         public int? portion { get; set; }
-        //public int[]? stepIds { get; set; }
         public int[]? mealIds { get; set; } = [];
+        public int[] tagIds { get; set; } = Array.Empty<int>();
         public IngredientCreateRequest[] ingredients { get; set; } = [];
-        public StepCreateRequest[] steps { get; set; } = [];
+        public Step[] steps { get; set; } = [];
     }
 }

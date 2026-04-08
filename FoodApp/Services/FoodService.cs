@@ -37,13 +37,18 @@ namespace FoodApp.Services
         {
             int? foodTypeId = request.foodTypeId;
 
-            if ((foodTypeId == null || foodTypeId <=0) && request.foodType != null)
+            if (foodTypeId.HasValue && foodTypeId.Value > 0 && request.foodType != null)
+            {
+                throw new ArgumentException("you could specify onle foodTypeId or crete object");
+            }
+
+            if ((!foodTypeId.HasValue || foodTypeId <=0) && request.foodType != null)
             {
                 var createdType = _foodTypeRepo.CreateFoodType(request.foodType.name);
                 foodTypeId = createdType.id;
             }
 
-            var result = _repo.CreateFood(request.name, foodTypeId ??0);
+                var result = _repo.CreateFood(request.name, foodTypeId ?? 0);
             return result;
         }
 

@@ -10,6 +10,7 @@ namespace FoodApp.Repositories
         RecipeMeal? CreateRecipeMeal(int recipeId, int mealId);
         bool DeleteRecipeMeal(int id);
         bool DeleteRecipeMeal(int recipeId, int mealId);
+        bool DeleteRecipesMeal(int recipeId);
     }
 
     public class RecipeMealRepository : IRecipeMealRepository
@@ -45,6 +46,13 @@ namespace FoodApp.Repositories
         {
             var sql = "DELETE FROM recipe_meal WHERE recipeId = @recipeId AND mealId = @mealId;";
             DBConnector.QueryDatabase<int>(sql, new { recipeId = recipeId, mealId = mealId }).ToList();
+            return true;
+        }
+
+        public bool DeleteRecipesMeal(int recipeId)
+        {
+            var sql = "DELETE FROM recipe_meal WHERE recipeId = @recipeId;";
+            DBConnector.QueryDatabase<int>(sql, new { recipeId = recipeId}).ToList();
             return true;
         }
     }

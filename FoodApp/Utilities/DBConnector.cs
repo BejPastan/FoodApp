@@ -47,6 +47,7 @@ namespace FoodApp.Utilities
             SqlConnection connection = Open();
             try
             {
+                Console.WriteLine(sql);
                 return connection.Query<T>(sql, parameters);
             }
             catch (SqlException ex)

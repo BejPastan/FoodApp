@@ -21,13 +21,13 @@
     {
         public required string name { get; set; }
         public int? foodTypeId { get; set; } = 0;
-        public FoodType? foodType { get; set; }
+        public FoodTypeCreateRequest? foodType { get; set; }
     }
 
     public class UpdateFoodRequest
     {
-        public required string? name { get; set; }
+        public string? name { get; set; }
         public int? foodTypeId { get; set; } = 0;
-        public FoodType? foodType { get; set; }
+        public FoodTypeCreateRequest? foodType { get; set; }
     }
 }

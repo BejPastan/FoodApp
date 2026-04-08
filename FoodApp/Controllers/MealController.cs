@@ -110,7 +110,7 @@ namespace FoodApp.Controllers
         /// Returns 400 if no fields are provided for update.
         /// </remarks>
         [HttpPatch("api/meals/{id}")]
-        public IActionResult PatchMeal(int id, [FromQuery] MealUpdateRequest request)
+        public IActionResult PatchMeal(int id, [FromBody] MealUpdateRequest request)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 var updated = _service.UpdateMeal(id, request);

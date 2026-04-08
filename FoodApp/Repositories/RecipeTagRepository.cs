@@ -10,6 +10,12 @@ namespace FoodApp.Repositories
         IEnumerable<RecipeTag> GetRecipeTags(int? recipeId, int? tagId);
         RecipeTag? CreateRecipeTag(int recipeId, int tagId);
         bool DeleteRecipeTag(int recipeId, int tagId);
+        /// <summary>
+        /// Delete all tags associated with specific recipe record
+        /// </summary>
+        /// <param name="recipeId"></param>
+        /// <returns></returns>
+        bool DeleteRecipeTags(int recipeId);
     }
 
     public class RecipeTagRepository : IRecipeTagRepository
@@ -33,6 +39,19 @@ namespace FoodApp.Repositories
         {
             var sql = "DELETE FROM recipe_tags WHERE recipeId = @recipeId AND tagId = @tagId;";
             DBConnector.QueryDatabase<int>(sql, new { recipeId = recipeId, tagId = tagId }).ToList();
+            return true;
+        }
+
+        /// <summary>
+        /// Delete all tags associated with specific recipe record
+        /// </summary>
+        /// <param name="recipeId"></param>
+        /// <returns></returns>
+        public bool DeleteRecipeTags(int recipeId)
+        {
+            Console.WriteLine("Deleting recipe tags");
+            var sql = "DELETE FROM recipe_tags WHERE recipeId = @recipeId;";
+            DBConnector.QueryDatabase<int>(sql, new { recipeId }).ToList();
             return true;
         }
     }

@@ -1,0 +1,2669 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "FoodApp API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/food": {
+      "get": {
+        "tags": [
+          "Food"
+        ],
+        "summary": "Searches for food items based on optional filters.",
+        "description": "Requires user authentication. Supports pagination with page and perPage parameters.\r\nIf typeId is provided, only foods of that type are returned.\r\nIf name is provided, foods containing that text in their name are returned.",
+        "parameters": [
+          {
+            "name": "typeId",
+            "in": "query",
+            "description": "Optional food type ID to filter by.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optional name to search for (partial match).",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination (default: 1).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of items per page (default: 10, max: 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching food items."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Food"
+        ],
+        "summary": "Creates a new food record.",
+        "description": "Requires admin role authentication. Either foodTypeId must be provided, or foodType.name must be specified\r\nto create a new food type. The system will automatically handle food type creation if needed.",
+        "requestBody": {
+          "description": "The food data to create. Must include either foodTypeId or foodType.name.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreteFoodRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreteFoodRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreteFoodRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created food item."
+          },
+          "400": {
+            "description": "Bad Request - invalid food data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/food/{id}": {
+      "get": {
+        "tags": [
+          "Food"
+        ],
+        "summary": "Retrieves a specific food item by its ID.",
+        "description": "Requires user authentication. Returns detailed information about a single food item.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the food item.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested food item."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - food item with the specified ID does not exist."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Food"
+        ],
+        "summary": "Updates an existing food record.",
+        "description": "Requires admin role authentication. The food object must have its ID property set to match the route parameter.\r\nOnly non-null properties will be updated. Returns 400 if no fields are provided for update.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the food item to update.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The updated food data. The ID in the body must match the route parameter.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFoodRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFoodRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFoodRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated food item."
+          },
+          "400": {
+            "description": "Bad Request - no valid fields provided for update or food item not found."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Food"
+        ],
+        "summary": "Deletes a food item by its ID.",
+        "description": "Requires admin role authentication. This operation is soft delete - the food item is marked as deleted\r\nrather than being permanently removed from the database.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the food item to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/food_type": {
+      "get": {
+        "tags": [
+          "FoodType"
+        ],
+        "summary": "Retrieves a list of food types with optional filtering and pagination.",
+        "description": "Requires user authentication. Supports pagination with page and perPage parameters.\r\nIf name is provided, food types containing that text in their name are returned.\r\nResults are sorted alphabetically by name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optional name to search for (partial match, case-insensitive).",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination (default: 1).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of items per page (default: 25, max: 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching food types."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "FoodType"
+        ],
+        "summary": "Creates a new food type.",
+        "description": "Requires admin role authentication. The food type name must be unique within the system.\r\nFood type names are trimmed of whitespace and validated for minimum length.",
+        "requestBody": {
+          "description": "The food type data to create. Name is required and must be unique.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodTypeCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodTypeCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodTypeCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created food type."
+          },
+          "400": {
+            "description": "Bad Request - invalid food type data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/food_type/{id}": {
+      "get": {
+        "tags": [
+          "FoodType"
+        ],
+        "summary": "Retrieves a specific food type by its ID.",
+        "description": "Requires user authentication. Returns detailed information about a single food type.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the food type.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested food type."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - food type with the specified ID does not exist."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "FoodType"
+        ],
+        "summary": "Updates an existing food type.",
+        "description": "Requires admin role authentication. Only the name field can be updated.\r\nThe updated name must be unique within the system.\r\nReturns 400 if no fields are provided for update.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the food type to update.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The updated food type data. Only provided fields will be updated.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodTypeUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodTypeUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodTypeUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated food type."
+          },
+          "400": {
+            "description": "Bad Request - no valid fields provided for update."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          },
+          "404": {
+            "description": "Not Found - food type with the specified ID does not exist."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "FoodType"
+        ],
+        "summary": "Deletes a food type by its ID.",
+        "description": "Requires admin role authentication. This operation performs a cascading update:\r\n- The food type is permanently removed from the database\r\n- All foods that had this type will have their type_id set to null\r\n- This is a destructive operation that cannot be undone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the food type to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/ingredients": {
+      "get": {
+        "tags": [
+          "Ingredient"
+        ],
+        "summary": "Retrieves a list of ingredients with optional filtering and pagination.",
+        "description": "Requires user authentication. Supports filtering by either recipeId or foodId, but not both simultaneously.\r\nEach ingredient includes detailed information about the associated food item and measurement unit.\r\nResults are sorted by ingredient ID in ascending order.",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "query",
+            "description": "Optional recipe ID to filter ingredients by recipe.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "foodId",
+            "in": "query",
+            "description": "Optional food ID to filter ingredients by food item.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination (default: 1).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of items per page (default: 25, max: 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching ingredients."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Ingredient"
+        ],
+        "summary": "Creates a new ingredient record.",
+        "description": "Requires admin role authentication. The ingredient links a specific food item to a recipe\r\nwith a specified quantity and unit of measurement. All referenced IDs (foodId, unitId, recipeId)\r\nmust exist in the database. The unitAmount must be a positive decimal value.",
+        "requestBody": {
+          "description": "The ingredient data to create. Must include valid foodId, unitId, unitAmount, and recipeId.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngredientCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngredientCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngredientCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created ingredient."
+          },
+          "400": {
+            "description": "Bad Request - invalid ingredient data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/ingredients/{id}": {
+      "get": {
+        "tags": [
+          "Ingredient"
+        ],
+        "summary": "Retrieves a specific ingredient by its ID.",
+        "description": "Requires user authentication. Returns complete ingredient information including\r\nthe associated food item and measurement unit details.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the ingredient.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested ingredient with full details."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - ingredient with the specified ID does not exist."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Ingredient"
+        ],
+        "summary": "Updates an existing ingredient record.",
+        "description": "Requires admin role authentication. The ingredient object must have its ID property set to match the route parameter.\r\nOnly non-null properties will be updated. Returns 400 if no fields are provided for update.\r\nAll referenced IDs must remain valid after the update.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the ingredient to update (must match the ingredient's ID in the request body).",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The updated ingredient data. The ID in the body must match the route parameter.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngredientUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngredientUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngredientUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated ingredient."
+          },
+          "400": {
+            "description": "Bad Request - no valid fields provided for update or ingredient not found."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Ingredient"
+        ],
+        "summary": "Deletes an ingredient by its ID.",
+        "description": "Requires admin role authentication. This operation permanently removes the ingredient from the database.\r\nThis breaks the link between the food item and recipe. The associated food item and recipe remain in the system.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the ingredient to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/meals": {
+      "get": {
+        "tags": [
+          "Meal"
+        ],
+        "summary": "Retrieves a list of meals with optional filtering and pagination.",
+        "description": "Requires user authentication. Supports pagination with page and perPage parameters.\r\nIf name is provided, meals containing that text in their name are returned.\r\nResults are sorted alphabetically by name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optional name to search for (partial match, case-insensitive).",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination (default: 1).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of items per page (default: 25, max: 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching meals."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Meal"
+        ],
+        "summary": "Creates a new meal record.",
+        "description": "Requires admin role authentication. The meal name must be unique within the system.\r\nMeal names are trimmed of whitespace and validated for minimum length.\r\nCommon meal types include Breakfast, Lunch, Dinner, Snack, but custom types are supported.",
+        "requestBody": {
+          "description": "The meal data to create. Name is required and must be unique.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MealCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MealCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MealCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created meal."
+          },
+          "400": {
+            "description": "Bad Request - invalid meal data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/meals/{id}": {
+      "get": {
+        "tags": [
+          "Meal"
+        ],
+        "summary": "Retrieves a specific meal by its ID.",
+        "description": "Requires user authentication. Returns detailed information about a single meal.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the meal.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested meal."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - meal with the specified ID does not exist."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Meal"
+        ],
+        "summary": "Updates an existing meal record.",
+        "description": "Requires admin role authentication. Only the name field can be updated.\r\nThe updated name must be unique within the system.\r\nReturns 400 if no fields are provided for update.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the meal to update.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the updated meal."
+          },
+          "400": {
+            "description": "Bad Request - no valid fields provided for update or meal not found."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Meal"
+        ],
+        "summary": "Deletes a meal by its ID.",
+        "description": "Requires admin role authentication. This operation performs a cascading update:\r\n- The meal is permanently removed from the database\r\n- All recipes that had this meal association will have their meal references removed\r\n- This is a destructive operation that cannot be undone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the meal to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/recipes": {
+      "get": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Retrieves a list of recipes with optional filtering and pagination.",
+        "description": "Requires user authentication. Supports pagination with page and perPage parameters.\r\nIf name is provided, recipes containing that text in their name are returned.\r\nEach recipe includes complete information about its ingredients, preparation steps, and meal associations.\r\nResults are sorted by recipe ID in ascending order.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optional name to search for (partial match, case-insensitive).",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination (default: 1).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of items per page (default: 25, max: 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching recipes."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Creates a new recipe with complete details.",
+        "description": "Requires admin role authentication. The recipe must include:\r\n- Name (required, unique within the system)\r\n- Preparation time in minutes (required, positive integer)\r\n- Number of portions (required, positive integer)\r\n- Complete ingredient list with valid food IDs, unit IDs, and quantities\r\n- Step-by-step instructions in order\r\n- Associated meal types\r\nAll referenced IDs must exist in the database.",
+        "requestBody": {
+          "description": "The recipe data to create including name, preparation time, portions, ingredients, steps, and meal associations.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created recipe."
+          },
+          "400": {
+            "description": "Bad Request - invalid recipe data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/recipes/{id}": {
+      "get": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Retrieves a specific recipe by its ID.",
+        "description": "Requires user authentication. Returns complete recipe information including:\r\n- Basic recipe details (name, preparation time, portions)\r\n- Complete ingredient list with quantities and units\r\n- Step-by-step preparation instructions\r\n- Associated meal types",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the recipe.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested recipe with full details."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - recipe with the specified ID does not exist."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Updates an existing recipe.",
+        "description": "Requires admin role authentication. The recipe object must have its ID property set to match the route parameter.\r\nAll recipe components can be updated including:\r\n- Basic recipe details (name, preparation time, portions)\r\n- Complete ingredient list (add, update, or remove ingredients)\r\n- Preparation steps (add, update, or reorder steps)\r\n- Meal associations (add or remove meal types)\r\nReturns 400 if no fields are provided for update.\r\nAll referenced IDs must remain valid after the update.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the recipe to update (must match the recipe's ID in the request body).",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The updated recipe data. The ID in the body must match the route parameter.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated recipe."
+          },
+          "400": {
+            "description": "Bad Request - no valid fields provided for update or recipe not found."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Deletes a recipe by its ID.",
+        "description": "Requires admin role authentication. This operation performs a cascading deletion:\r\n- The recipe is permanently removed from the database\r\n- All associated ingredients are removed\r\n- All associated steps are removed\r\n- All recipe-meal associations are removed\r\n- All recipe-tag associations are removed\r\n- All user meal records referencing this recipe remain but lose the recipe reference\r\nThis is a destructive operation that cannot be undone.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the recipe to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/recipes/choices": {
+      "get": {
+        "tags": [
+          "Recipe"
+        ],
+        "summary": "Retrieves a selection of recipes for a specific meal type, excluding recipes used within a specified number of weeks.",
+        "description": "Requires user authentication. This endpoint is designed for meal planning to help users avoid recipe repetition.\r\nThe system looks back the specified number of weeks in the user's meal history and excludes any recipes\r\nthat have been used during that period. Returns up to 3 recipes (as defined by CHOOSE_SIZE constant)\r\nthat are associated with the specified meal type and haven't been used recently.\r\nThis helps with meal variety and planning.",
+        "parameters": [
+          {
+            "name": "mealId",
+            "in": "query",
+            "description": "The ID of the meal type for which recipes are needed (e.g., Breakfast, Lunch, Dinner).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "excludeWeeks",
+            "in": "query",
+            "description": "Number of weeks to look back for used recipes to avoid repetition.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a selection of recipes for the specified meal type."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - meal type with the specified ID does not exist."
+          }
+        }
+      }
+    },
+    "/api/recipe_meals": {
+      "get": {
+        "tags": [
+          "RecipeMeal"
+        ],
+        "summary": "Retrieves recipe-meal associations with optional filtering.",
+        "description": "Requires user authentication. Supports filtering by either recipeId or mealId, but not both simultaneously.\r\nEach association includes the recipe ID, meal ID, and the full meal details.\r\nResults are sorted by recipe ID in ascending order.",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "query",
+            "description": "Optional recipe ID to filter associations by recipe.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "mealId",
+            "in": "query",
+            "description": "Optional meal ID to filter associations by meal type.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching recipe-meal associations."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "RecipeMeal"
+        ],
+        "summary": "Creates a new recipe-meal association.",
+        "description": "Requires admin role authentication. Creates an association between a specific recipe and meal type.\r\nBoth recipeId and mealId must reference existing records in the database.\r\nDuplicate associations (same recipe and meal combination) are not allowed.",
+        "requestBody": {
+          "description": "The recipe-meal association data to create. Must include valid recipeId and mealId.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecipeMealRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecipeMealRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecipeMealRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created recipe-meal association."
+          },
+          "400": {
+            "description": "Bad Request - invalid association data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/recipe_meals/{id}": {
+      "get": {
+        "tags": [
+          "RecipeMeal"
+        ],
+        "summary": "Retrieves a specific recipe-meal association by its ID.",
+        "description": "Requires user authentication. Returns complete information about the association\r\nincluding the recipe ID, meal ID, and meal details.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the recipe-meal association.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested recipe-meal association."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - recipe-meal association with the specified ID does not exist."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "RecipeMeal"
+        ],
+        "summary": "Deletes a recipe-meal association by its ID.",
+        "description": "Requires admin role authentication. This operation removes the association between a recipe and meal type.\r\nThe recipe and meal records themselves remain in the database.\r\nThis is a safe operation that only removes the linking record.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the recipe-meal association to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/recipe_tags": {
+      "get": {
+        "tags": [
+          "RecipeTag"
+        ],
+        "summary": "Retrieves recipe-tag associations with optional filtering.",
+        "description": "Requires user authentication. Supports filtering by either recipeId or tagId, but not both simultaneously.\r\nEach association includes the recipe ID, tag ID, and the full tag details.\r\nResults are sorted by recipe ID in ascending order.",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "query",
+            "description": "Optional recipe ID to filter associations by recipe.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "query",
+            "description": "Optional tag ID to filter associations by tag.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching recipe-tag associations."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "RecipeTag"
+        ],
+        "summary": "Creates a new recipe-tag association.",
+        "description": "Requires admin role authentication. Creates an association between a specific recipe and tag.\r\nBoth recipeId and tagId must reference existing records in the database.\r\nDuplicate associations (same recipe and tag combination) are not allowed.",
+        "requestBody": {
+          "description": "The recipe-tag association data to create. Must include valid recipeId and tagId.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeTagCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeTagCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeTagCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created recipe-tag association."
+          },
+          "400": {
+            "description": "Bad Request - invalid association data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "RecipeTag"
+        ],
+        "summary": "Deletes a recipe-tag association by recipe and tag IDs.",
+        "description": "Requires admin role authentication. This operation removes the association between a recipe and tag.\r\nThe recipe and tag records themselves remain in the database.\r\nThis is a safe operation that only removes the linking record.",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "query",
+            "description": "The unique identifier of the recipe.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "query",
+            "description": "The unique identifier of the tag.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/steps": {
+      "get": {
+        "tags": [
+          "Step"
+        ],
+        "summary": "Retrieves a list of steps with optional filtering and pagination.",
+        "description": "Requires user authentication. Supports filtering by recipeId to get all steps for a specific recipe.\r\nSteps are returned in sequential order by their stepNumber property.\r\nEach step includes its instruction text and the recipe it belongs to.",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "query",
+            "description": "Optional recipe ID to filter steps by recipe.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination (default: 1).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of items per page (default: 25, max: 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching steps."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Step"
+        ],
+        "summary": "Creates a new step for a recipe.",
+        "description": "Requires admin role authentication. Creates a new instruction step for a specific recipe.\r\nThe recipeId must reference an existing recipe. The stepNumber should be unique within the recipe\r\nand represents the order in which this step should be performed. The instruction text should be\r\nclear and detailed enough for users to follow.",
+        "requestBody": {
+          "description": "The step data to create. Must include recipeId, instruction text, and stepNumber.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created step."
+          },
+          "400": {
+            "description": "Bad Request - invalid step data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/steps/{id}": {
+      "get": {
+        "tags": [
+          "Step"
+        ],
+        "summary": "Retrieves a specific step by its ID.",
+        "description": "Requires user authentication. Returns detailed information about a single step\r\nincluding its instruction text, step number, and associated recipe.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the step.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested step."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - step with the specified ID does not exist."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Step"
+        ],
+        "summary": "Updates an existing step.",
+        "description": "Requires admin role authentication. The step object must have its ID property set to match the route parameter.\r\nThe instruction text, step number, and recipe association can be updated.\r\nReturns 400 if no fields are provided for update.\r\nAll referenced IDs must remain valid after the update.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the step to update (must match the step's ID in the request body).",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The updated step data. The ID in the body must match the route parameter.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated step."
+          },
+          "400": {
+            "description": "Bad Request - no valid fields provided for update or step not found."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Step"
+        ],
+        "summary": "Deletes a step by its ID.",
+        "description": "Requires admin role authentication. This operation permanently removes the step from the database.\r\nThe recipe itself remains in the system, but this specific instruction is lost.\r\nConsider updating the step instead of deleting it if you want to preserve the recipe structure.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the step to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/tags": {
+      "get": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Retrieves a list of tags with optional filtering.",
+        "description": "Requires user authentication. If name is provided, tags containing that text in their name are returned.\r\nResults are sorted alphabetically by name. Tags are used to categorize recipes for easier discovery.\r\nCommon tag examples include \"vegetarian\", \"gluten-free\", \"quick-meal\", \"italian\", etc.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optional name to search for (partial match, case-insensitive).",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching tags."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Creates a new tag.",
+        "description": "Requires admin role authentication. The tag name must be unique within the system.\r\nTag names are trimmed of whitespace and validated for minimum length.\r\nTags help organize recipes by categories like dietary restrictions, cooking methods,\r\ncuisine types, or any other meaningful classification system.",
+        "requestBody": {
+          "description": "The tag data to create. Name is required and must be unique.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created tag."
+          },
+          "400": {
+            "description": "Bad Request - invalid tag data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/tags/{id}": {
+      "get": {
+        "tags": [
+          "Tag"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Updates an existing tag.",
+        "description": "Requires admin role authentication. The tag object must have its ID property set to match the route parameter.\r\nThe updated name must be unique within the system. Returns 400 if no fields are provided for update.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the tag to update (must match the tag's ID in the request body).",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The updated tag data. The ID in the body must match the route parameter.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated tag."
+          },
+          "400": {
+            "description": "Bad Request - no valid fields provided for update or tag not found."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Deletes a tag by its ID.",
+        "description": "Requires admin role authentication. This operation performs a cascading update:\r\n- The tag is permanently removed from the database\r\n- All recipe-tag associations for this tag are also removed\r\n- Recipes themselves remain in the system, they just lose this tag classification\r\nThis is a safe operation that preserves recipe data while removing the categorization.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the tag to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/units": {
+      "get": {
+        "tags": [
+          "Unit"
+        ],
+        "summary": "Initializes a new instance of the FoodApp.Controllers.UnitController class.",
+        "description": "Requires user or admin authentication. Supports filtering by specific IDs or search text.\r\nIf both filters are provided, results must match both criteria.\r\nUnits are used to specify measurement quantities for recipe ingredients.\r\nCommon units include \"cup\", \"gram\", \"tablespoon\", \"teaspoon\", etc.",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "description": "Optional array of unit IDs to filter by. If provided, only units with these IDs are returned.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Optional search text to filter units by name (partial match, case-insensitive).",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination (default: 1).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of items per page (default: 25, max: 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching units."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Unit"
+        ],
+        "summary": "Creates a new measurement unit.",
+        "description": "Requires admin role authentication. The unit name must be unique within the system.\r\nThe volumeEquivalent is used for conversion calculations between different units.\r\nFor example, if 1 cup = 236.588 ml, then volumeEquivalent for cup would be 236.588.\r\nThis allows the system to convert between units for recipe scaling and ingredient calculations.",
+        "requestBody": {
+          "description": "The unit data to create. Must include name and volumeEquivalent.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created unit."
+          },
+          "400": {
+            "description": "Bad Request - invalid unit data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/units/{id}": {
+      "get": {
+        "tags": [
+          "Unit"
+        ],
+        "summary": "Retrieves a specific unit by its ID.",
+        "description": "Requires user or admin authentication. Returns detailed information about a single unit\r\nincluding its name, volume equivalent for conversion calculations, and description.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the unit.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested unit."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - unit with the specified ID does not exist."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Unit"
+        ],
+        "summary": "Updates an existing measurement unit.",
+        "description": "Requires admin role authentication. The updated name must be unique within the system.\r\nThe volumeEquivalent can be updated for conversion accuracy improvements.\r\nReturns 400 if no fields are provided for update.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the unit to update.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The updated unit data. Only provided fields will be updated.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated unit."
+          },
+          "400": {
+            "description": "Bad Request - no valid fields provided for update or unit not found."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Unit"
+        ],
+        "summary": "Deletes a measurement unit by its ID.",
+        "description": "Requires admin role authentication. This operation performs a cascading update:\r\n- The unit is permanently removed from the database\r\n- All ingredients using this unit will have their unit_id set to null\r\n- This is a destructive operation that affects recipe ingredients\r\nConsider updating the unit instead of deleting it to preserve recipe integrity.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the unit to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "403": {
+            "description": "Forbidden - user does not have admin role required for this operation."
+          }
+        }
+      }
+    },
+    "/api/units/convert": {
+      "get": {
+        "tags": [
+          "Unit"
+        ],
+        "summary": "Converts an amount from one unit to another using volume equivalents.",
+        "description": "Requires user or admin authentication. This endpoint performs unit conversion based on\r\nthe volume equivalent values stored for each unit. The conversion uses the formula:\r\nnewAmount = (originalAmount * oldUnit.volumeEquivalent) / newUnit.volumeEquivalent\r\nThis is useful for recipe scaling, measurement system conversion, and ingredient calculations.",
+        "parameters": [
+          {
+            "name": "oldId",
+            "in": "query",
+            "description": "The ID of the unit to convert from.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newId",
+            "in": "query",
+            "description": "The ID of the unit to convert to.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "originalAmount",
+            "in": "query",
+            "description": "The amount in the original unit to convert.",
+            "schema": {
+              "type": "number",
+              "format": "float"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the conversion result with new unit and amount."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          },
+          "404": {
+            "description": "Not Found - one or both unit IDs do not exist."
+          }
+        }
+      }
+    },
+    "/api/users/signup": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Creates a new user account and returns an authentication token.",
+        "description": "Creates a new user account with the provided name, email, and password.\r\nThe password is securely hashed before storage. The email must be unique within the system.\r\nUpon successful registration, a JWT authentication token is returned that can be used for subsequent API calls.\r\nThe token has a limited expiry time and should be refreshed using the /api/auth/me endpoint.",
+        "requestBody": {
+          "description": "The signup request containing user name, email, and password.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the authentication token for the new user."
+          },
+          "400": {
+            "description": "Bad Request - invalid signup data or missing required fields."
+          },
+          "409": {
+            "description": "Conflict - a user with this email already exists."
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Authenticates a user and returns an authentication token.",
+        "description": "Authenticates the user with the provided email and password credentials.\r\nThe password is verified against the stored hash. Upon successful authentication,\r\na JWT token is returned that should be included in the Authorization header for subsequent requests.\r\nThe token includes the user's ID and has a limited expiry time.",
+        "requestBody": {
+          "description": "The login request containing email and password.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the authentication token."
+          },
+          "400": {
+            "description": "Bad Request - invalid login data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - invalid email or password."
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieves the current user's profile information and refreshes the authentication token.",
+        "description": "Requires valid authentication token in the Authorization header. This endpoint serves multiple purposes:\r\n1. Validates that the current token is still valid\r\n2. Returns the current user's profile information including their role\r\n3. Issues a new token with extended expiry time in the response headers\r\nThe new token should be stored by the client and used for subsequent API calls.\r\nThis endpoint is typically called when the client detects that the token is about to expire.",
+        "responses": {
+          "200": {
+            "description": "Returns the current user's profile with a refreshed token."
+          },
+          "401": {
+            "description": "Unauthorized - invalid or expired authentication token."
+          },
+          "404": {
+            "description": "Not Found - user account no longer exists."
+          }
+        }
+      }
+    },
+    "/api/user_meals": {
+      "get": {
+        "tags": [
+          "UserMeal"
+        ],
+        "summary": "Retrieves the current user's meal records with optional date filtering.",
+        "description": "Requires user authentication. Returns all meal records for the authenticated user within the specified date range.\r\nIf no date range is provided, returns all meal records for the user.\r\nEach record includes the recipe details, meal type, and scheduled date.\r\nThis endpoint is useful for meal planning views and scheduling applications.",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Optional start date to filter meal records (inclusive).",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Optional end date to filter meal records (inclusive).",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of matching user meal records."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "UserMeal"
+        ],
+        "summary": "Creates a new user meal record.",
+        "description": "Requires user authentication. Creates a new meal record for the authenticated user.\r\nThe userId is automatically set from the authentication token.\r\nThe recipeId must reference an existing recipe, and mealId must reference an existing meal type.\r\nThe mealDate specifies when the user plans to prepare this meal.\r\nThis endpoint is used for meal planning and scheduling functionality.",
+        "requestBody": {
+          "description": "The meal record data to create. Must include recipeId, mealId, and mealDate.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserMealCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserMealCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserMealCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the created user meal record."
+          },
+          "400": {
+            "description": "Bad Request - invalid meal record data or missing required fields."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      }
+    },
+    "/api/user_meals/{id}": {
+      "get": {
+        "tags": [
+          "UserMeal"
+        ],
+        "summary": "Retrieves a specific user meal record by its ID.",
+        "description": "Requires user authentication. Returns detailed information about a specific meal record\r\nincluding the associated recipe, meal type, and scheduled date.\r\nNote that users can only access their own meal records.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the user meal record.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested user meal record."
+          },
+          "404": {
+            "description": "Not Found - user meal record with the specified ID does not exist."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "UserMeal"
+        ],
+        "summary": "Deletes a user meal record by its ID.",
+        "description": "Requires user authentication. This operation permanently removes the meal record from the user's schedule.\r\nThe associated recipe and meal type records remain in the system.\r\nThis is a safe operation that only removes the user's specific meal plan record.\r\nUsers can only delete their own meal records.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The unique identifier of the user meal record to delete.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns deletion status (true if successful, false if not found)."
+          },
+          "401": {
+            "description": "Unauthorized - valid authentication token required."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateRecipeMealRequest": {
+        "type": "object",
+        "properties": {
+          "recipeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mealId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreteFoodRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "foodTypeId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "foodType": {
+            "$ref": "#/components/schemas/FoodTypeCreateRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FoodTypeCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FoodTypeUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "IngredientCreateRequest": {
+        "required": [
+          "unitAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "foodId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "unitId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "unitAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "recipeId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "food": {
+            "$ref": "#/components/schemas/CreteFoodRequest"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/UnitCreateRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IngredientUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "foodId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "unitId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "unitAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "recipeId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "food": {
+            "$ref": "#/components/schemas/CreteFoodRequest"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/UnitCreateRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MealCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecipeCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "time": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "portion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ingredientIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "mealIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "ingredients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngredientCreateRequest"
+            },
+            "nullable": true
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StepCreateRequest"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagCreateRequest"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecipeTagCreateRequest": {
+        "type": "object",
+        "properties": {
+          "recipeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tagId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecipeUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "time": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "portion": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "mealIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "ingredients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngredientCreateRequest"
+            },
+            "nullable": true
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "mealIds and tagIds are treated as PUT, they are updated to be in state as in request\r\nIngredients are treated as inputs, they are added, nothing is removed\r\nSteps are treated treated as current state, if they have id, they are updated, if not, they are added to recipe"
+      },
+      "SignUpRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Step": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recipeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instruction": {
+            "type": "string",
+            "nullable": true
+          },
+          "stepNumber": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "StepCreateRequest": {
+        "type": "object",
+        "properties": {
+          "recipeId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "instruction": {
+            "type": "string",
+            "nullable": true
+          },
+          "stepNumber": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "recipe id is not required beacause we often create step when creting recipe"
+      },
+      "StepUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "recipeId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "instruction": {
+            "type": "string",
+            "nullable": true
+          },
+          "stepNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TagCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TagUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnitCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "volumeEquivalent": {
+            "type": "number",
+            "format": "double"
+          },
+          "desc": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnitUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "volumeEquivalent": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "desc": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateFoodRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "foodTypeId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "foodType": {
+            "$ref": "#/components/schemas/FoodTypeCreateRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserMealCreateRequest": {
+        "type": "object",
+        "properties": {
+          "recipeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mealId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mealDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Put **_ONLY_** your JWT Bearer token on textbox below!",
+        "scheme": "Bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}

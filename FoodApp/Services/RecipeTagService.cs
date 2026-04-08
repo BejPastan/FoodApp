@@ -8,6 +8,7 @@ namespace FoodApp.Services
         IEnumerable<RecipeTag> GetRecipeTags(int? recipeId, int? tagId);
         RecipeTag? CreateRecipeTag(RecipeTagCreateRequest request);
         bool DeleteRecipeTag(int recipeId, int tagId);
+        bool DeleteRecipeTags(int recipeId);
     }
 
     public class RecipeTagService : IRecipeTagService
@@ -21,5 +22,16 @@ namespace FoodApp.Services
             return _repo.CreateRecipeTag(request.recipeId, request.tagId);
         }
         public bool DeleteRecipeTag(int recipeId, int tagId) => _repo.DeleteRecipeTag(recipeId, tagId);
+
+        /// <summary>
+        /// Delete all tags associations with specific recipe
+        /// </summary>
+        /// <param name="recipeId"></param>
+        /// <returns></returns>
+        public bool DeleteRecipeTags(int recipeId)
+        {
+            Console.WriteLine("Deleting recipe Tags");
+            return _repo.DeleteRecipeTags(recipeId);
+        }
     }
 }

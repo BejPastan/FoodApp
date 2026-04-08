@@ -1,4 +1,4 @@
-﻿using FoodApp.Models;
+using FoodApp.Models;
 using FoodApp.Repositories;
 using FoodApp.Utilities;
 
@@ -21,14 +21,18 @@ namespace FoodApp.Services
         private readonly IStepService _stepService;
         private readonly IIngredientService _ingredientServ;
         private readonly IRecipeMealService _recipeMealService;
+        private readonly IRecipeTagService _recipeTagService;
+        private readonly ITagService _tagService;
 
-        public RecipeService(IRecipeRepository recipeRepo, IMealService mealService, IStepService stepService, IIngredientService ingredientServ, IRecipeMealService recipeMealService)
+        public RecipeService(IRecipeRepository recipeRepo, IMealService mealService, IStepService stepService, IIngredientService ingredientServ, IRecipeMealService recipeMealService, IRecipeTagService recipeTagService, ITagService tagService)
         {
             _recipeRepo = recipeRepo;
             _mealService = mealService;
             _stepService = stepService;
             _ingredientServ = ingredientServ;
             _recipeMealService = recipeMealService;
+            _recipeTagService = recipeTagService;
+            _tagService = tagService;
         }
 
         public IEnumerable<RecipeRecord> GetRecipes(string nameFilter, int page = 1, int pageSize = 25)
@@ -41,7 +45,7 @@ namespace FoodApp.Services
         {
             var recipe = _recipeRepo.GetRecipeById(id);
             if (recipe == null) return null;
-            return FormatRecipe(recipe);
+            return FormatRecipe(recipe, FormatMode.full);
         }
 
         public Recipe? CreateRecipe(RecipeCreateRequest request)
@@ -76,28 +80,78 @@ namespace FoodApp.Services
 
         public Recipe? UpdateRecipe(int recipeId, RecipeUpdateRequest request)
         {
+            Console.WriteLine($"Updating recipe {recipeId} with name: {request.name}, portion: {request.portion}, time: {request.time}");
+            // Handle steps - update existing ones or create new ones
             foreach (var step in request.steps)
             {
                 step.recipeId = recipeId;
-                _stepService.CreateStep(step);
+                if (step.id > 0)
+                {
+                    // Update existing step
+                    StepUpdateRequest stepUpdate = new StepUpdateRequest
+                    {
+                        recipeId = recipeId,
+                        instruction = step.instruction,
+                        stepNumber = step.stepNumber
+                    };
+                    _stepService.UpdateStep(step.id, stepUpdate);
+                }
+                else
+                {
+                    // Create new step
+                    StepCreateRequest stepCreate = new StepCreateRequest
+                    {
+                        recipeId = recipeId,
+                        instruction = step.instruction,
+                        stepNumber = step.stepNumber
+                    };
+                    _stepService.CreateStep(stepCreate);
+                }
             }
 
+            // Handle ingredients - add new ones (nothing removed)
             foreach(var ingredient in request.ingredients)
             {
                 ingredient.recipeId = recipeId;
                 _ingredientServ.CreateIngredient(ingredient);
             }
 
-
-            foreach(var meal in request.mealIds)
+            // Handle mealIds - PUT behavior: delete existing, create new
+            if (request.mealIds != null)
             {
-                CreateRecipeMealRequest recipeMeal = new();
-                recipeMeal.mealId = meal;
-                recipeMeal.recipeId = recipeId;
-                _recipeMealService.CreateRecipeMeal(recipeMeal);
+                _recipeMealService.DeleteRecipesMeal(recipeId);
+                //Add all meals
+                foreach (var mealId in request.mealIds)
+                {
+                    CreateRecipeMealRequest recipeMeal = new CreateRecipeMealRequest
+                    {
+                        mealId = mealId,
+                        recipeId = recipeId
+                    };
+                    _recipeMealService.CreateRecipeMeal(recipeMeal);
+                }
+
+            }
+
+            // Handle tagIds - PUT behavior: delete existing, create new
+            Console.WriteLine(request.tagIds==null);
+            if (request.tagIds != null)
+            {
+                _recipeTagService.DeleteRecipeTags(recipeId);
+                foreach (var tagId in request.tagIds)
+                {
+                    RecipeTagCreateRequest recipeTag = new RecipeTagCreateRequest
+                    {
+                        recipeId = recipeId,
+                        tagId = tagId
+                    };
+                    _recipeTagService.CreateRecipeTag(recipeTag);
+                }
             }
 
             var updated = _recipeRepo.UpdateRecipe(recipeId, request.name, request.portion, request.time);
+
+            Console.WriteLine($"Updated recipe: {updated}");
 
             return FormatRecipe(updated);
         }
@@ -124,15 +178,17 @@ namespace FoodApp.Services
                 case FormatMode.inspect:
                     {
                         toFormat.meals = _mealService.GetMeals(null, toFormat.id).ToArray();
-                        toFormat.steps = _stepService.GetSteps(toFormat.id).ToArray();
                         toFormat.ingredients = _ingredientServ.GetIngredients(toFormat.id, null).ToArray();
+                        toFormat.tags = _tagService.GetTags(null, toFormat.id).ToArray();
                         break;
                     }
                 case FormatMode.full:
                     {
+                        Console.WriteLine("formatting full");
                         toFormat.meals = _mealService.GetMeals(null, toFormat.id).ToArray();
                         toFormat.steps = _stepService.GetSteps(toFormat.id).ToArray();
                         toFormat.ingredients = _ingredientServ.GetIngredients(toFormat.id, null).ToArray();
+                        toFormat.tags = _tagService.GetTags(null, toFormat.id).ToArray();
                         break;
                     }
             }
@@ -147,9 +203,9 @@ namespace FoodApp.Services
                 id = toFormat.id,
                 name = toFormat.name,
                 portion = toFormat.portion,
-                time = toFormat.time
+                time = toFormat.time,
             };
-            return FormatRecipe(toReturn, mode);
+            return toReturn;
         }
     }
 }

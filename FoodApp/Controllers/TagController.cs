@@ -40,10 +40,10 @@ namespace FoodApp.Controllers
         /// Common tag examples include "vegetarian", "gluten-free", "quick-meal", "italian", etc.
         /// </remarks>
         [HttpGet("api/tags")]
-        public IActionResult GetTags([FromQuery] string name = "")
+        public IActionResult GetTags([FromQuery] string name = "", int page = 1, int perPage = 25, int? recipeId =null)
         {
             Authentication.ValidateToken(Request);
-            return Ok(_service.GetTags(name));
+            return Ok(_service.GetTags(name, recipeId, page, perPage));
         }
 
         /// <summary>
