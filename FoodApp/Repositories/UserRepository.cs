@@ -94,12 +94,15 @@ namespace FoodApp.Repositories
 
         public User UpdateUser(int userId, string? name = null, string? password = null, string? email = null)
         {
-            var sql = @"UPDATE users OUTPUT INSERTED.*
+            var sql = @"UPDATE users
                         SET 
                             name = COALESCE(@Name, name),
                             password = COALESCE(@Password, password),
                             email = COALESCE(@Email, email)
+                        OUTPUT INSERTED.*
                         WHERE id = @UserId;";
+
+            Console.WriteLine(password);
 
             var parameters = new 
             { 

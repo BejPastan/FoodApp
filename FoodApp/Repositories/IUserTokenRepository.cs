@@ -28,7 +28,7 @@ namespace FoodApp.Repositories
                             UPDATE SET 
                                 target.token = source.token,
                                 target.expirationDate = source.expirationDate,
-                                target.used = 1
+                                target.used = 0
                         WHEN NOT MATCHED THEN
                             INSERT (userId, token, expirationDate, used)
                             VALUES (source.userId, source.token, source.expirationDate, 0)
@@ -36,10 +36,10 @@ namespace FoodApp.Repositories
 
             var result = DBConnector.QueryDatabase<UserToken>(sql, new 
             { 
-                Token = request.token, 
-                ExpirationDate = request.expirationDate, 
-                Used = request.used, 
-                UserId = request.userId 
+                token = request.token, 
+                expirationDate = request.expirationDate, 
+                used = request.used, 
+                userId = request.userId 
             }).ToList();
 
             if (result.Count > 0)
@@ -52,15 +52,18 @@ namespace FoodApp.Repositories
 
         public UserToken? GetValidToken(string tokenValue)
         {
-            var sql = @"SELECT * FROM user_tokens 
-                        WHERE token = @Token AND used = 0 AND expirationDate > GETUTCDATE();";
+            var date = DateTime.UtcNow;
+            Console.WriteLine(date);
 
-            return DBConnector.QueryDatabase<UserToken>(sql, new { Token = tokenValue ?? string.Empty }).FirstOrDefault();
+            var sql = @"SELECT * FROM user_token
+                        WHERE token = @Token AND used = 0 AND expirationDate >= @date;";
+
+            return DBConnector.QueryDatabase<UserToken>(sql, new { Token = tokenValue ?? string.Empty, date }).FirstOrDefault();
         }
 
         public bool MarkTokenAsUsed(int tokenId)
         {
-            var sql = @"UPDATE user_tokens SET used = 1 WHERE id = @Id;";
+            var sql = @"UPDATE user_token SET used = 1 WHERE id = @Id;";
             DBConnector.QueryDatabase<int>(sql, new { Id = tokenId }).ToList();
             return true;
         }
