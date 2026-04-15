@@ -1,7 +1,6 @@
 using FoodApp.Services;
 using FoodApp.Repositories;
 using FoodApp.Utilities;
-
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -18,7 +17,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(_ => true)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .WithExposedHeaders("New-Token");
@@ -45,6 +44,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMealRepository, MealRepository>();
 builder.Services.AddScoped<IRecipeMealRepository, RecipeMealRepository>();
 builder.Services.AddScoped<IUserMealRepository, UserMealRepository>();
+builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
+builder.Services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
 #endregion
 
 #region services
@@ -62,6 +63,7 @@ builder.Services.AddScoped<IFoodTypeService, FoodTypeService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IIngredientService, IngredientService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 #endregion
 
 var app = builder.Build();

@@ -13,6 +13,8 @@
             password = builder.Configuration["ConnectionStrings:Password"] ?? throw new InvalidOperationException("DB_PASSWORD configuration is missing.");
             authSecret = builder.Configuration["Auth:SecretKey"] ?? throw new InvalidOperationException("AUTH_SECRET_KEY configuration is missing.");
             tokenExpiryMinutes = int.TryParse(builder.Configuration["Auth:TokenExpirationMinutes"], out int minutes) ? minutes : tokenExpiryMinutes;
+            emailPass = builder.Configuration["Email:appPassword"] ?? throw new InvalidOperationException("EMAIL_PASSWORD_NOT_FOUND");
+            email = builder.Configuration["Email:email"] ?? throw new InvalidOperationException("EMAIL_NOT_FOUND");
         }
 
         public static string GetDatabaseCredentials()
@@ -26,6 +28,19 @@
         public static string GetAuthSecretKey()
         {
             return authSecret;
+        }
+
+        static string email;
+        static string emailPass;
+
+        public static string GetSmtpEmail()
+        {
+            return email;
+        }
+
+        public static string GetSmtpPass()
+        {
+            return emailPass;
         }
     }
 }

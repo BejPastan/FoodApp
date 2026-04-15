@@ -43,6 +43,15 @@ namespace FoodApp.Utilities
             return BCrypt.Net.BCrypt.EnhancedVerify(password, hash, HashType.SHA384);
         }
 
+        public static string GenerateSixDigitCode()
+        {
+            var bytes = new byte[4];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+            uint value = BitConverter.ToUInt32(bytes, 0);
+            return (value % 1000000).ToString("D6");
+        }
+
         private static int? GetUserIdFromToken(string token)
         {
             try

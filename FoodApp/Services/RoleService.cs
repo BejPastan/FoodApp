@@ -7,6 +7,8 @@ namespace FoodApp.Services
     public  interface IRoleService
     {
         Role? GetRoleByUserId(int id);
+        bool CheckRole(Roles[] permittedRoles, int userId);
+        public bool AddRoleToUser(int userId, Roles role);
     }
 
     public class RoleService : IRoleService
@@ -36,6 +38,11 @@ namespace FoodApp.Services
                 return true;
             }
             return false;
+        }
+
+        public bool AddRoleToUser(int userId, Roles role)
+        {
+            return _roleRepo.AddRoleToUser(userId, role);
         }
     }
 }

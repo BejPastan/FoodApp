@@ -8,11 +8,11 @@ namespace FoodApp.Models
         public required string name { get; set; }
         public string password { get; set; }//this is the hashed password
         public required string email { get; set; }
-        public DateTime? last_login { get; set; }
+        public DateTime? lastLogin { get; set; }
 
         public override string ToString()
         {
-            return $"User: {name} (ID: {id}, Email: {email}, Last Login: {last_login})";
+            return $"User: {name} (ID: {id}, Email: {email}, Last Login: {lastLogin})";
         }
     }
 
@@ -36,7 +36,7 @@ namespace FoodApp.Models
 
         public override string ToString()
         {
-            return $"User: {name} (ID: {id}, Email: {email}, Last Login: {last_login}), role: ({role})";
+            return $"User: {name} (ID: {id}, Email: {email}, Last Login: {lastLogin}), role: ({role})";
         }
     }
 
@@ -44,5 +44,21 @@ namespace FoodApp.Models
     {
         public string? name { get; set; }
         public string? email { get; set; }
+    }
+
+    public class PasswordResetStartRequest
+    {
+        public string email { get; set; }
+    }
+
+    public class PasswordResetConfirmRequest
+    {
+        public string token { get; set; }
+        public string newPassword { get; set; }
+    }
+
+    public class ConfirmSignUpRequest
+    {
+        public string token { get; set; }
     }
 }

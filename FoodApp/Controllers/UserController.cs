@@ -69,6 +69,7 @@ namespace FoodApp.Controllers
         public IActionResult Login([FromBody] LoginRequest request)
         {
             var token = _service.LoginUser(request.email, request.password);
+            Console.WriteLine($"token: {token}");
             AuthenticationResponse resp = new AuthenticationResponse(token);
             return Ok(resp);
         }
@@ -99,10 +100,119 @@ namespace FoodApp.Controllers
                 throw new UnauthorizedAccessException("You don't have permission to do this");
             }
 
+            Console.WriteLine(userId);
+
             ExtendedUser user = _service.GetCurrentUser(userId.Value);
             string token = Authentication.CreateAuthToken(userId.Value);
             Response.Headers.Add("new-token", token);
             return Ok(user);
+        }
+
+        /// <summary>
+        /// Initiates password reset process for a user.
+        /// </summary>
+        /// <param name="request">Request containing the user's email address.</param>
+        /// <returns>Success status regardless of whether email exists</returns>
+        /// <response code="200">Returns success status.</response>
+        /// <response code="400">Bad Request - invalid email format.</response>
+        /// <remarks>
+        /// Public endpoint. If the email exists in the system, a password reset token will be generated 
+        /// and sent via email. Always returns success even for non-existing emails
+        /// </remarks>
+        [HttpPost("api/users/reset-password")]
+        public IActionResult StartPasswordReset([FromBody] PasswordResetStartRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.email))
+            {
+                return BadRequest(new { error = "Email is required" });
+            }
+
+            _service.StartPasswordReset(request.email);
+            return Ok(new { success = true });
+        }
+
+        /// <summary>
+        /// Completes password reset process using verification token.
+        /// </summary>
+        /// <param name="request">Request containing reset token and new password.</param>
+        /// <returns>Success status of password reset operation.</returns>
+        /// <response code="200">Returns success status if password was reset.</response>
+        /// <response code="400">Bad Request - invalid token or password.</response>
+        /// <response code="404">Not Found - invalid or expired token.</response>
+        /// <remarks>
+        /// Public endpoint. Validates the reset token and updates the user's password if the token is valid.
+        /// The token is marked as used after this operation and cannot be reused.
+        /// </remarks>
+        [HttpPost("api/users/reset-password/confirm")]
+        public IActionResult ConfirmPasswordReset([FromBody] PasswordResetConfirmRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.token) || string.IsNullOrWhiteSpace(request.newPassword))
+            {
+                return BadRequest(new { error = "Token and new password are required" });
+            }
+
+            var success = _service.ConfirmPasswordReset(request.token, request.newPassword);
+            if (!success)
+            {
+                return NotFound(new { error = "Invalid or expired token" });
+            }
+
+            return Ok(new { success = true });
+        }
+
+        /// <summary>
+        /// Confirms user account registration using verification token.
+        /// </summary>
+        /// <param name="request">Request containing confirmation token.</param>
+        /// <returns>Success status of account confirmation.</returns>
+        /// <response code="200">Returns success status if account was confirmed.</response>
+        /// <response code="400">Bad Request - invalid token.</response>
+        /// <response code="404">Not Found - invalid or expired token.</response>
+        /// <remarks>
+        /// Public endpoint. Validates the registration confirmation token and activates the user account.
+        /// The token is marked as used after this operation.
+        /// </remarks>
+        [HttpPost("api/users/confirm-signup")]
+        public IActionResult ConfirmSignUp([FromBody] ConfirmSignUpRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.token))
+            {
+                return BadRequest(new { error = "Token is required" });
+            }
+
+            var success = _service.ConfirmSignUp(request.token);
+            if (!success)
+            {
+                return NotFound(new { error = "Invalid or expired token" });
+            }
+
+            return Ok(new { success = true });
+        }
+
+        /// <summary>
+        /// Updates the authenticated user's profile information.
+        /// </summary>
+        /// <param name="request">Request containing updated profile fields.</param>
+        /// <returns>The updated user profile information.</returns>
+        /// <response code="200">Returns the updated user profile.</response>
+        /// <response code="400">Bad Request - invalid update data.</response>
+        /// <response code="401">Unauthorized - valid authentication token required.</response>
+        /// <response code="409">Conflict - email address is already in use.</response>
+        /// <remarks>
+        /// Requires valid authentication token. Users can only update their own profile.
+        /// Supports partial updates - only provided fields will be modified.
+        /// </remarks>
+        [HttpPatch("api/users/profile")]
+        public IActionResult UpdateUserProfile([FromBody] UserUpdateRequest request)
+        {
+            int? userId = Authentication.GetUserIdFromHeader(Request);
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("You don't have permission to do this");
+            }
+
+            var updatedUser = _service.UpdateUser(request, userId.Value);
+            return Ok(updatedUser);
         }
     }
 }

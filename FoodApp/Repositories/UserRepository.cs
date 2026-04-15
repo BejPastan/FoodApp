@@ -13,6 +13,7 @@ namespace FoodApp.Repositories
         User? GetUserDataById(int id);
         ExtendedUser? GetExtendedUserDataById(int id);
         bool DeleteUser(int id);
+        User UpdateUser(int userId, string? name = null, string? password = null, string? email = null);
     }
 
     public class UserRepository : IUserRepository
@@ -30,7 +31,7 @@ namespace FoodApp.Repositories
                     name = inserted.name,
                     email = inserted.email,
                     password = string.Empty,
-                    last_login = inserted.last_login
+                    lastLogin = inserted.lastLogin
                 };
             }
             throw new InvalidOperationException("Failed to insert user.");
@@ -44,17 +45,17 @@ namespace FoodApp.Repositories
 
         public User LoginUser(int userId)
         {
-            var updateSql = "UPDATE users SET last_login = @last_login WHERE id = @id;";
+            var updateSql = "UPDATE users SET lastLogin = @lastLogin WHERE id = @id;";
             try
             {
-                DBConnector.QueryDatabase<int>(updateSql, new { last_login = DateTime.Now, id = userId }).ToList();
+                DBConnector.QueryDatabase<int>(updateSql, new { lastLogin = DateTime.Now, id = userId }).ToList();
             }
             catch
             {
                 Console.WriteLine("error updating last login");
             }
 
-            var fetchSql = "SELECT id, name, email, last_login FROM users WHERE id = @id;";
+            var fetchSql = "SELECT id, name, email, lastLogin FROM users WHERE id = @id;";
             var user = DBConnector.QueryDatabase<User>(fetchSql, new { id = userId }).FirstOrDefault();
             if (user == null)
             {
@@ -70,7 +71,7 @@ namespace FoodApp.Repositories
             var user = DBConnector.QueryDatabase<User>(sql, new { id = id }).FirstOrDefault();
             if (user == null) return null;
             user.password = string.Empty;
-            user.last_login = null;
+            user.lastLogin = null;
             return user;
         }
 
@@ -83,12 +84,33 @@ namespace FoodApp.Repositories
 
         public ExtendedUser? GetExtendedUserDataById(int id)
         {
-            var sql = "SELECT users.*, r.name as role FROM users LEFT JOIN user_roles ur ON ur.user_id = users.id LEFT JOIN role r ON r.id = ur.role_id;";
-            var user = DBConnector.QueryDatabase<ExtendedUser>(sql, new { id = id }).FirstOrDefault();
-            user.roleName = user.role.GetDisplayName();
+            var sql = "SELECT users.*, r.name as role FROM users LEFT JOIN user_roles ur ON ur.user_id = users.id LEFT JOIN role r ON r.id = ur.role_id WHERE users.id = @id";
+            var user = DBConnector.QueryDatabase<ExtendedUser>(sql, new { id }).FirstOrDefault();
             if (user == null) return null;
+            user.roleName = user.role.GetDisplayName();
             user.password = string.Empty;
             return user;
+        }
+
+        public User UpdateUser(int userId, string? name = null, string? password = null, string? email = null)
+        {
+            var sql = @"UPDATE users OUTPUT INSERTED.*
+                        SET 
+                            name = COALESCE(@Name, name),
+                            password = COALESCE(@Password, password),
+                            email = COALESCE(@Email, email)
+                        WHERE id = @UserId;";
+
+            var parameters = new 
+            { 
+                UserId = userId, 
+                Name = name, 
+                Password = password, 
+                Email = email 
+            };
+
+            var results = DBConnector.QueryDatabase<User>(sql, parameters);
+            return results.FirstOrDefault();
         }
     }
 }
