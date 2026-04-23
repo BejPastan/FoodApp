@@ -29,15 +29,13 @@ namespace FoodApp.Models
     /// <summary>
     /// Standardized success response model for API responses
     /// </summary>
-    public class SuccessResponse<T>
+    public class SuccessResponse
     {
-        public T data { get; set; }
         public string message { get; set; }
         public DateTime timestamp { get; set; }
 
-        public SuccessResponse(T data, string message = "Success")
+        public SuccessResponse(string message = "Success")
         {
-            this.data = data;
             this.message = message;
             timestamp = DateTime.UtcNow;
         }

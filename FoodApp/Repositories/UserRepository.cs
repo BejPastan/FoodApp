@@ -8,6 +8,7 @@ namespace FoodApp.Repositories
     public interface IUserRepository
     {
         User SignUpUser(string username, string hashedPassword, string email);
+        User ChangeUserStatus(int id, UserStatus newStatus);
         User? GetUserByEmail(string email);
         User LoginUser(int userId);
         User? GetUserDataById(int id);
@@ -55,16 +56,21 @@ namespace FoodApp.Repositories
                 Console.WriteLine("error updating last login");
             }
 
-            var fetchSql = "SELECT id, name, email, lastLogin FROM users WHERE id = @id;";
+            var fetchSql = "SELECT id, name, email, lastLogin FROM users WHERE id = @id AND userStatus = 'active';";
             var user = DBConnector.QueryDatabase<User>(fetchSql, new { id = userId }).FirstOrDefault();
             if (user == null)
             {
-                throw new InvalidOperationException("Failed to retrieve user after login.");
+                throw new AccessViolationException("user does not exist or is not active");
             }
             user.password = string.Empty;
             return user;
         }
 
+        /// <summary>
+        /// Return user with given ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public User? GetUserDataById(int id)
         {
             var sql = "SELECT id, name, email FROM users WHERE id = @id;";
@@ -75,6 +81,11 @@ namespace FoodApp.Repositories
             return user;
         }
 
+        /// <summary>
+        /// Delete user record from database
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public bool DeleteUser(int id)
         {
             var sql = "DELETE FROM users WHERE user_id = @userId";
@@ -114,6 +125,20 @@ namespace FoodApp.Repositories
 
             var results = DBConnector.QueryDatabase<User>(sql, parameters);
             return results.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Update user Status
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="newStatus"></param>
+        /// <returns></returns>
+        public User ChangeUserStatus(int userId, UserStatus newStatus)
+        {
+            var sql = "UPDATE users SET userStatus = @newStatus OUTPUT INSERTED.* WHERE id = @userId";
+            var parameters = new { newStatus = newStatus.ToString(),  userId = userId};
+            var result = DBConnector.QueryDatabase<User>(sql,parameters);
+            return result.FirstOrDefault();
         }
     }
 }

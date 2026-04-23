@@ -19,7 +19,7 @@
 
         public static string GetDatabaseCredentials()
         {
-            return $"Data Source={serverName};Persist Security Info=False;Database=foodApp;User ID={userName};Password={password};Pooling=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Application Name=\"SQL Server Management Studio\";Command Timeout=0";
+            return $"Data Source={serverName};Persist Security Info=False;Database=free-sql-db-2905813;User ID={userName};Password={password};Pooling=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Application Name=\"SQL Server Management Studio\";Command Timeout=0";
         }
 
         static string authSecret = "This is a very secret key for authentication";

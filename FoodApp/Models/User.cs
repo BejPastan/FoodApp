@@ -9,10 +9,11 @@ namespace FoodApp.Models
         public string password { get; set; }//this is the hashed password
         public required string email { get; set; }
         public DateTime? lastLogin { get; set; }
+        public UserStatus userStatus { get; set; }
 
         public override string ToString()
         {
-            return $"User: {name} (ID: {id}, Email: {email}, Last Login: {lastLogin})";
+            return $"User: {name} (ID: {id}, Email: {email}, Last Login: {lastLogin}, status: {userStatus})";
         }
     }
 

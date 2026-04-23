@@ -32,7 +32,7 @@ namespace FoodApp.Services
                 body = body.Replace($"{placeholder.Key}", placeholder.Value);
             }
 
-            SendGmailEmail(recipientEmail, template.name, body);
+            SendGmailEmail(recipientEmail, template.subject, body);
         }
 
         private void SendGmailEmail(string recipientEmail, string subject, string body)

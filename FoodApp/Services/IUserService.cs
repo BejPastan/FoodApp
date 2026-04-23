@@ -9,7 +9,7 @@ namespace FoodApp.Services
         User? GetUserDataById(int id);
         ExtendedUser? GetCurrentUser(int userId);
         string LoginUser(string email, string password);
-        string SignUpUser(string name, string email, string password);
+        bool SignUpUser(string name, string email, string password);
         /// <summary>
         /// check if user accound exist, if yes, generate token, and send email
         /// </summary>
@@ -35,6 +35,13 @@ namespace FoodApp.Services
         /// <param name="request"></param>
         /// <returns></returns>
         public ExtendedUser UpdateUser(UserUpdateRequest request, int userId);
+
+        /// <summary>
+        /// delete user record
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public bool DeleteUser(int userId);
     }
 
     public class UserService : IUserService
@@ -87,7 +94,7 @@ namespace FoodApp.Services
         /// <param name="password">user password</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public string SignUpUser(string name, string email, string password)
+        public bool SignUpUser(string name, string email, string password)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(name))
             {
@@ -129,9 +136,34 @@ namespace FoodApp.Services
                 throw;
             }
 
-            var token = Authentication.CreateAuthToken(user.id);
-            return token;
+            return true;
         }
+
+        public bool ConfirmSignUp(string token)
+        {
+            var validToken = _userTokenRepository.GetValidToken(token);
+            if (validToken == null)
+            {
+                return false;
+            }
+
+            var user = _userTokenRepository.GetUserByToken(token);
+            if(user == null || user.userStatus != UserStatus.inactive)
+            {
+                throw new Exception("wrong token, or account does not exist");
+            }
+
+            user = _repo.ChangeUserStatus(user.id, UserStatus.active);
+            if(user==null)
+            {
+                throw new Exception("Internal server error");
+            }
+            // Mark token as used
+            _userTokenRepository.MarkTokenAsUsed(validToken.id);
+
+            return true;
+        }
+
 
         public bool StartPasswordReset(string email)
         {
@@ -190,23 +222,6 @@ namespace FoodApp.Services
             return true;
         }
 
-        public bool ConfirmSignUp(string token)
-        {
-            var validToken = _userTokenRepository.GetValidToken(token);
-            if (validToken == null)
-            {
-                return false;
-            }
-
-            // Activate user account
-            Console.WriteLine("WARNING: USER STATUS IS NOT IMPLEMENTED YET");
-            
-            // Mark token as used
-            _userTokenRepository.MarkTokenAsUsed(validToken.id);
-
-            return true;
-        }
-
         public ExtendedUser UpdateUser(UserUpdateRequest request, int userId)
         {
             var existingUser = _repo.GetUserDataById(userId);
@@ -230,6 +245,12 @@ namespace FoodApp.Services
 
             // Return updated user with extended info
             return _repo.GetExtendedUserDataById(userId);
+        }
+
+        public bool DeleteUser(int userId)
+        {
+            _repo.DeleteUser(userId);
+            return true;
         }
     }
 }

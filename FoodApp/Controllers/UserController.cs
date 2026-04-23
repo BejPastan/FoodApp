@@ -16,17 +16,15 @@ namespace FoodApp.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _service;
-        private readonly IAuthService _auth;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="UserController"/> class.
         /// </summary>
         /// <param name="service">The user service for data operations.</param>
         /// <param name="authService">The authentication service for permission checks.</param>
-        public UserController(IUserService service, IAuthService authService)
+        public UserController(IUserService service)
         {
             _service = service;
-            _auth = authService;
         }
 
         /// <summary>
@@ -46,10 +44,42 @@ namespace FoodApp.Controllers
         [HttpPost("api/users/signup")]
         public IActionResult SignUp([FromBody] SignUpRequest request)
         {
-            var token = _service.SignUpUser(request.name, request.email, request.password);
-            AuthenticationResponse resp = new AuthenticationResponse(token);
+            var succcess = _service.SignUpUser(request.name, request.email, request.password);
+            SuccessResponse resp = new();
+            resp.message = "Account created";
             return Ok(resp);
         }
+
+
+        /// <summary>
+        /// Confirms user account registration using verification token.
+        /// </summary>
+        /// <param name="request">Request containing confirmation token.</param>
+        /// <returns>Success status of account confirmation.</returns>
+        /// <response code="200">Returns success status if account was confirmed.</response>
+        /// <response code="400">Bad Request - invalid token.</response>
+        /// <response code="404">Not Found - invalid or expired token.</response>
+        /// <remarks>
+        /// Public endpoint. Validates the registration confirmation token and activates the user account.
+        /// The token is marked as used after this operation.
+        /// </remarks>
+        [HttpPost("api/users/signup/confirm")]
+        public IActionResult ConfirmSignUp([FromBody] ConfirmSignUpRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.token))
+            {
+                return BadRequest(new { error = "Token is required" });
+            }
+
+            var success = _service.ConfirmSignUp(request.token);
+            if (!success)
+            {
+                return NotFound(new { error = "Invalid or expired token" });
+            }
+
+            return Ok(new { success = true });
+        }
+
 
         /// <summary>
         /// Authenticates a user and returns an authentication token.
@@ -161,35 +191,6 @@ namespace FoodApp.Controllers
         }
 
         /// <summary>
-        /// Confirms user account registration using verification token.
-        /// </summary>
-        /// <param name="request">Request containing confirmation token.</param>
-        /// <returns>Success status of account confirmation.</returns>
-        /// <response code="200">Returns success status if account was confirmed.</response>
-        /// <response code="400">Bad Request - invalid token.</response>
-        /// <response code="404">Not Found - invalid or expired token.</response>
-        /// <remarks>
-        /// Public endpoint. Validates the registration confirmation token and activates the user account.
-        /// The token is marked as used after this operation.
-        /// </remarks>
-        [HttpPost("api/users/confirm-signup")]
-        public IActionResult ConfirmSignUp([FromBody] ConfirmSignUpRequest request)
-        {
-            if (string.IsNullOrWhiteSpace(request.token))
-            {
-                return BadRequest(new { error = "Token is required" });
-            }
-
-            var success = _service.ConfirmSignUp(request.token);
-            if (!success)
-            {
-                return NotFound(new { error = "Invalid or expired token" });
-            }
-
-            return Ok(new { success = true });
-        }
-
-        /// <summary>
         /// Updates the authenticated user's profile information.
         /// </summary>
         /// <param name="request">Request containing updated profile fields.</param>
@@ -213,6 +214,12 @@ namespace FoodApp.Controllers
 
             var updatedUser = _service.UpdateUser(request, userId.Value);
             return Ok(updatedUser);
+        }
+
+        [HttpPost("api/users/delete/{userId}")]
+        public IActionResult DeleteUser(int userId)
+        {
+            return Ok(new SuccessResponse(message: "user removed"));
         }
     }
 }

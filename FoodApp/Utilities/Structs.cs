@@ -21,4 +21,11 @@
         user,
         admin
     }
+
+    public enum UserStatus
+    {
+        active,
+        inactive,
+        timeout
+    }
 }

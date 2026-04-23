@@ -19,8 +19,6 @@ namespace FoodApp.Utilities
 
         public void OnException(ExceptionContext context)
         {
-            Console.WriteLine("exception logged");
-
             // Log the exception
             _logger.LogError(context.Exception, "An unhandled exception occurred");
 
