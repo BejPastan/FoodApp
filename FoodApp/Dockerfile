@@ -16,7 +16,7 @@ COPY ["./FoodApp.csproj", "./"]
 RUN dotnet restore "./FoodApp.csproj"
 COPY . .
 WORKDIR "/src/FoodApp"
-RUN dotnet build "FoodApp.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./FoodApp.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
