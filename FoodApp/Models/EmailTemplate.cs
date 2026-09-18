@@ -2,7 +2,7 @@ namespace FoodApp.Models
 {
     public class EmailTemplate
     {
-        public int id { get; set; }
+        public Guid id { get; set; }
         public string name { get; set; }
         public string template { get; set; }
         public string subject {get; set;}

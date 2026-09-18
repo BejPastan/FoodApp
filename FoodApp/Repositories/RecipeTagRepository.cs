@@ -7,20 +7,20 @@ namespace FoodApp.Repositories
 {
     public interface IRecipeTagRepository
     {
-        IEnumerable<RecipeTag> GetRecipeTags(int? recipeId, int? tagId);
-        RecipeTag? CreateRecipeTag(int recipeId, int tagId);
-        bool DeleteRecipeTag(int recipeId, int tagId);
+        IEnumerable<RecipeTag> GetRecipeTags(Guid? recipeId, Guid? tagId);
+        RecipeTag? CreateRecipeTag(Guid recipeId, Guid tagId);
+        bool DeleteRecipeTag(Guid recipeId, Guid tagId);
         /// <summary>
         /// Delete all tags associated with specific recipe record
         /// </summary>
         /// <param name="recipeId"></param>
         /// <returns></returns>
-        bool DeleteRecipeTags(int recipeId);
+        bool DeleteRecipeTags(Guid recipeId);
     }
 
     public class RecipeTagRepository : IRecipeTagRepository
     {
-        public IEnumerable<RecipeTag> GetRecipeTags(int? recipeId, int? tagId)
+        public IEnumerable<RecipeTag> GetRecipeTags(Guid? recipeId, Guid? tagId)
         {
             var sql = "SELECT * FROM recipe_tags WHERE 1=1";
             if (recipeId.HasValue) sql += " AND recipeId = @recipeId";
@@ -29,16 +29,16 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<RecipeTag>(sql, new { recipeId = recipeId, tagId = tagId });
         }
 
-        public RecipeTag? CreateRecipeTag(int recipeId, int tagId)
+        public RecipeTag? CreateRecipeTag(Guid recipeId, Guid tagId)
         {
             var sql = "INSERT INTO recipe_tags (recipeId, tagId) OUTPUT INSERTED.* VALUES (@recipeId, @tagId);";
             return DBConnector.QueryDatabase<RecipeTag>(sql, new { recipeId = recipeId, tagId = tagId }).FirstOrDefault();
         }
 
-        public bool DeleteRecipeTag(int recipeId, int tagId)
+        public bool DeleteRecipeTag(Guid recipeId, Guid tagId)
         {
             var sql = "DELETE FROM recipe_tags WHERE recipeId = @recipeId AND tagId = @tagId;";
-            DBConnector.QueryDatabase<int>(sql, new { recipeId = recipeId, tagId = tagId }).ToList();
+            DBConnector.QueryDatabase<Guid>(sql, new { recipeId = recipeId, tagId = tagId }).ToList();
             return true;
         }
 
@@ -47,11 +47,11 @@ namespace FoodApp.Repositories
         /// </summary>
         /// <param name="recipeId"></param>
         /// <returns></returns>
-        public bool DeleteRecipeTags(int recipeId)
+        public bool DeleteRecipeTags(Guid recipeId)
         {
             Console.WriteLine("Deleting recipe tags");
             var sql = "DELETE FROM recipe_tags WHERE recipeId = @recipeId;";
-            DBConnector.QueryDatabase<int>(sql, new { recipeId }).ToList();
+            DBConnector.QueryDatabase<Guid>(sql, new { recipeId }).ToList();
             return true;
         }
     }

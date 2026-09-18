@@ -1,9 +1,7 @@
 using FoodApp.Models;
-using FoodApp.Repositories;
-using FoodApp.Services;
+using FoodApp.Services.Interfaces;
 using FoodApp.Utilities;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace FoodApp.Controllers
 {
@@ -12,21 +10,16 @@ namespace FoodApp.Controllers
     /// login, and retrieving current user information. This controller handles the core authentication functionality
     /// of the FoodApp application.
     /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="UserController"/> class.
+    /// </remarks>
+    /// <param name="service">The user service for data operations.</param>
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController(IUserService service) : ControllerBase
     {
-        private readonly IUserService _service;
-        
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserController"/> class.
-        /// </summary>
-        /// <param name="service">The user service for data operations.</param>
-        /// <param name="authService">The authentication service for permission checks.</param>
-        public UserController(IUserService service)
-        {
-            _service = service;
-        }
+        private readonly IUserService _service = service;
 
+        #region signup
         /// <summary>
         /// Creates a new user account and returns an authentication token.
         /// </summary>
@@ -45,8 +38,10 @@ namespace FoodApp.Controllers
         public IActionResult SignUp([FromBody] SignUpRequest request)
         {
             var succcess = _service.SignUpUser(request.name, request.email, request.password);
-            SuccessResponse resp = new();
-            resp.message = "Account created";
+            SuccessResponse resp = new()
+            {
+                message = "Account created"
+            };
             return Ok(resp);
         }
 
@@ -80,9 +75,11 @@ namespace FoodApp.Controllers
             return Ok(new { success = true });
         }
 
+        #endregion
 
+        #region Loggin cycle
         /// <summary>
-        /// Authenticates a user and returns an authentication token.
+        /// Authenticates a user and returns auth and refresh token
         /// </summary>
         /// <param name="request">The login request containing email and password.</param>
         /// <returns>An authentication token for the authenticated user.</returns>
@@ -95,49 +92,76 @@ namespace FoodApp.Controllers
         /// a JWT token is returned that should be included in the Authorization header for subsequent requests.
         /// The token includes the user's ID and has a limited expiry time.
         /// </remarks>
-        [HttpPost("api/users/login")]
+        [HttpPost("api/auth/login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var token = _service.LoginUser(request.email, request.password);
-            Console.WriteLine($"token: {token}");
-            AuthenticationResponse resp = new AuthenticationResponse(token);
-            return Ok(resp);
+            try
+            {
+                var token = _service.LoginUser(request.email, request.password);
+                Response.Cookies.Append(Constants.authHeader,token.authToken, authCookie);
+                Response.Cookies.Append(Constants.refreshHeader, token.refreshToken, refreshCookie);
+                return Ok(new SuccessResponse());
+            }
+            catch (Exception ex) 
+            { 
+                Console.WriteLine(ex);
+                throw;
+            }
+
         }
 
         /// <summary>
-        /// Retrieves the current user's profile information and refreshes the authentication token.
+        /// Retrieves the current user's profile information
         /// </summary>
         /// <returns>The current user's profile information including role details.</returns>
         /// <response code="200">Returns the current user's profile with a refreshed token.</response>
         /// <response code="401">Unauthorized - invalid or expired authentication token.</response>
         /// <response code="404">Not Found - user account no longer exists.</response>
-        /// <remarks>
-        /// Requires valid authentication token in the Authorization header. This endpoint serves multiple purposes:
-        /// 1. Validates that the current token is still valid
-        /// 2. Returns the current user's profile information including their role
-        /// 3. Issues a new token with extended expiry time in the response headers
-        /// The new token should be stored by the client and used for subsequent API calls.
-        /// This endpoint is typically called when the client detects that the token is about to expire.
-        /// </remarks>
         /// <exception cref="UnauthorizedAccessException">Thrown when the user is not authenticated.</exception>
         [HttpGet("api/auth/me")]
         public IActionResult GetCurrentUser()
         {
-            int? userId = Authentication.GetUserIdFromHeader(Request);
-
-            if (userId == null)
-            {
-                throw new UnauthorizedAccessException("You don't have permission to do this");
-            }
-
+            Guid? userId = Authentication.GetUserIdFromHeader(Request) ?? throw new UnauthorizedAccessException("You don't have permission to do this");
             Console.WriteLine(userId);
-
-            ExtendedUser user = _service.GetCurrentUser(userId.Value);
-            string token = Authentication.CreateAuthToken(userId.Value);
-            Response.Headers.Add("new-token", token);
+            
+            ExtendedUser? user = _service.GetCurrentUser(userId.Value);
             return Ok(user);
         }
 
+        /// <summary>
+        /// exchange refresh token for auth token
+        /// </summary>
+        /// <returns>return empty response with header with new Auth token, and refresh token</returns>
+        [HttpGet("api/auth/refresh")]
+        public IActionResult RefreshToken()
+        {
+            try
+            {
+                //int? userId = Authentication.GetUserIdFromHeader(Request) ?? throw new UnauthorizedAccessException("You don't have permission to do this");
+                var token = _service.RefreshAuthToken(Request.Cookies[Constants.refreshHeader]);
+
+                Response.Cookies.Append(Constants.authHeader, token.authToken, authCookie);
+                Response.Cookies.Append(Constants.refreshHeader, token.refreshToken, refreshCookie);
+                return Ok(new SuccessResponse());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        [HttpPost("api/auth/logout")]
+        public IActionResult Logout()
+        {
+            Guid? userId = Authentication.GetUserIdFromHeader(Request) ?? throw new UnauthorizedAccessException("You don't have permission to do this");
+            _service.Logout(userId.Value);
+            return Ok(new SuccessResponse());
+        }
+
+
+        #endregion
+        #region password reset
         /// <summary>
         /// Initiates password reset process for a user.
         /// </summary>
@@ -189,6 +213,7 @@ namespace FoodApp.Controllers
 
             return Ok(new { success = true });
         }
+        #endregion
 
         /// <summary>
         /// Updates the authenticated user's profile information.
@@ -206,20 +231,38 @@ namespace FoodApp.Controllers
         [HttpPatch("api/users/profile")]
         public IActionResult UpdateUserProfile([FromBody] UserUpdateRequest request)
         {
-            int? userId = Authentication.GetUserIdFromHeader(Request);
-            if (userId == null)
-            {
-                throw new UnauthorizedAccessException("You don't have permission to do this");
-            }
-
+            Guid? userId = Authentication.GetUserIdFromHeader(Request) ?? throw new UnauthorizedAccessException("You don't have permission to do this");
             var updatedUser = _service.UpdateUser(request, userId.Value);
             return Ok(updatedUser);
         }
 
+        /// <summary>
+        /// Delete user data from database
+        /// </summary>
+        /// <param name="userId">id of user to delete</param>
+        /// <returns>when successfull return message</returns>
         [HttpPost("api/users/delete/{userId}")]
         public IActionResult DeleteUser(int userId)
         {
             return Ok(new SuccessResponse(message: "user removed"));
         }
+
+        private readonly CookieOptions authCookie =
+        new()
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = DateTimeOffset.UtcNow.AddSeconds(Constants.AuthTokenExpire)
+        };
+
+        private readonly CookieOptions refreshCookie = 
+        new(){
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = DateTime.UtcNow.AddSeconds(Constants.RefreshTokenExpire),
+            Path = "/api/auth/refresh"
+        };
     }
 }

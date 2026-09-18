@@ -7,13 +7,13 @@ namespace FoodApp.Repositories
 {
     public interface IRoleRepository
     {
-        Role? GetRoleByUserId(int id);
-        bool AddRoleToUser(int  userId, Roles role);
+        Role? GetRoleByUserId(Guid id);
+        bool AddRoleToUser(Guid userId, Roles role);
     }
 
     public class RoleRepository : IRoleRepository
     {
-        public bool AddRoleToUser(int userId, Roles role)
+        public bool AddRoleToUser(Guid userId, Roles role)
         {
             try
             {
@@ -21,14 +21,19 @@ namespace FoodApp.Repositories
                 DBConnector.QueryDatabase<Role>(sql, new {roleName = role.ToString(), userId = userId});
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 throw new Exception("There was error when adding user");
             }
 
         }
 
-        public Role? GetRoleByUserId(int id)
+        /// <summary>
+        /// Return user role
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Role? GetRoleByUserId(Guid id)
         {
             var sql = "SELECT role.* FROM role JOIN user_roles ON user_roles.user_id = @userId WHERE role.id = user_roles.role_id;";
             var result = DBConnector.QueryDatabase<Role>(sql, new {userId = id});

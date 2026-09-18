@@ -5,16 +5,16 @@ namespace FoodApp.Repositories
 {
     public interface ITagRepository
     {
-        IEnumerable<Tag> GetTags(string nameFilter, int? recipeId, int page, int pageSize);
-        Tag? GetTagById(int id);
+        IEnumerable<Tag> GetTags(string nameFilter, Guid? recipeId, int page, int pageSize);
+        Tag? GetTagById(Guid id);
         Tag CreateTag(string name);
-        Tag? UpdateTag(int id, string? name);
-        bool DeleteTag(int id);
+        Tag? UpdateTag(Guid id, string? name);
+        bool DeleteTag(Guid id);
     }
 
     public class TagRepository : ITagRepository
     {
-        public IEnumerable<Tag> GetTags(string nameFilter, int? recipeId, int page, int pageSize)
+        public IEnumerable<Tag> GetTags(string nameFilter, Guid? recipeId, int page, int pageSize)
         {
             var sql = "SELECT * FROM tags WHERE name LIKE @name";
             Console.WriteLine(recipeId);
@@ -26,7 +26,7 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<Tag>(sql, new { name = $"%{nameFilter}%", recipeId, offset = (page - 1) * pageSize, pageSize = pageSize }).ToList();
         }
 
-        public Tag? GetTagById(int id)
+        public Tag? GetTagById(Guid id)
         {
             var sql = "SELECT * FROM tags WHERE id = @id;";
             return DBConnector.QueryDatabase<Tag>(sql, new { id = id }).FirstOrDefault();
@@ -40,17 +40,17 @@ namespace FoodApp.Repositories
             throw new Exception("Insert failed");
         }
 
-        public Tag? UpdateTag(int id, string? name)
+        public Tag? UpdateTag(Guid id, string? name)
         {
             if (name == null) return null;
             var sql = "UPDATE tags SET name = @name WHERE id = @id; SELECT * FROM tags WHERE id = @id;";
             return DBConnector.QueryDatabase<Tag>(sql, new { name = name, id = id }).FirstOrDefault();
         }
 
-        public bool DeleteTag(int id)
+        public bool DeleteTag(Guid id)
         {
             var sql = "DELETE FROM tags WHERE id = @id;";
-            DBConnector.QueryDatabase<int>(sql, new { id = id }).ToList();
+            DBConnector.QueryDatabase<Guid>(sql, new { id = id }).ToList();
             return true;
         }
     }

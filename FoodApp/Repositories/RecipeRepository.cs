@@ -1,32 +1,71 @@
 using FoodApp.Models;
+using FoodApp.Repositories.Interfaces;
 using FoodApp.Utilities;
+using System.Text.Json;
 
 namespace FoodApp.Repositories
 {
-    public interface IRecipeRepository
+    /// <summary>
+    /// Default implementation of IRecipeRepo
+    /// </summary>
+    public class RecipeRepository : IRecipeRepo
     {
-        IEnumerable<RecipeRecord> GetRecipes(string nameFilter, int page = 1, int pageSize = 25);
-        Recipe? GetRecipeById(int id);
-        Recipe CreateRecipe(string name, int portion, int prepTime);
-        RecipeRecord? UpdateRecipe(int id, string? name, int? portion, int? prepTime);
-        bool DeleteRecipe(int id);
-        RecipeRecord[] GetRecipesToChoose(int userId, int mealId, int excludedWeeks);
-    }
-
-    public class RecipeRepository : IRecipeRepository
-    {
-        public IEnumerable<RecipeRecord> GetRecipes(string nameFilter, int page = 1, int pageSize = 25)
+        /// <inheritdoc/>
+        public IEnumerable<RecipeRecord> GetRecipes(string[]? mealNames, string[]? tags, string nameFilter, int page = 1, int pageSize = 25)
         {
-            var sql = "SELECT * FROM recipe WHERE name LIKE @name ORDER BY name ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
-            return DBConnector.QueryDatabase<RecipeRecord>(sql, new { name = $"%{nameFilter}%", offset = (page - 1) * pageSize, pageSize = pageSize });
-        }
+            var param = new Dictionary<string, object>
+            {
+                { "name", $"%{nameFilter}%" },
+                { "offset", (page - 1) * pageSize },
+                { "pageSize", pageSize }
+            };
 
-        public Recipe? GetRecipeById(int id)
-        {
-            var sql = "SELECT * FROM recipe WHERE id = @id;";
-            var result = DBConnector.QueryDatabase<Recipe>(sql, new { id = id }).FirstOrDefault();
+            var sql = """
+                SELECT r.id, r.name, r.portion, r.time FROM recipe r 
+
+                """;
+
+            if (mealNames != null && mealNames.Length > 0)
+            {
+                sql += """
+                    JOIN recipe_meal rm ON rm.recipeId = r.id 
+                    JOIN meal m ON rm.mealId = m.id 
+                    JOIN OPENJSON(@mealArray) AS ma ON m.name LIKE ma.value
+
+                    """;
+                param.Add("mealArray", JsonSerializer.Serialize(mealNames));
+            }
+            if(tags!= null && tags.Length > 0)
+            {
+                sql += """
+                    JOIN recipe_tags rt ON rt.recipeId = r.id
+                    JOIN tags t ON rt.tagId = t.id
+                    JOIN OPENJSON(@tagArray) AS ta ON t.name = ta.value
+
+                    """;
+                param.Add("tagArray", JsonSerializer.Serialize(tags));
+            }
+
+            sql += """
+                WHERE r.name LIKE @name 
+                GROUP BY r.id, r.name, r.portion, r.time
+                ORDER BY r.name ASC 
+                OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
+                """;
+
+            var result = DBConnector.QueryDatabase<RecipeRecord>(sql,param);
             return result;
         }
+
+        /// <inheritdoc/>
+        public Recipe? GetRecipeById(Guid id)
+        {
+            var sql = "SELECT * FROM recipe WHERE id = @id;";
+            var result = DBConnector.QueryDatabase<Recipe>(sql, new { id }).FirstOrDefault();
+            return result;
+        }
+
+        /// <inheritdoc/>
 
         public Recipe CreateRecipe(string name, int portion, int prepTime)
         {
@@ -34,15 +73,8 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<Recipe>(sql, new { name, prepTime, portion }).First();
         }
 
-        /// <summary>
-        /// updatet values in selected object, and return it 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="name"></param>
-        /// <param name="portion"></param>
-        /// <param name="prepTime"></param>
-        /// <returns></returns>
-        public RecipeRecord? UpdateRecipe(int id, string? name, int? portion, int? prepTime)
+        /// <inheritdoc/>
+        public RecipeRecord? UpdateRecipe(Guid id, string? name, int? portion, int? prepTime)
         {
             string sql = "UPDATE recipe SET ";
             if (name != null)
@@ -62,21 +94,15 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<RecipeRecord>(sql, new { id = id, name = name, prepTime = prepTime, portion = portion }).FirstOrDefault();
         }
 
-        public bool DeleteRecipe(int id)
+        /// <inheritdoc/>
+        public bool DeleteRecipe(Guid id)
         {
             string sql = "DELETE FROM recipe OUTPUT DELETED.* WHERE id = @id;";
             return DBConnector.QueryDatabase<Recipe>(sql, new { id = id }).Any();
         }
 
-        /// <summary>
-        /// Return list of possible recipes to choose from based on criteria
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="mealId"></param>
-        /// <param name="excluded"></param>
-        /// <param name="excludedWeeks"></param>
-        /// <returns></returns>
-        public RecipeRecord[] GetRecipesToChoose(int userId, int mealId, int excludedWeeks)
+        /// <inheritdoc/>
+        public RecipeRecord[] GetRecipesToChoose(Guid userId, Guid mealId, int excludedWeeks)
         {
             DateTime cutOffDate = DateTime.Now.AddDays(-excludedWeeks * 7);
             string sql = "With recipe_usage AS (Select rm.recipeId, COUNT(um.recipeId) eaten from recipe_meal rm JOIN meal ON meal.id = rm.mealId LEFT JOIN user_meals um ON um.recipeId = rm.recipeId AND um.mealDate >= @cutDate AND um.userId = @userId WHERE meal.id = @mealId GROUP BY rm.recipeId),ranked_recipes AS (SELECT TOP(3) ROW_NUMBER() OVER(ORDER BY ru.eaten asc, NEWID()) as rank_order, ru.recipeId as recipeId FROM recipe_usage ru ORDER BY rank_order) SELECT * FROM recipe WHERE recipe.id IN(SELECT ranked_recipes.recipeId FROM ranked_recipes);";

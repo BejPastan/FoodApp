@@ -4,7 +4,7 @@ namespace FoodApp.Models
 {
     public class Unit
     {
-        public int id { get; set; }
+        public Guid id { get; set; }
         public string name { get; set; } = string.Empty;
         public decimal volumeEquivalent { get; set; }
         public string desc { get; set; } = string.Empty;

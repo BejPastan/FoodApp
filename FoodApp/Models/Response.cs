@@ -29,16 +29,10 @@ namespace FoodApp.Models
     /// <summary>
     /// Standardized success response model for API responses
     /// </summary>
-    public class SuccessResponse
+    public class SuccessResponse(string message ="Success")
     {
-        public string message { get; set; }
-        public DateTime timestamp { get; set; }
-
-        public SuccessResponse(string message = "Success")
-        {
-            this.message = message;
-            timestamp = DateTime.UtcNow;
-        }
+        public string message { get; set; } = message;
+        public DateTime timestamp { get; set; } = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -63,8 +57,15 @@ namespace FoodApp.Models
     /// </summary>
     public class AuthenticationResponse
     {
+        /// <summary>
+        /// Auth token
+        /// </summary>
         public string token { get; set; }
 
+        /// <summary>
+        /// Respons model for auth request
+        /// </summary>
+        /// <param name="token"></param>
         public AuthenticationResponse(string token)
         {
             this.token = token;

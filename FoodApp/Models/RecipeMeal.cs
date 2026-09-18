@@ -2,9 +2,9 @@
 {
     public class RecipeMeal
     {
-        public int id { get; set; }
-        public int recipeId { get; set; }
-        public int mealId { get; set; }
+        public Guid id { get; set; }
+        public Guid recipeId { get; set; }
+        public Guid mealId { get; set; }
 
         public override string ToString()
         {
@@ -14,13 +14,13 @@
 
     public class CreateRecipeMealRequest
     {
-        public int recipeId { get; set; }
-        public int mealId { get; set; }
+        public Guid recipeId { get; set; }
+        public Guid mealId { get; set; }
     }
 
     public class RecipeMealUpdateRequest
     {
-        public int? recipeId { get; set; }
-        public int? mealId { get; set; }
+        public Guid? recipeId { get; set; }
+        public Guid? mealId { get; set; }
     }
 }

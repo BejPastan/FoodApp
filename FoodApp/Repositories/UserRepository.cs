@@ -1,24 +1,64 @@
-﻿using FoodApp.Utilities;
-using FoodApp.Models;
-using System.Security.Authentication.ExtendedProtection;
+﻿using FoodApp.Models;
+using FoodApp.Utilities;
 using Microsoft.OpenApi.Extensions;
+using Newtonsoft.Json.Linq;
+using System.Security.Authentication.ExtendedProtection;
 
 namespace FoodApp.Repositories
 {
     public interface IUserRepository
     {
+        /// <summary>
+        /// Create new user as inactive
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="hashedPassword"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
         User SignUpUser(string username, string hashedPassword, string email);
-        User ChangeUserStatus(int id, UserStatus newStatus);
+        /// <summary>
+        /// set new status to user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="newStatus"></param>
+        /// <returns></returns>
+        User ChangeUserStatus(Guid id, UserStatus newStatus);
+        /// <summary>
+        /// find user by email address
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         User? GetUserByEmail(string email);
-        User LoginUser(int userId);
-        User? GetUserDataById(int id);
-        ExtendedUser? GetExtendedUserDataById(int id);
-        bool DeleteUser(int id);
-        User UpdateUser(int userId, string? name = null, string? password = null, string? email = null);
+        /// <summary>
+        /// set user data in database to be as logged in user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        User LoginUser(Guid userId);
+        /// <summary>
+        /// Find user by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        User? GetUserDataById(Guid id);
+        /// <summary>
+        /// get full user data
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ExtendedUser? GetExtendedUserDataById(Guid id);
+        /// <summary>
+        /// Delete user record from database
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        bool DeleteUser(Guid id);
+        User UpdateUser(Guid userId, string? name = null, string? password = null, string? email = null);
     }
 
     public class UserRepository : IUserRepository
     {
+        /// <inheritdoc/>
         public User SignUpUser(string username, string hashedPassword, string email)
         {
             var sql = "INSERT INTO users (name, password, email) OUTPUT INSERTED.* VALUES (@Username, @Password, @Email);";
@@ -38,18 +78,20 @@ namespace FoodApp.Repositories
             throw new InvalidOperationException("Failed to insert user.");
         }
 
+        /// <inheritdoc/>
         public User? GetUserByEmail(string email)
         {
             var sql = "SELECT * FROM users WHERE email = @email;";
             return DBConnector.QueryDatabase<User>(sql, new { email = email ?? string.Empty }).FirstOrDefault();
         }
 
-        public User LoginUser(int userId)
+        /// <inheritdoc/>
+        public User LoginUser(Guid userId)
         {
             var updateSql = "UPDATE users SET lastLogin = @lastLogin WHERE id = @id;";
             try
             {
-                DBConnector.QueryDatabase<int>(updateSql, new { lastLogin = DateTime.Now, id = userId }).ToList();
+                DBConnector.QueryDatabase<Guid>(updateSql, new { lastLogin = DateTime.Now, id = userId }).ToList();
             }
             catch
             {
@@ -71,7 +113,7 @@ namespace FoodApp.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public User? GetUserDataById(int id)
+        public User? GetUserDataById(Guid id)
         {
             var sql = "SELECT id, name, email FROM users WHERE id = @id;";
             var user = DBConnector.QueryDatabase<User>(sql, new { id = id }).FirstOrDefault();
@@ -81,19 +123,16 @@ namespace FoodApp.Repositories
             return user;
         }
 
-        /// <summary>
-        /// Delete user record from database
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public bool DeleteUser(int id)
+        /// <inheritdoc/>
+        public bool DeleteUser(Guid id)
         {
             var sql = "DELETE FROM users WHERE user_id = @userId";
-            DBConnector.QueryDatabase<int>(sql, new {userId = id}).FirstOrDefault();
+            DBConnector.QueryDatabase<Guid>(sql, new {userId = id}).FirstOrDefault();
             return true;
         }
 
-        public ExtendedUser? GetExtendedUserDataById(int id)
+        /// <inheritdoc/>
+        public ExtendedUser? GetExtendedUserDataById(Guid id)
         {
             var sql = "SELECT users.*, r.name as role FROM users LEFT JOIN user_roles ur ON ur.user_id = users.id LEFT JOIN role r ON r.id = ur.role_id WHERE users.id = @id";
             var user = DBConnector.QueryDatabase<ExtendedUser>(sql, new { id }).FirstOrDefault();
@@ -103,7 +142,8 @@ namespace FoodApp.Repositories
             return user;
         }
 
-        public User UpdateUser(int userId, string? name = null, string? password = null, string? email = null)
+        /// <inheritdoc/>
+        public User UpdateUser(Guid userId, string? name = null, string? password = null, string? email = null)
         {
             var sql = @"UPDATE users
                         SET 
@@ -127,18 +167,14 @@ namespace FoodApp.Repositories
             return results.FirstOrDefault();
         }
 
-        /// <summary>
-        /// Update user Status
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="newStatus"></param>
-        /// <returns></returns>
-        public User ChangeUserStatus(int userId, UserStatus newStatus)
+        /// <inheritdoc/>
+        public User ChangeUserStatus(Guid userId, UserStatus newStatus)
         {
             var sql = "UPDATE users SET userStatus = @newStatus OUTPUT INSERTED.* WHERE id = @userId";
-            var parameters = new { newStatus = newStatus.ToString(),  userId = userId};
+            var parameters = new { newStatus = newStatus.ToString(), userId = userId};
             var result = DBConnector.QueryDatabase<User>(sql,parameters);
             return result.FirstOrDefault();
         }
+
     }
 }

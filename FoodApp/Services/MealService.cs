@@ -5,11 +5,11 @@ namespace FoodApp.Services
 {
     public interface IMealService
     {
-        Meal[] GetMeals(string? nameFilter, int? recipeId, int page = 1, int pageSize = 25);
-        Meal? GetMealById(int id);
+        Meal[] GetMeals(string? nameFilter, Guid? recipeId, int page = 1, int pageSize = 25);
+        Meal? GetMealById(Guid id);
         Meal CreateMeal(MealCreateRequest request);
-        Meal? UpdateMeal(int id, MealUpdateRequest request);
-        bool DeleteMeal(int id);
+        Meal? UpdateMeal(Guid id, MealUpdateRequest request);
+        bool DeleteMeal(Guid id);
     }
 
     public class MealService : IMealService
@@ -20,17 +20,16 @@ namespace FoodApp.Services
             _mealRepo = mealRepo;
         }
 
-        public Meal[] GetMeals(string? nameFilter, int? recipeId, int page = 1, int pageSize = 25)
+        public Meal[] GetMeals(string? nameFilter, Guid? recipeId, int page = 1, int pageSize = 25)
         {
             return _mealRepo.GetMeals(nameFilter, recipeId, page, pageSize).ToArray();
         }
 
-        public Meal? GetMealById(int id) => _mealRepo.GetMealById(id);
+        public Meal? GetMealById(Guid id) => _mealRepo.GetMealById(id);
 
-        public Meal CreateMeal(MealCreateRequest request) => _mealRepo.CreateMeal(request.name);
+        public Meal CreateMeal(MealCreateRequest request) => _mealRepo.CreateMeal(request.name, request.order);
 
-        public Meal? UpdateMeal(int id, MealUpdateRequest request) => _mealRepo.UpdateMeal(id, request.name);
-
-        public bool DeleteMeal(int id) => _mealRepo.DeleteMeal(id);
+        public Meal? UpdateMeal(Guid id, MealUpdateRequest request) => _mealRepo.UpdateMeal(id, request.name, request.order);
+        public bool DeleteMeal(Guid id) => _mealRepo.DeleteMeal(id);
     }
 }

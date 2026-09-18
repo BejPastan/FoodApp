@@ -48,7 +48,7 @@ namespace FoodApp.Controllers
         /// Requires user authentication. Returns detailed information about a single food type.
         /// </remarks>
         [HttpGet("api/food_type/{id}")]
-        public IActionResult GetFoodType(int id)
+        public IActionResult GetFoodType(Guid id)
         {
                 Authentication.ValidateToken(Request);
                 var foodType = _service.GetFoodTypeById(id);
@@ -99,7 +99,7 @@ namespace FoodApp.Controllers
         /// Returns 400 if no fields are provided for update.
         /// </remarks>
         [HttpPatch("api/food_type/{id}")]
-        public IActionResult PatchFoodType(int id, [FromBody] FoodTypeUpdateRequest request)
+        public IActionResult PatchFoodType(Guid id, [FromBody] FoodTypeUpdateRequest request)
         {
                 _auth.CheckPermissions(Request, [Roles.admin]);
                 if (request.name == null) return BadRequest(new { error = "No fields provided to update." });
@@ -123,7 +123,7 @@ namespace FoodApp.Controllers
         /// - This is a destructive operation that cannot be undone
         /// </remarks>
         [HttpDelete("api/food_type/{id}")]
-        public IActionResult DeleteFoodType(int id)
+        public IActionResult DeleteFoodType(Guid id)
         {
                 _auth.CheckPermissions(Request, [Roles.admin]);
                 var ok = _service.DeleteFoodType(id);

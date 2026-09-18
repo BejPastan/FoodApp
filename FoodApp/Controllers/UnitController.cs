@@ -40,7 +40,7 @@ namespace FoodApp.Controllers
         /// Common units include "cup", "gram", "tablespoon", "teaspoon", etc.
         /// </remarks>
         [HttpGet("api/units")]
-        public IActionResult GetUnits([FromQuery] int[] ids, [FromQuery] string search = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
+        public IActionResult GetUnits([FromQuery] Guid[] ids, [FromQuery] string search = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
             _auth.CheckPermissions(Request, [Roles.user, Roles.admin]);
             Console.WriteLine(ids.Length);
@@ -60,7 +60,7 @@ namespace FoodApp.Controllers
         /// including its name, volume equivalent for conversion calculations, and description.
         /// </remarks>
         [HttpGet("api/units/{id}")]
-        public IActionResult GetUnit(int id)
+        public IActionResult GetUnit(Guid id)
         {
             _auth.CheckPermissions(Request, [Roles.user, Roles.admin]);
             var item = _service.GetUnitById(id);
@@ -110,7 +110,7 @@ namespace FoodApp.Controllers
         /// Returns 400 if no fields are provided for update.
         /// </remarks>
         [HttpPatch("api/units/{id}")]
-        public IActionResult PatchUnit(int id, [FromBody] UnitUpdateRequest request)
+        public IActionResult PatchUnit(Guid id, [FromBody] UnitUpdateRequest request)
         {
             _auth.CheckPermissions(Request, [Roles.admin]);
             var updated = _service.UpdateUnit(id, request);
@@ -137,7 +137,7 @@ namespace FoodApp.Controllers
         /// Consider updating the unit instead of deleting it to preserve recipe integrity.
         /// </remarks>
         [HttpDelete("api/units/{id}")]
-        public IActionResult DeleteUnit(int id)
+        public IActionResult DeleteUnit(Guid id)
         {
             _auth.CheckPermissions(Request, [Roles.admin]);
             _service.DeleteUnit(id);
@@ -161,14 +161,11 @@ namespace FoodApp.Controllers
         /// This is useful for recipe scaling, measurement system conversion, and ingredient calculations.
         /// </remarks>
         [HttpGet("api/units/convert")]
-        public IActionResult ConvertUnit([FromQuery] string oldId, [FromQuery] string newId, [FromQuery] float originalAmount)
+        public IActionResult ConvertUnit([FromQuery] Guid oldId, [FromQuery] Guid newId, [FromQuery] float originalAmount)
         {
             _auth.CheckPermissions(Request, [Roles.user, Roles.admin]);
 
-            int oldUnitId = int.Parse(oldId);
-            int newUnitId = int.Parse(newId);
-
-            return Ok(_service.ConvertUnit(oldUnitId, newUnitId, originalAmount));
+            return Ok(_service.ConvertUnit(oldId, newId, originalAmount));
         }
     }
 }

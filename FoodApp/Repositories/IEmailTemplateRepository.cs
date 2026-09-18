@@ -5,13 +5,13 @@ namespace FoodApp.Repositories
 {
     public interface IEmailTemplateRepository
     {
-        EmailTemplate? GetTemplate(int? id, string? name);
+        EmailTemplate? GetTemplate(Guid? id, string? name);
         EmailTemplate AddTemplate(CreateEmailTemplateRequest request);
     }
 
     public class EmailTemplateRepository : IEmailTemplateRepository
     {
-        public EmailTemplate? GetTemplate(int? id, string? name)
+        public EmailTemplate? GetTemplate(Guid? id, string? name)
         {
             var parameters = new { Id = id, Name = name ?? string.Empty };
             

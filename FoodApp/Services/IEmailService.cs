@@ -7,7 +7,7 @@ namespace FoodApp.Services
 {
     public interface IEmailService
     {
-        void SendEmailFromTemplate(int? temaplateId, string? templateName, string recipientEmail, Dictionary<string, string> placeholders);
+        void SendEmailFromTemplate(Guid? temaplateId, string? templateName, string recipientEmail, Dictionary<string, string> placeholders);
     }
 
     public class EmailService : IEmailService
@@ -19,7 +19,7 @@ namespace FoodApp.Services
             _emailTemplateRepository = emailTemplateRepository;
         }
 
-        public void SendEmailFromTemplate(int? templateId, string? templateName, string recipientEmail, Dictionary<string, string> placeholders)
+        public void SendEmailFromTemplate(Guid? templateId, string? templateName, string recipientEmail, Dictionary<string, string> placeholders)
         {
             var template = _emailTemplateRepository.GetTemplate(templateId, templateName);
 

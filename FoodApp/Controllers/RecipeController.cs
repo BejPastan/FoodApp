@@ -1,5 +1,6 @@
 using FoodApp.Models;
 using FoodApp.Services;
+using FoodApp.Services.Interfaces;
 using FoodApp.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,24 +11,18 @@ namespace FoodApp.Controllers
     /// including ingredients, steps, and meal associations. Also provides functionality for recipe selection
     /// to avoid repetition in meal planning.
     /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="RecipeController"/> class.
+    /// </remarks>
+    /// <param name="service">The recipe service for data operations.</param>
+    /// <param name="authService">The authentication service for permission checks.</param>
     [ApiController]
-    public class RecipeController : Controller
+    public class RecipeController(IRecipeService service, IAuthService authService) : Controller
     {
         private const int CHOOSE_SIZE = 3;
 
-        private readonly IRecipeService _service;
-        private readonly IAuthService _auth;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RecipeController"/> class.
-        /// </summary>
-        /// <param name="service">The recipe service for data operations.</param>
-        /// <param name="authService">The authentication service for permission checks.</param>
-        public RecipeController(IRecipeService service, IAuthService authService)
-        {
-            _service = service;
-            _auth = authService;
-        }
+        private readonly IRecipeService _service = service;
+        private readonly IAuthService _auth = authService;
 
         /// <summary>
         /// Retrieves a list of recipes with optional filtering and pagination.
@@ -35,6 +30,8 @@ namespace FoodApp.Controllers
         /// <param name="name">Optional name to search for (partial match, case-insensitive).</param>
         /// <param name="page">Page number for pagination (default: 1).</param>
         /// <param name="perPage">Number of items per page (default: 25, max: 100).</param>
+        /// <param name="mealNames"></param>
+        /// <param name="tags"></param>
         /// <returns>A list of recipes matching the search criteria with full details including ingredients, steps, and associated meals.</returns>
         /// <response code="200">Returns the list of matching recipes.</response>
         /// <response code="401">Unauthorized - valid authentication token required.</response>
@@ -45,10 +42,10 @@ namespace FoodApp.Controllers
         /// Results are sorted by recipe ID in ascending order.
         /// </remarks>
         [HttpGet("api/recipes")]
-        public IActionResult GetRecipesAPI([FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
+        public IActionResult GetRecipesAPI([FromQuery] string[] mealNames, [FromQuery] string[]? tags, [FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
                 Authentication.ValidateToken(Request);
-                return Ok(_service.GetRecipes(name, page, perPage));
+                return Ok(_service.GetRecipes(mealNames, tags, name, page, perPage));
         }
 
         /// <summary>
@@ -67,7 +64,7 @@ namespace FoodApp.Controllers
         /// - Associated meal types
         /// </remarks>
         [HttpGet("api/recipes/{id}")]
-        public IActionResult GetRecipe(int id)
+        public IActionResult GetRecipe(Guid id)
         {
                 Authentication.ValidateToken(Request);
                 Recipe? item = _service.GetRecipeById(id);
@@ -127,7 +124,7 @@ namespace FoodApp.Controllers
         /// All referenced IDs must remain valid after the update.
         /// </remarks>
         [HttpPatch("api/recipes/{id}")]
-        public IActionResult PatchRecipe(int id, [FromBody] RecipeUpdateRequest request)
+        public IActionResult PatchRecipe(Guid id, [FromBody] RecipeUpdateRequest request)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 var updated = _service.UpdateRecipe(id, request);
@@ -157,7 +154,7 @@ namespace FoodApp.Controllers
         /// This is a destructive operation that cannot be undone.
         /// </remarks>
         [HttpDelete("api/recipes/{id}")]
-        public IActionResult DeleteRecipe(int id)
+        public IActionResult DeleteRecipe(Guid id)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 _service.DeleteRecipe(id);
@@ -182,9 +179,9 @@ namespace FoodApp.Controllers
         /// </remarks>
         /// <exception cref="UnauthorizedAccessException">Thrown when the user is not authenticated.</exception>
         [HttpGet("api/recipes/choices")]
-        public IActionResult GetRecipeToChoose([FromQuery] int mealId, [FromQuery] int excludeWeeks)
+        public IActionResult GetRecipeToChoose([FromQuery] Guid mealId, [FromQuery] int excludeWeeks)
         {
-                int? userId = Authentication.GetUserIdFromHeader(Request);
+                Guid? userId = Authentication.GetUserIdFromHeader(Request);
                 if(userId==null)
                 {
                     throw new UnauthorizedAccessException("You are not authorized to do this");

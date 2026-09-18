@@ -8,16 +8,16 @@ namespace FoodApp.Repositories
 {
     public interface IIngredientRepository
     {
-        IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page, int pageSize);
-        Ingredient? GetIngredientById(int id);
-        Ingredient CreateIngredient(int foodId, int unitId, decimal unitAmount, int recipeId);
-        Ingredient? UpdateIngredient(int id, int? foodId, int? unitId, decimal? unitAmount, int? recipeId);
-        bool DeleteIngredient(int id);
+        IEnumerable<Ingredient> GetIngredients(Guid? recipeId, Guid? foodId, int page, int pageSize);
+        Ingredient? GetIngredientById(Guid id);
+        Ingredient CreateIngredient(Guid foodId, Guid unitId, decimal unitAmount, Guid recipeId);
+        Ingredient? UpdateIngredient(Guid id, Guid? foodId, Guid? unitId, decimal? unitAmount, Guid? recipeId);
+        bool DeleteIngredient(Guid id);
     }
 
     public class IngredientRepository : IIngredientRepository
     {
-        public IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page, int pageSize)
+        public IEnumerable<Ingredient> GetIngredients(Guid? recipeId, Guid? foodId, int page, int pageSize)
         {
             var sql = "SELECT * FROM ingredients WHERE 1=1";
             if (recipeId.HasValue) sql += " AND recipeId = @recipeId";
@@ -26,13 +26,13 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<Ingredient>(sql, new { recipeId = recipeId, foodId = foodId, offset = (page - 1) * pageSize, pageSize = pageSize }).ToList();
         }
         
-        public Ingredient? GetIngredientById(int id)
+        public Ingredient? GetIngredientById(Guid id)
         {
             var sql = "SELECT * FROM ingredients WHERE id = @id;";
             return DBConnector.QueryDatabase<Ingredient>(sql, new { id = id }).FirstOrDefault();
         }
 
-        public Ingredient CreateIngredient(int foodId, int unitId, decimal unitAmount, int recipeId)
+        public Ingredient CreateIngredient(Guid foodId, Guid unitId, decimal unitAmount, Guid recipeId)
         {
             var sql = $"INSERT INTO ingredients (foodId, unitId, unitAmount, recipeId) OUTPUT INSERTED.* VALUES (@foodId, @unitId, @amt, @recipeId);";
             Console.WriteLine($"foodId: {foodId}, unitId {unitId}, amt: {unitAmount}, recipeId: {recipeId}");
@@ -41,7 +41,7 @@ namespace FoodApp.Repositories
             throw new Exception("Insert failed");
         }
 
-        public Ingredient? UpdateIngredient(int id, int? foodId, int? unitId, decimal? unitAmount, int? recipeId)
+        public Ingredient? UpdateIngredient(Guid id, Guid? foodId, Guid? unitId, decimal? unitAmount, Guid? recipeId)
         {
             var sets = new List<string>();
             var parameters = new DynamicParameters();
@@ -55,10 +55,10 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<Ingredient>(sql, parameters).FirstOrDefault();
         }
 
-        public bool DeleteIngredient(int id)
+        public bool DeleteIngredient(Guid id)
         {
             var sql = "DELETE FROM ingredients WHERE id = @id;";
-            DBConnector.QueryDatabase<int>(sql, new { id = id }).ToList();
+            DBConnector.QueryDatabase<Guid>(sql, new { id = id }).ToList();
             return true;
         }
     }

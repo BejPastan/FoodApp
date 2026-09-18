@@ -5,11 +5,11 @@ namespace FoodApp.Services
 {
     public interface IFoodService
     {
-        IEnumerable<Food> GetFoods(int? typeId, string nameFilter, int page = 1, int pageSize = 25);
-        Food? GetFoodById(int id);
-        Food CreateFood(CreteFoodRequest request);
-        Food? UpdateFood(int id, UpdateFoodRequest request);
-        bool DeleteFood(int id);
+        IEnumerable<Food> GetFoods(Guid? typeId, string nameFilter, int page = 1, int pageSize = 25);
+        Food? GetFoodById(Guid id);
+        Food CreateFood(CreateFoodRequest request);
+        Food? UpdateFood(Guid id, UpdateFoodRequest request);
+        bool DeleteFood(Guid id);
     }
 
     public class FoodService : IFoodService
@@ -21,11 +21,15 @@ namespace FoodApp.Services
             _repo = repo;
             _foodTypeRepo = foodTypeRepo;
         }
-        public IEnumerable<Food> GetFoods(int? typeId, string nameFilter, int page = 1, int pageSize = 25)
+
+        /// <inheritdoc/>
+        public IEnumerable<Food> GetFoods(Guid? typeId, string nameFilter, int page = 1, int pageSize = 25)
         {
             return _repo.GetFoods(typeId, nameFilter, page, pageSize);
         }
-        public Food? GetFoodById(int id)
+
+        /// <inheritdoc/>
+        public Food? GetFoodById(Guid id)
         {
             var food = _repo.GetFoodById(id);
             var foodType = food != null ? _foodTypeRepo.GetFoodTypeById(food.foodTypeId) : null;
@@ -33,36 +37,37 @@ namespace FoodApp.Services
             return food;
         }
 
-        public Food CreateFood(CreteFoodRequest request)
+        /// <inheritdoc/>
+        public Food CreateFood(CreateFoodRequest request)
         {
-            int? foodTypeId = request.foodTypeId;
+            Guid? foodTypeId = request.foodTypeId;
 
-            if (foodTypeId.HasValue && foodTypeId.Value > 0 && request.foodType != null)
+            if (foodTypeId.HasValue && foodTypeId.Value != Guid.Empty && request.foodType != null)
             {
                 throw new ArgumentException("you could specify onle foodTypeId or crete object");
             }
 
-            if ((!foodTypeId.HasValue || foodTypeId <=0) && request.foodType != null)
+            if ((!foodTypeId.HasValue || foodTypeId == Guid.Empty) && request.foodType != null)
             {
                 var createdType = _foodTypeRepo.CreateFoodType(request.foodType.name);
                 foodTypeId = createdType.id;
             }
 
-                var result = _repo.CreateFood(request.name, foodTypeId ?? 0);
+                var result = _repo.CreateFood(request.name, foodTypeId ?? Guid.Empty);
             return result;
         }
 
-        public Food? UpdateFood(int id, UpdateFoodRequest request)
+        public Food? UpdateFood(Guid id, UpdateFoodRequest request)
         {
-            int? foodTypeId = request.foodTypeId;
+            Guid? foodTypeId = request.foodTypeId;
             Console.WriteLine(foodTypeId);
-            if ((!foodTypeId.HasValue || foodTypeId.Value <=0) && request.foodType != null)
+            if ((!foodTypeId.HasValue || foodTypeId.Value == Guid.Empty) && request.foodType != null)
             {
                 var createdType = _foodTypeRepo.CreateFoodType(request.foodType.name);
                 foodTypeId = createdType.id;
             }
 
-            if(foodTypeId==0)
+            if(foodTypeId== Guid.Empty)
             {
                 foodTypeId = null;
             }
@@ -71,6 +76,6 @@ namespace FoodApp.Services
             return updated;
         }
 
-        public bool DeleteFood(int id) => _repo.DeleteFood(id);
+        public bool DeleteFood(Guid id) => _repo.DeleteFood(id);
     }
 }

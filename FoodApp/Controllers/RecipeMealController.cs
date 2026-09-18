@@ -41,7 +41,7 @@ namespace FoodApp.Controllers
         /// Results are sorted by recipe ID in ascending order.
         /// </remarks>
         [HttpGet("api/recipe_meals")]
-        public IActionResult GetRecipeMeals([FromQuery] int? recipeId = null, [FromQuery] int? mealId = null)
+        public IActionResult GetRecipeMeals([FromQuery] Guid? recipeId = null, [FromQuery] Guid? mealId = null)
         {
             Authentication.ValidateToken(Request);
             return Ok(_service.GetRecipeMeals(recipeId, mealId));
@@ -60,7 +60,7 @@ namespace FoodApp.Controllers
         /// including the recipe ID, meal ID, and meal details.
         /// </remarks>
         [HttpGet("api/recipe_meals/{id}")]
-        public IActionResult GetRecipeMeal(int id)
+        public IActionResult GetRecipeMeal(Guid id)
         {
             Authentication.ValidateToken(Request);
             var item = _service.GetRecipeMealById(id);
@@ -104,7 +104,7 @@ namespace FoodApp.Controllers
         /// This is a safe operation that only removes the linking record.
         /// </remarks>
         [HttpDelete("api/recipe_meals/{id}")]
-        public IActionResult DeleteRecipeMeal(int id)
+        public IActionResult DeleteRecipeMeal(Guid id)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             _service.DeleteRecipeMeal(id);

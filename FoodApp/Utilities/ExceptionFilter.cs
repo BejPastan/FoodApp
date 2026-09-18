@@ -46,6 +46,7 @@ namespace FoodApp.Utilities
                 NotFoundException notFoundEx => (
                     statusCode: (int)HttpStatusCode.NotFound,
                     errorResponse: new ErrorResponse(notFoundEx, "NOT_FOUND")
+                    
                 ),
                 UnauthorizedException unauthorizedEx => (
                     statusCode: (int)HttpStatusCode.Unauthorized,

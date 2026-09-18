@@ -41,7 +41,7 @@ namespace FoodApp.Controllers
         /// Results are sorted by recipe ID in ascending order.
         /// </remarks>
         [HttpGet("api/recipe_tags")]
-        public IActionResult GetRecipeTags([FromQuery] int? recipeId = null, [FromQuery] int? tagId = null)
+        public IActionResult GetRecipeTags([FromQuery] Guid? recipeId = null, [FromQuery] Guid? tagId = null)
         {
             Authentication.ValidateToken(Request);
             return Ok(_service.GetRecipeTags(recipeId, tagId));
@@ -84,7 +84,7 @@ namespace FoodApp.Controllers
         /// This is a safe operation that only removes the linking record.
         /// </remarks>
         [HttpDelete("api/recipe_tags")]
-        public IActionResult DeleteRecipeTag([FromQuery] int recipeId, [FromQuery] int tagId)
+        public IActionResult DeleteRecipeTag([FromQuery] Guid recipeId, [FromQuery] Guid tagId)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             _service.DeleteRecipeTag(recipeId, tagId);

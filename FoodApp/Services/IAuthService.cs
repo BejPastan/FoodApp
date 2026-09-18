@@ -4,29 +4,38 @@ using System.Net;
 
 namespace FoodApp.Services
 {
+    /// <summary>
+    /// interface for checking permissions
+    /// </summary>
     public interface IAuthService
     {
         /// <summary>
         /// Check if userhave permission to 
         /// </summary>
         /// <param name="token"></param>
-        int CheckPermissions(HttpRequest token, Roles[] permittedRoles);
+        /// <param name="permittedRoles"></param>
+        Guid CheckPermissions(HttpRequest token, Roles[] permittedRoles);
     }
 
-    public class AuthService : IAuthService
+    /// <summary>
+    /// Default implementation of IAuthService
+    /// </summary>
+    public class AuthService(IRoleService roleServ) : IAuthService
     {
-        IRoleService _roleServ;
+        readonly IRoleService _roleServ = roleServ;
 
-        public AuthService(IRoleService roleServ)
-        {
-            _roleServ = roleServ;
-        }
-
-        public int CheckPermissions(HttpRequest token, Roles[] permittedRoles)
+        /// <summary>
+        /// Check if user have permission for given resource
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="permittedRoles"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        public Guid CheckPermissions(HttpRequest token, Roles[] permittedRoles)
         {
             try
             {
-                int userId = Authentication.GetUserIdFromHeader(token).Value;
+                Guid userId = Authentication.GetUserIdFromHeader(token).Value;
 
                 Role userRole = _roleServ.GetRoleByUserId(userId);
                 if(!permittedRoles.Contains(userRole.name))

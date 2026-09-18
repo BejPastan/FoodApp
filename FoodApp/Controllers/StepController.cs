@@ -42,7 +42,7 @@ namespace FoodApp.Controllers
         /// Each step includes its instruction text and the recipe it belongs to.
         /// </remarks>
         [HttpGet("api/steps")]
-        public IActionResult GetSteps([FromQuery] int? recipeId = null, [FromQuery] int page = 1, [FromQuery] int perPage = 25)
+        public IActionResult GetSteps([FromQuery] Guid? recipeId = null, [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
             Authentication.ValidateToken(Request);
             return Ok(_service.GetSteps(recipeId, page, perPage));
@@ -61,7 +61,7 @@ namespace FoodApp.Controllers
         /// including its instruction text, step number, and associated recipe.
         /// </remarks>
         [HttpGet("api/steps/{id}")]
-        public IActionResult GetStep(int id)
+        public IActionResult GetStep(Guid id)
         {
             Authentication.ValidateToken(Request);
             var item = _service.GetStepById(id);
@@ -109,7 +109,7 @@ namespace FoodApp.Controllers
         /// All referenced IDs must remain valid after the update.
         /// </remarks>
         [HttpPatch("api/steps/{id}")]
-        public IActionResult PatchStep(int id, [FromBody] StepUpdateRequest stepRequest)
+        public IActionResult PatchStep(Guid id, [FromBody] StepUpdateRequest stepRequest)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             var updated = _service.UpdateStep(id, stepRequest);
@@ -134,7 +134,7 @@ namespace FoodApp.Controllers
         /// Consider updating the step instead of deleting it if you want to preserve the recipe structure.
         /// </remarks>
         [HttpDelete("api/steps/{id}")]
-        public IActionResult DeleteStep(int id)
+        public IActionResult DeleteStep(Guid id)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             _service.DeleteStep(id);

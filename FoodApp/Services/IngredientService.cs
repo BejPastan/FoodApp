@@ -6,11 +6,11 @@ namespace FoodApp.Services
 {
     public interface IIngredientService
     {
-        IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page = 1, int perPage = 25);
-        Ingredient? GetIngredientById(int id);
+        IEnumerable<Ingredient> GetIngredients(Guid? recipeId, Guid? foodId, int page = 1, int perPage = 25);
+        Ingredient? GetIngredientById(Guid id);
         Ingredient CreateIngredient(IngredientCreateRequest request);
-        Ingredient? UpdateIngredient(int id, IngredientUpdateRequest request);
-        bool DeleteIngredient(int id);
+        Ingredient? UpdateIngredient(Guid id, IngredientUpdateRequest request);
+        bool DeleteIngredient(Guid id);
     }
 
     public class IngredientService : IIngredientService
@@ -25,7 +25,7 @@ namespace FoodApp.Services
             _unitServ = unitServ;
         }
 
-        public IEnumerable<Ingredient> GetIngredients(int? recipeId, int? foodId, int page = 1, int perPage = 25)
+        public IEnumerable<Ingredient> GetIngredients(Guid? recipeId, Guid? foodId, int page = 1, int perPage = 25)
         {
             Ingredient[] ingredients = _repo.GetIngredients(recipeId, foodId, page, perPage).ToArray();
             foreach (var ingredient in ingredients)
@@ -34,7 +34,7 @@ namespace FoodApp.Services
             }
             return ingredients;
         }
-        public Ingredient? GetIngredientById(int id)
+        public Ingredient? GetIngredientById(Guid id)
         {
             var ingredient = _repo.GetIngredientById(id);
             if (ingredient == null)
@@ -52,12 +52,12 @@ namespace FoodApp.Services
             }
 
             // Ensure food exists
-            int foodId = 0;
-            if ((!request.foodId.HasValue || request.foodId.Value<=0) && request.food != null)
+            Guid foodId = Guid.Empty;
+            if ((!request.foodId.HasValue || request.foodId != Guid.Empty) && request.food != null)
             {
                 var createdFood = _foodServ.CreateFood(request.food);
                 foodId = createdFood.id;
-            }else if(request.foodId.HasValue && request.foodId.Value > 0)
+            }else if(request.foodId.HasValue && request.foodId.Value == Guid.Empty)
             {
                 foodId = request.foodId.Value;
             }
@@ -67,13 +67,13 @@ namespace FoodApp.Services
             }
 
             // Ensure unit exists
-            int unitId = 0;
-            if ((!request.unitId.HasValue || request.unitId <= 0) && request.unit != null)
+            Guid unitId = Guid.Empty;
+            if ((!request.unitId.HasValue || request.unitId != Guid.Empty) && request.unit != null)
             {
                 var createdUnit = _unitServ.CreateUnit(request.unit);
                 unitId = createdUnit.id;
             }
-            else if (request.unitId.HasValue && request.unitId.Value > 0)
+            else if (request.unitId.HasValue && request.unitId.Value == Guid.Empty)
             {
                 unitId = request.unitId.Value;
             }
@@ -93,28 +93,28 @@ namespace FoodApp.Services
         /// <param name="request"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException">happen when request contain both id and crete request for food or unit</exception>
-        public Ingredient? UpdateIngredient(int id, IngredientUpdateRequest request)
+        public Ingredient? UpdateIngredient(Guid id, IngredientUpdateRequest request)
         {
-            int? foodId = request.foodId;
-            int? unitId = request.unitId;
-            if ((foodId.HasValue && foodId.Value >= 0) && request.food != null)
+            Guid? foodId = request.foodId;
+            Guid? unitId = request.unitId;
+            if ((foodId.HasValue && foodId.Value != Guid.Empty) && request.food != null)
             {
                 throw new ArgumentException("You could provide only food id or food create request");
             }
 
-            if ((unitId.HasValue && unitId.Value <= 0) && request.unit != null)
+            if ((unitId.HasValue && unitId.Value == Guid.Empty) && request.unit != null)
             {
                 throw new ArgumentException("You could provide only unit id or unit create request");
             }
 
-            if ((!foodId.HasValue || foodId.Value <= 0) && request.food != null)
+            if ((!foodId.HasValue || foodId.Value == Guid.Empty) && request.food != null)
             {
                 var createdFood = _foodServ.CreateFood(request.food);
                 foodId = createdFood.id;
             }
 
 
-            if ((!unitId.HasValue || unitId.Value <= 0) && request.unit != null)
+            if ((!unitId.HasValue || unitId.Value == Guid.Empty) && request.unit != null)
             {
                 var createdUnit = _unitServ.CreateUnit(request.unit);
                 unitId = createdUnit.id;
@@ -130,7 +130,7 @@ namespace FoodApp.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool DeleteIngredient(int id) => _repo.DeleteIngredient(id);
+        public bool DeleteIngredient(Guid id) => _repo.DeleteIngredient(id);
 
         public Ingredient FormatIngridient(Ingredient toFormat, FormatMode mode = FormatMode.inspect)
         {

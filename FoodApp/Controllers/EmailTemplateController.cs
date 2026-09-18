@@ -40,7 +40,7 @@ namespace FoodApp.Controllers
         /// Requires admin role authentication. Identifier can be either the integer ID or the template name.
         /// </remarks>
         [HttpGet("api/email-templates/{id}")]
-        public IActionResult GetTemplate(int id)
+        public IActionResult GetTemplate(Guid id)
         {
             _authService.CheckPermissions(Request, [Roles.admin]);
             

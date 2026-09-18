@@ -8,10 +8,10 @@ namespace FoodApp.Repositories
     public interface IFoodTypeRepository
     {
         IEnumerable<FoodType> GetFoodTypes(string nameFilter, int page = 1, int pageSize = 25);
-        FoodType? GetFoodTypeById(int id);
+        FoodType? GetFoodTypeById(Guid id);
         FoodType CreateFoodType(string name);
-        FoodType? UpdateFoodType(int id, string? name);
-        bool DeleteFoodType(int id);
+        FoodType? UpdateFoodType(Guid id, string? name);
+        bool DeleteFoodType(Guid id);
     }
 
     public class FoodTypeRepository : IFoodTypeRepository
@@ -22,7 +22,7 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<FoodType>(sql, new { name = $"%{(nameFilter ?? string.Empty)}%", offset = (page - 1) * pageSize, pageSize = pageSize });
         }
 
-        public FoodType? GetFoodTypeById(int id)
+        public FoodType? GetFoodTypeById(Guid id)
         {
             var sql = "SELECT * FROM food_type WHERE id = @id;";
             return DBConnector.QueryDatabase<FoodType>(sql, new { id = id }).FirstOrDefault();
@@ -36,17 +36,17 @@ namespace FoodApp.Repositories
             throw new Exception("Insert failed for food_type");
         }
 
-        public FoodType? UpdateFoodType(int id, string? name)
+        public FoodType? UpdateFoodType(Guid id, string? name)
         {
             if (name == null) return null;
             var sql = "UPDATE food_type SET name = @name WHERE id = @id; SELECT * FROM food_type WHERE id = @id;";
             return DBConnector.QueryDatabase<FoodType>(sql, new { name = $"{name}", id = id }).FirstOrDefault();
         }
 
-        public bool DeleteFoodType(int id)
+        public bool DeleteFoodType(Guid id)
         {
             var sql = "DELETE FROM food_type WHERE id = @id;";
-            DBConnector.QueryDatabase<int>(sql, new { id = id }).ToList();
+            DBConnector.QueryDatabase<Guid>(sql, new { id = id }).ToList();
             return true;
         }
     }

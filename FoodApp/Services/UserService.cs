@@ -1,113 +1,115 @@
-using FoodApp.Models;
-using FoodApp.Utilities;
+﻿using FoodApp.Models;
 using FoodApp.Repositories;
+using FoodApp.Repositories.Interfaces;
+using FoodApp.Services.Interfaces;
+using FoodApp.Utilities;
 
 namespace FoodApp.Services
 {
-    public interface IUserService
+    /// <summary>
+    /// Default implementation of IUserService
+    /// </summary>
+    /// <inheritdoc/>
+    public class UserService(IUserRepository repo, IRoleRepository roleRepo, IUserTokenRepository userTokenRepository, IEmailService emailService, IRefreshTokenRepo refreshTokenRepo) : IUserService
     {
-        User? GetUserDataById(int id);
-        ExtendedUser? GetCurrentUser(int userId);
-        string LoginUser(string email, string password);
-        bool SignUpUser(string name, string email, string password);
-        /// <summary>
-        /// check if user accound exist, if yes, generate token, and send email
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        public bool StartPasswordReset(string email);
-        /// <summary>
-        /// get user  from token, and change it's password
-        /// </summary>
-        /// <param name="token"></param>
-        /// <param name="newPass"></param>
-        /// <returns></returns>
-        public bool ConfirmPasswordReset(string token, string newPass);
-        /// <summary>
-        /// Confirm user sign up using token, change user state to active
-        /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public bool ConfirmSignUp(string token);
-        /// <summary>
-        /// Update user name, and/or email, when updating email, check if such email is not occupied yet
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public ExtendedUser UpdateUser(UserUpdateRequest request, int userId);
+        private readonly IUserRepository _repo = repo;
+        private readonly IRoleRepository _roleRepository = roleRepo;
+        private readonly IUserTokenRepository _userTokenRepository = userTokenRepository;
+        private readonly IEmailService _emailService = emailService;
+        private readonly IRefreshTokenRepo _refreshTokenRepo = refreshTokenRepo;
 
-        /// <summary>
-        /// delete user record
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        public bool DeleteUser(int userId);
-    }
+        /// <inheritdoc/>
+        public User? GetUserDataById(Guid id) => _repo.GetUserDataById(id);
 
-    public class UserService : IUserService
-    {
-        private readonly IUserRepository _repo;
-        private readonly IRoleRepository _roleRepository;
-        private readonly IUserTokenRepository _userTokenRepository;
-        private readonly IEmailService _emailService;
-        
-        public UserService(IUserRepository repo, IRoleRepository roleRepo, IUserTokenRepository userTokenRepository, IEmailService emailService) 
-        { 
-            _repo = repo;
-            _roleRepository = roleRepo;
-            _userTokenRepository = userTokenRepository;
-            _emailService = emailService;
-        }
-        
-        public User? GetUserDataById(int id) => _repo.GetUserDataById(id);
-        
-        public ExtendedUser? GetCurrentUser(int userId)
+        /// <inheritdoc/>
+        public ExtendedUser? GetCurrentUser(Guid userId)
         {
             return _repo.GetExtendedUserDataById(userId);
         }
 
-        public string LoginUser(string email, string password)
+        #region user session cycle
+        /// <inheritdoc/>
+        public LoginResp LoginUser(string email, string password)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 throw new ArgumentException("email and password are required");
             }
-            
+
             var user = _repo.GetUserByEmail(email);
             if (user == null || !Authentication.CheckPassword(password, user.password))
             {
                 throw new UnauthorizedAccessException("invalid email or password");
             }
-            
-
 
             user = _repo.LoginUser(user.id);
-            var token = Authentication.CreateAuthToken(user.id);
-            return token;
+
+            return GetNewTokens(user.id);
         }
 
-        /// <summary>
-        /// create new account and sent confirmation email
-        /// </summary>
-        /// <param name="name">user name</param>
-        /// <param name="email">user email</param>
-        /// <param name="password">user password</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
+        /// <inheritdoc/>
+        public LoginResp RefreshAuthToken(string oldRToken)
+        {
+            //check if refresh token is valid
+            string hashedToken = Authentication.HashToken(oldRToken);
+            var userId = _refreshTokenRepo.GetUserByToken(hashedToken).id;
+
+            if (!_refreshTokenRepo.IsRefreshTokenValid(userId, hashedToken))
+            {
+                throw new UnauthorizedAccessException("your refresh token is not valid");
+            }
+            return GetNewTokens(userId);
+        }
+
+        private LoginResp GetNewTokens(Guid userId)
+        {
+            var token = Authentication.CreateAuthToken(userId);
+
+            string rToken = Authentication.GenerateRefreshToken();
+            RefreshTokenData refreshToken = new RefreshTokenData()
+            {
+                expirationDate = DateTime.UtcNow.AddSeconds(Constants.RefreshTokenExpire),
+                token = Authentication.HashToken(rToken),
+                userId = userId,
+                used = false
+            };
+            var fullRToken = _refreshTokenRepo.SetRefreshToken(refreshToken);
+
+            var resp = new LoginResp()
+            {
+                authToken = token,
+                refreshToken = rToken
+            };
+
+            return resp;
+        }
+
+        /// <inheritdoc/>
+        public bool Logout(Guid userId)
+        {
+            var toUpdate = new RefreshTokenData();
+            toUpdate.userId = userId;
+            toUpdate.used = true;
+            return true;
+        }
+        #endregion
+
+        #region signup
+        /// <inheritdoc/>
         public bool SignUpUser(string name, string email, string password)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("email, password and name are required");
             }
-            
+
             var hashed = Authentication.HashPassword(password);
             var user = _repo.SignUpUser(name, hashed, email);
 
             try
             {
                 _roleRepository.AddRoleToUser(user.id, Roles.admin);
-                
+
                 // Generate confirmation token
                 var confirmationCode = Authentication.GenerateSixDigitCode();
                 var tokenRequest = new CreateUserTokenRequest
@@ -117,16 +119,16 @@ namespace FoodApp.Services
                     used = false,
                     userId = user.id
                 };
-                
+
                 _userTokenRepository.AddToken(tokenRequest);
-                
+
                 // Send confirmation email
                 var placeholders = new Dictionary<string, string>
                 {
                     { "{{Name}}", name },
                     { "{{ConfirmationCode}}", confirmationCode }
                 };
-                
+
                 _emailService.SendEmailFromTemplate(null, "AccountConfirmation", email, placeholders);
             }
             catch (Exception ex)
@@ -139,6 +141,7 @@ namespace FoodApp.Services
             return true;
         }
 
+        /// <inheritdoc/>
         public bool ConfirmSignUp(string token)
         {
             var validToken = _userTokenRepository.GetValidToken(token);
@@ -148,13 +151,13 @@ namespace FoodApp.Services
             }
 
             var user = _userTokenRepository.GetUserByToken(token);
-            if(user == null || user.userStatus != UserStatus.inactive)
+            if (user == null || user.userStatus != UserStatus.inactive)
             {
                 throw new Exception("wrong token, or account does not exist");
             }
 
             user = _repo.ChangeUserStatus(user.id, UserStatus.active);
-            if(user==null)
+            if (user == null)
             {
                 throw new Exception("Internal server error");
             }
@@ -163,8 +166,11 @@ namespace FoodApp.Services
 
             return true;
         }
+        #endregion
 
+        #region password reset
 
+        /// <inheritdoc/>
         public bool StartPasswordReset(string email)
         {
             var user = _repo.GetUserByEmail(email);
@@ -181,27 +187,28 @@ namespace FoodApp.Services
                 used = false,
                 userId = user.id
             };
-            
+
             _userTokenRepository.AddToken(tokenRequest);
-            
+
             var placeholders = new Dictionary<string, string>
             {
                 { "{{Name}}", user.name },
                 { "{{ResetCode}}", resetCode }
             };
-            
+
             try
             {
                 _emailService.SendEmailFromTemplate(null, "PasswordReset", email, placeholders);
             }
             catch
             {
-                
+
             }
 
             return true;
         }
 
+        /// <inheritdoc/>
         public bool ConfirmPasswordReset(string token, string newPass)
         {
             var validToken = _userTokenRepository.GetValidToken(token);
@@ -212,17 +219,19 @@ namespace FoodApp.Services
 
             // Hash new password
             var hashedPassword = Authentication.HashPassword(newPass);
-            
+
             // Update user password
             _repo.UpdateUser(validToken.userId, password: hashedPassword);
-            
+
             // Mark token as used
             _userTokenRepository.MarkTokenAsUsed(validToken.id);
 
             return true;
         }
+        #endregion
 
-        public ExtendedUser UpdateUser(UserUpdateRequest request, int userId)
+        /// <inheritdoc/>
+        public ExtendedUser UpdateUser(UserUpdateRequest request, Guid userId)
         {
             var existingUser = _repo.GetUserDataById(userId);
             if (existingUser == null)
@@ -247,7 +256,8 @@ namespace FoodApp.Services
             return _repo.GetExtendedUserDataById(userId);
         }
 
-        public bool DeleteUser(int userId)
+        /// <inheritdoc/>
+        public bool DeleteUser(Guid userId)
         {
             _repo.DeleteUser(userId);
             return true;

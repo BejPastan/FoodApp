@@ -1,13 +1,15 @@
 using FoodApp.Services;
 using FoodApp.Repositories;
 using FoodApp.Utilities;
+using FoodApp.Repositories.Interfaces;
+using FoodApp.Services.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
-
+Dapper.SqlMapper.AddTypeHandler(new SQLDateOnlyTypeHandler());
 SecretController.LoadSecrets(ref builder);
 // connecting to database
 DBConnector.SetConnectionString(SecretController.GetDatabaseCredentials());
-Authentication.Initialize(SecretController.GetAuthSecretKey(), 129600);//3 months
+Authentication.Initialize(SecretController.GetAuthSecretKey());//3 months
 DBConnector.Open();
 
 Swagger.AddSwaggerDocumentation(ref builder);
@@ -17,10 +19,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.SetIsOriginAllowed(_ => true)
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:4173", "http://localhost:4173", "https://food-app-front-vercel.vercel.app")
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .WithExposedHeaders("New-Token");
+              .AllowCredentials();
     });
 });
 
@@ -32,12 +34,13 @@ builder.Services.AddControllers(options =>
 
 #region adding repositories
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRefreshTokenRepo, RefreshTokenRepo>();
 builder.Services.AddScoped<IFoodRepository, FoodRepository>();
 builder.Services.AddScoped<IFoodTypeRepository, FoodTypeRepository>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IStepRepository, StepRepository>();
 builder.Services.AddScoped<IIngredientRepository, IngredientRepository>();
-builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+builder.Services.AddScoped<IRecipeRepo, RecipeRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IRecipeTagRepository, RecipeTagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -71,4 +74,5 @@ Swagger.UseSwaggerDocumentation(ref app);
 app.UseRouting();
 app.UseCors("AllowAll");
 app.MapControllers();
+app.UseDeveloperExceptionPage();
 app.Run();

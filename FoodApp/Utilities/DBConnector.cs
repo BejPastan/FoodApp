@@ -30,6 +30,7 @@ namespace FoodApp.Utilities
         public static SqlConnection Open()
         {
             SqlConnection connection = new(_connectionString);
+            Console.WriteLine(_connectionString);
             connection.Open();
             Console.WriteLine(connection.State);
             return connection;
@@ -54,26 +55,6 @@ namespace FoodApp.Utilities
             {
                 Console.WriteLine($"SQL error ({ex.Number}): {ex.Message}");
                 return [];
-            }
-            finally
-            {
-                connection.Close();
-                connection.Dispose();
-            }
-        }
-
-        public static IEnumerable<T> QueryNested<T, T2>(string sql, string[] column, object? parameters = null)
-        {
-            SqlConnection connection = Open();
-            try
-            {
-
-                return [];
-            }
-            catch (SqlException ex)
-            {
-                Console.WriteLine($"SQL error ({ex.Number}): {ex.Message}");
-                return Enumerable.Empty<T>();
             }
             finally
             {

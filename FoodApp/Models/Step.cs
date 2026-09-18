@@ -2,8 +2,8 @@ namespace FoodApp.Models
 {
     public class Step
     {
-        public int id { get; set; }
-        public int recipeId { get; set; }
+        public Guid id { get; set; }
+        public Guid recipeId { get; set; }
         public string instruction { get; set; } = string.Empty;
         public int stepNumber { get; set; } = 0;
 
@@ -19,14 +19,14 @@ namespace FoodApp.Models
     /// </summary>
     public class StepCreateRequest
     {
-        public int? recipeId { get; set; } = 0;
+        public Guid? recipeId { get; set; } = Guid.Empty;
         public string instruction { get; set; } = string.Empty;
         public int stepNumber { get; set; } = 0;
     }
 
     public class StepUpdateRequest
     {
-        public int? recipeId { get; set; }
+        public Guid? recipeId { get; set; }
         public string? instruction { get; set; }
         public int? stepNumber { get; set; }
     }

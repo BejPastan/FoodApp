@@ -5,11 +5,11 @@ namespace FoodApp.Services
 {
     public interface IStepService
     {
-        IEnumerable<Step> GetSteps(int? recipeId, int page = 1, int pageSize = 25);
-        Step? GetStepById(int id);
+        IEnumerable<Step> GetSteps(Guid? recipeId, int page = 1, int pageSize = 25);
+        Step? GetStepById(Guid id);
         Step CreateStep(StepCreateRequest request);
-        Step? UpdateStep(int id, StepUpdateRequest request);
-        bool DeleteStep(int id);
+        Step? UpdateStep(Guid id, StepUpdateRequest request);
+        bool DeleteStep(Guid id);
     }
 
     public class StepService : IStepService
@@ -20,12 +20,12 @@ namespace FoodApp.Services
             _stepRepo = stepRepo;
         }
 
-        public IEnumerable<Step> GetSteps(int? recipeId, int page = 1, int pageSize = 25)
+        public IEnumerable<Step> GetSteps(Guid? recipeId, int page = 1, int pageSize = 25)
         {
             return _stepRepo.GetSteps(recipeId, page, pageSize);
         }
 
-        public Step? GetStepById(int id) => _stepRepo.GetStepById(id);
+        public Step? GetStepById(Guid id) => _stepRepo.GetStepById(id);
 
         public Step CreateStep(StepCreateRequest request)
         {
@@ -36,11 +36,11 @@ namespace FoodApp.Services
             return _stepRepo.CreateStep(request.recipeId.Value, request.instruction, request.stepNumber);
         }
 
-        public Step? UpdateStep(int id, StepUpdateRequest request)
+        public Step? UpdateStep(Guid id, StepUpdateRequest request)
         {
             return _stepRepo.UpdateStep(id, request.recipeId, request.instruction, request.stepNumber);
         }
 
-        public bool DeleteStep(int id) => _stepRepo.DeleteStep(id);
+        public bool DeleteStep(Guid id) => _stepRepo.DeleteStep(id);
     }
 }

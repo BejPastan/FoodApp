@@ -1,47 +1,27 @@
 using FoodApp.Models;
-using FoodApp.Repositories;
+using FoodApp.Repositories.Interfaces;
+using FoodApp.Services.Interfaces;
 using FoodApp.Utilities;
 
 namespace FoodApp.Services
 {
-    public interface IRecipeService
+    public class RecipeService(IRecipeRepo recipeRepo, IMealService mealService, IStepService stepService, IIngredientService ingredientServ, IRecipeMealService recipeMealService, IRecipeTagService recipeTagService, ITagService tagService) : IRecipeService
     {
-        IEnumerable<RecipeRecord> GetRecipes(string nameFilter, int page = 1, int pageSize = 25);
-        Recipe? GetRecipeById(int id);
-        Recipe? CreateRecipe(RecipeCreateRequest request);
-        Recipe? UpdateRecipe(int recipeId, RecipeUpdateRequest request);
-        bool DeleteRecipe(int id);
-        RecipeRecord[] GetRecipeToChoose(int mealId, int userId, int excludedWeeks, int chooseSize);
-    }
+        private readonly IRecipeRepo _recipeRepo = recipeRepo;
+        private readonly IMealService _mealService = mealService;
+        private readonly IStepService _stepService = stepService;
+        private readonly IIngredientService _ingredientServ = ingredientServ;
+        private readonly IRecipeMealService _recipeMealService = recipeMealService;
+        private readonly IRecipeTagService _recipeTagService = recipeTagService;
+        private readonly ITagService _tagService = tagService;
 
-    public class RecipeService : IRecipeService
-    {
-        private readonly IRecipeRepository _recipeRepo;
-        private readonly IMealService _mealService;
-        private readonly IStepService _stepService;
-        private readonly IIngredientService _ingredientServ;
-        private readonly IRecipeMealService _recipeMealService;
-        private readonly IRecipeTagService _recipeTagService;
-        private readonly ITagService _tagService;
-
-        public RecipeService(IRecipeRepository recipeRepo, IMealService mealService, IStepService stepService, IIngredientService ingredientServ, IRecipeMealService recipeMealService, IRecipeTagService recipeTagService, ITagService tagService)
+        public IEnumerable<RecipeRecord> GetRecipes(string[]? mealNames, string[]? tags, string nameFilter, int page = 1, int pageSize = 25)
         {
-            _recipeRepo = recipeRepo;
-            _mealService = mealService;
-            _stepService = stepService;
-            _ingredientServ = ingredientServ;
-            _recipeMealService = recipeMealService;
-            _recipeTagService = recipeTagService;
-            _tagService = tagService;
-        }
-
-        public IEnumerable<RecipeRecord> GetRecipes(string nameFilter, int page = 1, int pageSize = 25)
-        {
-            RecipeRecord[] recipes = _recipeRepo.GetRecipes(nameFilter, page, pageSize).ToArray();
+            RecipeRecord[] recipes = _recipeRepo.GetRecipes(mealNames, tags, nameFilter, page, pageSize).ToArray();
             return recipes;
         }
 
-        public Recipe? GetRecipeById(int id)
+        public Recipe? GetRecipeById(Guid id)
         {
             var recipe = _recipeRepo.GetRecipeById(id);
             if (recipe == null) return null;
@@ -51,7 +31,7 @@ namespace FoodApp.Services
         public Recipe? CreateRecipe(RecipeCreateRequest request)
         {
             Recipe created = _recipeRepo.CreateRecipe(request.name, request.portion, request.time);
-            int recipeId = created.id;
+            Guid recipeId = created.id;
             foreach(var step in request.steps)
             {
                 step.recipeId = recipeId;
@@ -78,14 +58,14 @@ namespace FoodApp.Services
             return FormatRecipe(_recipeRepo.GetRecipeById(recipeId), FormatMode.full);
         }
 
-        public Recipe? UpdateRecipe(int recipeId, RecipeUpdateRequest request)
+        public Recipe? UpdateRecipe(Guid recipeId, RecipeUpdateRequest request)
         {
             Console.WriteLine($"Updating recipe {recipeId} with name: {request.name}, portion: {request.portion}, time: {request.time}");
             // Handle steps - update existing ones or create new ones
             foreach (var step in request.steps)
             {
                 step.recipeId = recipeId;
-                if (step.id > 0)
+                if (step.id != Guid.Empty)
                 {
                     // Update existing step
                     StepUpdateRequest stepUpdate = new StepUpdateRequest
@@ -156,12 +136,12 @@ namespace FoodApp.Services
             return FormatRecipe(updated);
         }
 
-        public bool DeleteRecipe(int id)
+        public bool DeleteRecipe(Guid id)
         {
             return _recipeRepo.DeleteRecipe(id);
         }
 
-        public RecipeRecord[] GetRecipeToChoose(int mealId, int userId, int excludedWeeks, int choosSize)
+        public RecipeRecord[] GetRecipeToChoose(Guid mealId, Guid userId, int excludedWeeks, int choosSize)
         {
             int currentExcludedWeeks = excludedWeeks;
             List<RecipeRecord> recipes = _recipeRepo.GetRecipesToChoose(userId, mealId, currentExcludedWeeks).ToList();

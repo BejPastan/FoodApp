@@ -6,9 +6,9 @@ namespace FoodApp.Services
 {
     public  interface IRoleService
     {
-        Role? GetRoleByUserId(int id);
-        bool CheckRole(Roles[] permittedRoles, int userId);
-        public bool AddRoleToUser(int userId, Roles role);
+        Role? GetRoleByUserId(Guid id);
+        bool CheckRole(Roles[] permittedRoles, Guid userId);
+        public bool AddRoleToUser(Guid userId, Roles role);
     }
 
     public class RoleService : IRoleService
@@ -20,13 +20,13 @@ namespace FoodApp.Services
             _roleRepo = roleRepository;
         }
 
-        public Role? GetRoleByUserId(int id)
+        public Role? GetRoleByUserId(Guid id)
         {
             Role? role = _roleRepo.GetRoleByUserId(id);
             return role;
         }
 
-        public bool CheckRole(Roles[] permittedRoles, int userId)
+        public bool CheckRole(Roles[] permittedRoles, Guid userId)
         {
             Role? role = GetRoleByUserId(userId);
             if (role == null)
@@ -40,7 +40,7 @@ namespace FoodApp.Services
             return false;
         }
 
-        public bool AddRoleToUser(int userId, Roles role)
+        public bool AddRoleToUser(Guid userId, Roles role)
         {
             return _roleRepo.AddRoleToUser(userId, role);
         }

@@ -1,40 +1,40 @@
 using FoodApp.Models;
 using FoodApp.Repositories;
+using FoodApp.Repositories.Interfaces;
+using FoodApp.Services.Interfaces;
 using FoodApp.Utilities;
 
 namespace FoodApp.Services
 {
-    public interface IUserMealService
-    {
-        IEnumerable<UserMealWithData> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate);
-        UserMeal? GetUserMealById(int id);
-        UserMeal CreateUserMeal(UserMealCreateRequest toCreate, int userId);
-        bool DeleteUserMeal(int id);
-    }
-
+    /// <summary>
+    /// Interface for managing user meals
+    /// </summary>
     public class UserMealService : IUserMealService
     {
         private readonly IUserMealRepository _repo;
         public UserMealService(IUserMealRepository repo) { _repo = repo; }
-        public IEnumerable<UserMealWithData> GetUserMeals(int userId, DateTime? startDate, DateTime? endDate)
+        /// <summary>
+        /// Return list of user meals
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        public IEnumerable<UserMealWithData> GetUserMeals(Guid userId, DateOnly? startDate, DateOnly? endDate)
         {
             var response = _repo.GetUserMeals(userId, startDate, endDate);
             return response;
         }
-        public UserMeal? GetUserMealById(int id) => _repo.GetUserMealById(id);
-        public UserMeal CreateUserMeal(UserMealCreateRequest toCreate, int userId)
+        public UserMeal? GetUserMealById(Guid id) => _repo.GetUserMealById(id);
+        public UserMeal CreateUserMeal(UserMealCreateRequest toCreate, Guid userId)
         {
-            int id =_repo.FindUserMealId(userId, toCreate.mealId, toCreate.mealDate);
-
-            if(id!=-1)
-            {
-                return _repo.UpdateUserMeal(id, userId, toCreate.mealId, toCreate.mealDate);
-            }
-            else
-            {
-                return _repo.CreateUserMeal(userId, toCreate.recipeId, toCreate.mealId, toCreate.mealDate);
-            }
+            return _repo.CreateUserMeal(userId, toCreate.recipeId, toCreate.mealId, toCreate.mealDate);
         }
-        public bool DeleteUserMeal(int id) => _repo.DeleteUserMeal(id);
+        public bool DeleteUserMeal(Guid id) => _repo.DeleteUserMeal(id);
+
+        public UserMeal UpdateUserMeal(UserMealUpdateRequest toUpdate, Guid userId)
+        {
+           return _repo.UpdateUserMeal(toUpdate.userMealId, toUpdate.recipeId);
+        }
     }
 }

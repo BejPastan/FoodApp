@@ -14,12 +14,12 @@ namespace FoodApp.Repositories
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        IEnumerable<Unit> GetUnits(string? searchFilter, int[]? unitIds, int page = 1, int pageSize = 25);
-        Unit? GetUnitById(int id);
+        IEnumerable<Unit> GetUnits(string? searchFilter, Guid[]? unitIds, int page = 1, int pageSize = 25);
+        Unit? GetUnitById(Guid id);
         Unit CreateUnit(string name, decimal volumeEquivalent, string? desc);
-        Unit? UpdateUnit(int id, string? name, decimal? volumeEquivalent, string? desc);
-        bool DeleteUnit(int id);
-        UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount);
+        Unit? UpdateUnit(Guid id, string? name, decimal? volumeEquivalent, string? desc);
+        bool DeleteUnit(Guid id);
+        UnitConvertResp ConvertUnit(Guid oldUnitId, Guid newUnitId, float originalAmount);
     }
 
     public class UnitRepository : IUnitRepository
@@ -32,7 +32,7 @@ namespace FoodApp.Repositories
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        public IEnumerable<Unit> GetUnits(string? searchFilter, int[]? unitIds, int page = 1, int pageSize = 25)
+        public IEnumerable<Unit> GetUnits(string? searchFilter, Guid[]? unitIds, int page = 1, int pageSize = 25)
         {
             Console.WriteLine(unitIds.Length);
             DynamicParameters param = new();
@@ -46,7 +46,7 @@ namespace FoodApp.Repositories
                 param.Add("@name", $"%{searchFilter}%");
 
             }
-            if (unitIds.Length>0)
+            if (unitIds != null && unitIds.Length > 0)
             {
                 sql+=(" AND id IN @ids");
                 param.Add("@ids", unitIds);
@@ -55,7 +55,7 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<Unit>(sql, param);
         }
 
-        public Unit? GetUnitById(int id)
+        public Unit? GetUnitById(Guid id)
         {
             var sql = "SELECT * FROM units WHERE id = @id;";
             return DBConnector.QueryDatabase<Unit>(sql, new { id }).FirstOrDefault();
@@ -77,7 +77,7 @@ namespace FoodApp.Repositories
         /// <param name="volumeEquivalent"></param>
         /// <param name="desc"></param>
         /// <returns></returns>
-        public Unit? UpdateUnit(int id, string? name, decimal? volumeEquivalent, string? desc)
+        public Unit? UpdateUnit(Guid id, string? name, decimal? volumeEquivalent, string? desc)
         {
             var sets = new List<string>();
             var parameters = new DynamicParameters();
@@ -99,10 +99,10 @@ namespace FoodApp.Repositories
             return DBConnector.QueryDatabase<Unit>(sql, parameters).FirstOrDefault();
         }
 
-        public bool DeleteUnit(int id)
+        public bool DeleteUnit(Guid id)
         {
             var sql = "DELETE FROM units WHERE id = @id;";
-            DBConnector.QueryDatabase<int>(sql, new { id });
+            DBConnector.QueryDatabase<Guid>(sql, new { id });
             return true;
         }
 
@@ -114,7 +114,7 @@ namespace FoodApp.Repositories
         /// <param name="originalAmount">amount in old unit</param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount)
+        public UnitConvertResp ConvertUnit(Guid oldUnitId, Guid newUnitId, float originalAmount)
         {
             var sql  = "SELECT org.volumeEquivalent / toConv.volumeEquivalent newUnitAmount, toConv.* FROM units org JOIN units toConv ON toConv.id = @newId WHERE org.id = @oldId";
             var resp = DBConnector.QueryDatabase<UnitConvertResp>(sql, new { newId = newUnitId, oldId = oldUnitId });

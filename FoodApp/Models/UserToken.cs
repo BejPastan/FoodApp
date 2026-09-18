@@ -2,11 +2,11 @@ namespace FoodApp.Models
 {
     public class UserToken
     {
-        public int id { get; set; }
+        public Guid id { get; set; }
         public string token { get; set; }
         public DateTime expirationDate { get; set; }
         public bool used { get; set; }
-        public int userId { get; set; }
+        public Guid userId { get; set; }
         
         public override string ToString()
         {
@@ -19,6 +19,6 @@ namespace FoodApp.Models
         public string token { get; set; }
         public DateTime expirationDate { get; set; }
         public bool used { get; set; }
-        public int userId { get; set; }
+        public Guid userId { get; set; }
     }
 }

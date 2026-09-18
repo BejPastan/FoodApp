@@ -4,7 +4,7 @@ namespace FoodApp.Models
 {
     public class User
     {
-        public int id { get; set; }
+        public Guid id { get; set; }
         public required string name { get; set; }
         public string password { get; set; }//this is the hashed password
         public required string email { get; set; }

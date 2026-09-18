@@ -5,12 +5,12 @@ namespace FoodApp.Services
 {
     public interface IUnitService
     {
-        IEnumerable<Unit> GetUnits(string nameFilter, int[] ids, int page = 1, int pageSize = 25);
-        Unit? GetUnitById(int id);
+        IEnumerable<Unit> GetUnits(string nameFilter, Guid[] ids, int page = 1, int pageSize = 25);
+        Unit? GetUnitById(Guid id);
         Unit CreateUnit(UnitCreateRequest request);
-        Unit? UpdateUnit(int id, UnitUpdateRequest request);
-        bool DeleteUnit(int id);
-        UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount);
+        Unit? UpdateUnit(Guid id, UnitUpdateRequest request);
+        bool DeleteUnit(Guid id);
+        UnitConvertResp ConvertUnit(Guid oldUnitId, Guid newUnitId, float originalAmount);
     }
 
     /// <summary>
@@ -21,25 +21,24 @@ namespace FoodApp.Services
     {
         private readonly IUnitRepository _repo = repo;
 
-        public IEnumerable<Unit> GetUnits(string nameFilter, int[] ids, int page = 1, int pageSize = 25)
+        public IEnumerable<Unit> GetUnits(string nameFilter, Guid[] ids, int page = 1, int pageSize = 25)
         {
             Console.WriteLine(ids.Length);
             return _repo.GetUnits(nameFilter, ids, page, pageSize);
         }
-        public Unit? GetUnitById(int id) => _repo.GetUnitById(id);
+        public Unit? GetUnitById(Guid id) => _repo.GetUnitById(id);
         
-        public Unit? UpdateUnit(int id, UnitUpdateRequest request)
+        public Unit? UpdateUnit(Guid id, UnitUpdateRequest request)
         {
             return _repo.UpdateUnit(id, request.name, request.volumeEquivalent, request.desc);
         }
-        public bool DeleteUnit(int id) => _repo.DeleteUnit(id);
-
+        public bool DeleteUnit(Guid id) => _repo.DeleteUnit(id);
         public Unit CreateUnit(UnitCreateRequest request)
         {
             return _repo.CreateUnit(request.name, request.volumeEquivalent, request.desc);
         }
 
-        public UnitConvertResp ConvertUnit(int oldUnitId, int newUnitId, float originalAmount)
+        public UnitConvertResp ConvertUnit(Guid oldUnitId, Guid newUnitId, float originalAmount)
         {
             return _repo.ConvertUnit(oldUnitId, newUnitId, originalAmount);
         }

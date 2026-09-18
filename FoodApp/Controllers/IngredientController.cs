@@ -42,7 +42,7 @@ namespace FoodApp.Controllers
         /// Results are sorted by ingredient ID in ascending order.
         /// </remarks>
         [HttpGet("api/ingredients")]
-        public IActionResult GetIngredients([FromQuery] int? recipeId = null, [FromQuery] int? foodId = null, [FromQuery] int page = 1, [FromQuery]int perPage = 25)
+        public IActionResult GetIngredients([FromQuery] Guid? recipeId = null, [FromQuery] Guid? foodId = null, [FromQuery] int page = 1, [FromQuery]int perPage = 25)
         {
                 Authentication.ValidateToken(Request);
                 Ingredient[] ingredients = _service.GetIngredients(recipeId, foodId,page, perPage).ToArray();
@@ -62,7 +62,7 @@ namespace FoodApp.Controllers
         /// the associated food item and measurement unit details.
         /// </remarks>
         [HttpGet("api/ingredients/{id}")]
-        public IActionResult GetIngredient(int id)
+        public IActionResult GetIngredient(Guid id)
         {
                 Authentication.ValidateToken(Request);
                 var item = _service.GetIngredientById(id);
@@ -113,7 +113,7 @@ namespace FoodApp.Controllers
         /// All referenced IDs must remain valid after the update.
         /// </remarks>
         [HttpPatch("api/ingredients/{id}")]
-        public IActionResult PatchIngredient(int id, [FromBody] IngredientUpdateRequest ingredient)
+        public IActionResult PatchIngredient(Guid id, [FromBody] IngredientUpdateRequest ingredient)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 var updated = _service.UpdateIngredient(id,ingredient);
@@ -138,7 +138,7 @@ namespace FoodApp.Controllers
         /// This breaks the link between the food item and recipe. The associated food item and recipe remain in the system.
         /// </remarks>
         [HttpDelete("api/ingredients/{id}")]
-        public IActionResult DeleteIngredient(int id)
+        public IActionResult DeleteIngredient(Guid id)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 _service.DeleteIngredient(id);

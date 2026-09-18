@@ -40,7 +40,7 @@ namespace FoodApp.Controllers
         /// Common tag examples include "vegetarian", "gluten-free", "quick-meal", "italian", etc.
         /// </remarks>
         [HttpGet("api/tags")]
-        public IActionResult GetTags([FromQuery] string name = "", int page = 1, int perPage = 25, int? recipeId =null)
+        public IActionResult GetTags([FromQuery] string name = "", int page = 1, int perPage = 25, Guid? recipeId =null)
         {
             Authentication.ValidateToken(Request);
             return Ok(_service.GetTags(name, recipeId, page, perPage));
@@ -60,7 +60,7 @@ namespace FoodApp.Controllers
         /// cooking methods, cuisine types, or other custom categories.
         /// </remarks>
         [HttpGet("api/tags/{id}")]
-        public IActionResult GetTag(int id)
+        public IActionResult GetTag(Guid id)
         {
             Authentication.ValidateToken(Request);
             var item = _service.GetTagById(id);
@@ -107,7 +107,7 @@ namespace FoodApp.Controllers
         /// The updated name must be unique within the system. Returns 400 if no fields are provided for update.
         /// </remarks>
         [HttpPatch("api/tags/{id}")]
-        public IActionResult PatchTag(int id, [FromBody] TagUpdateRequest request, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult PatchTag(Guid id, [FromBody] TagUpdateRequest request, [FromHeader(Name = "Authorization")] string authorization)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             var updated = _service.UpdateTag(id, request);
@@ -135,7 +135,7 @@ namespace FoodApp.Controllers
         /// This is a safe operation that preserves recipe data while removing the categorization.
         /// </remarks>
         [HttpDelete("api/tags/{id}")]
-        public IActionResult DeleteTag(int id, [FromHeader(Name = "Authorization")] string authorization)
+        public IActionResult DeleteTag(Guid id, [FromHeader(Name = "Authorization")] string authorization)
         {
             var userId = _auth.CheckPermissions(Request, [Roles.admin]);
             _service.DeleteTag(id);

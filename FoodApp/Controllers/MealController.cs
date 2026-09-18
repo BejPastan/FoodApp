@@ -61,7 +61,7 @@ namespace FoodApp.Controllers
         /// Requires user authentication. Returns detailed information about a single meal.
         /// </remarks>
         [HttpGet("api/meals/{id}")]
-        public IActionResult GetMeal(int id)
+        public IActionResult GetMeal(Guid id)
         {
             Authentication.ValidateToken(Request);
                 var item = _service.GetMealById(id);
@@ -110,7 +110,7 @@ namespace FoodApp.Controllers
         /// Returns 400 if no fields are provided for update.
         /// </remarks>
         [HttpPatch("api/meals/{id}")]
-        public IActionResult PatchMeal(int id, [FromBody] MealUpdateRequest request)
+        public IActionResult PatchMeal(Guid id, [FromBody] MealUpdateRequest request)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 var updated = _service.UpdateMeal(id, request);
@@ -133,7 +133,7 @@ namespace FoodApp.Controllers
         /// - This is a destructive operation that cannot be undone
         /// </remarks>
         [HttpDelete("api/meals/{id}")]
-        public IActionResult DeleteMeal(int id)
+        public IActionResult DeleteMeal(Guid id)
         {
                 var userId = _auth.CheckPermissions(Request, [Roles.admin]);
                 _service.DeleteMeal(id);

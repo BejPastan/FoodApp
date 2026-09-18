@@ -32,7 +32,7 @@ namespace FoodApp.Models
 
     public class RecipeRecord
     {
-        public int id { get; set; }
+        public Guid id { get; set; }
         public string name { get; set; } = string.Empty;
         public int time { get; set; }
         public int portion { get; set; }
@@ -43,9 +43,9 @@ namespace FoodApp.Models
         public string name { get; set; } = string.Empty;
         public int time { get; set; }
         public int portion { get; set; }
-        public int[] ingredientIds { get; set; } = Array.Empty<int>();
-        public int[] mealIds { get; set; } = Array.Empty<int>();
-        public int[] tagIds { get; set; } = Array.Empty<int>();
+        public Guid[] ingredientIds { get; set; } = Array.Empty<Guid>();
+        public Guid[] mealIds { get; set; } = Array.Empty<Guid>();
+        public Guid[] tagIds { get; set; } = Array.Empty<Guid>();
         public IngredientCreateRequest[] ingredients { get; set; } = Array.Empty<IngredientCreateRequest>();
         public StepCreateRequest[] steps { get; set; } = Array.Empty<StepCreateRequest>();
     }
@@ -60,8 +60,8 @@ namespace FoodApp.Models
         public string? name { get; set; }
         public int? time { get; set; }
         public int? portion { get; set; }
-        public int[]? mealIds { get; set; } = [];
-        public int[] tagIds { get; set; } = Array.Empty<int>();
+        public Guid[]? mealIds { get; set; } = [];
+        public Guid[] tagIds { get; set; } = Array.Empty<Guid>();
         public IngredientCreateRequest[] ingredients { get; set; } = [];
         public Step[] steps { get; set; } = [];
     }

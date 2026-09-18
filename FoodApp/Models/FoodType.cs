@@ -2,7 +2,7 @@ namespace FoodApp.Models
 {
     public class FoodType
     {
-        public int id { get; set; }
+        public Guid id { get; set; }
         public string name { get; set; } = string.Empty;
 
         public override string ToString()

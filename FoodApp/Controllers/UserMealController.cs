@@ -1,5 +1,6 @@
 using FoodApp.Models;
 using FoodApp.Services;
+using FoodApp.Services.Interfaces;
 using FoodApp.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,8 +38,7 @@ namespace FoodApp.Controllers
         /// </remarks>
         /// <exception cref="UnauthorizedAccessException">Thrown when the user is not authenticated.</exception>
         [HttpGet("api/user_meals")]
-        
-        public IActionResult GetUserMeals([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
+        public IActionResult GetUserMeals([FromQuery] DateOnly? startDate = null, [FromQuery] DateOnly? endDate = null)
         {
             var userId = Authentication.GetUserIdFromHeader(Request);
             if (userId == null)
@@ -61,7 +61,7 @@ namespace FoodApp.Controllers
         /// Note that users can only access their own meal records.
         /// </remarks>
         [HttpGet("api/user_meals/{id}")]
-        public IActionResult GetUserMeal(int id)
+        public IActionResult GetUserMeal(Guid id)
         {
                 var item = _service.GetUserMealById(id); 
                 if (item == null) return NotFound(); 
@@ -96,6 +96,24 @@ namespace FoodApp.Controllers
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <response code="200">Returns the updated user meal record.</response>
+        [HttpPatch("api/user_meals")]
+        public IActionResult ChangeMeal([FromBody] UserMealUpdateRequest request)
+        {
+            var userId = Authentication.GetUserIdFromHeader(Request);
+            if (userId == null)
+            {
+                return Unauthorized(new { error = "You don't have permission to do this" });
+            }
+            var created = _service.UpdateUserMeal(request, userId.Value);
+            return Ok(created);
+        }
+
+        /// <summary>
         /// Deletes a user meal record by its ID.
         /// </summary>
         /// <param name="id">The unique identifier of the user meal record to delete.</param>
@@ -109,7 +127,7 @@ namespace FoodApp.Controllers
         /// Users can only delete their own meal records.
         /// </remarks>
         [HttpDelete("api/user_meals/{id}")]
-        public IActionResult DeleteUserMeal(int id)
+        public IActionResult DeleteUserMeal(Guid id)
         {
             _service.DeleteUserMeal(id); return Ok(new { deleted = true });
         }

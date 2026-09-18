@@ -42,7 +42,7 @@ namespace FoodApp.Controllers
         /// </remarks>
         [HttpGet("api/food")]
         public IActionResult SearchFood(
-            [FromQuery] int? typeId,
+            [FromQuery] Guid? typeId,
             [FromQuery] string name = "",
             [FromQuery] int page = 1,
             [FromQuery] int perPage = 10
@@ -65,7 +65,7 @@ namespace FoodApp.Controllers
         /// Requires user authentication. Returns detailed information about a single food item.
         /// </remarks>
         [HttpGet("api/food/{id}")]
-        public IActionResult GetFood(int id)
+        public IActionResult GetFood(Guid id)
         {
                 Authentication.ValidateToken(Request);
                 var food = _service.GetFoodById(id);
@@ -88,10 +88,10 @@ namespace FoodApp.Controllers
         /// </remarks>
         /// <exception cref="Exception">Thrown when neither foodTypeId nor foodType.name is provided.</exception>
         [HttpPost("api/food")]
-        public IActionResult PostFood([FromBody] CreteFoodRequest request)
+        public IActionResult PostFood([FromBody] CreateFoodRequest request)
         {
                 var userId = _auth.CheckPermissions(Request,  [Roles.admin]);
-                if(request.foodTypeId ==0 && (request.foodType == null || string.IsNullOrEmpty(request.foodType.name)))
+                if(request.foodTypeId == Guid.Empty && (request.foodType == null || string.IsNullOrEmpty(request.foodType.name)))
                 {
                     throw new Exception("food type id or food type name required");
                 }
@@ -115,7 +115,7 @@ namespace FoodApp.Controllers
         /// </remarks>
         [HttpPatch("api/food/{id}")]
         public IActionResult PatchFood(
-            int id,
+            Guid id,
             [FromBody] UpdateFoodRequest food
         )
         {
@@ -138,7 +138,7 @@ namespace FoodApp.Controllers
         /// rather than being permanently removed from the database.
         /// </remarks>
         [HttpDelete("api/food/{id}")]
-        public IActionResult DeleteFood(int id)
+        public IActionResult DeleteFood(Guid id)
         {
                 var userId = _auth.CheckPermissions(Request,  [Roles.admin]);
                 var ok = _service.DeleteFood(id);
