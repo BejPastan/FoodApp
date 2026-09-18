@@ -12,8 +12,8 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./FoodApp/FoodApp.csproj", "./FoodApp/"]
-RUN dotnet restore "./FoodApp/FoodApp.csproj"
+COPY ["./FoodApp.csproj", "./"]
+RUN dotnet restore "./FoodApp.csproj"
 COPY . .
 WORKDIR "/src/FoodApp"
 RUN dotnet build "./FoodApp.csproj" -c $BUILD_CONFIGURATION -o /app/build
