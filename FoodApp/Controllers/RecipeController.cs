@@ -156,9 +156,15 @@ namespace FoodApp.Controllers
         [HttpDelete("api/recipes/{id}")]
         public IActionResult DeleteRecipe(Guid id)
         {
-                var userId = _auth.CheckPermissions(Request, [Roles.admin]);
-                _service.DeleteRecipe(id);
+            var userId = _auth.CheckPermissions(Request, [Roles.admin]);
+            if(_service.DeleteRecipe(id))
+            {
                 return Ok(new { deleted = true });
+            }
+            else
+            {
+                throw new NotFoundException($"Record with id {id} cannot be found");
+            }
         }
 
         /// <summary>

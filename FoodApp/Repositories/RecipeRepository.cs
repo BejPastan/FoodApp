@@ -98,7 +98,8 @@ namespace FoodApp.Repositories
         public bool DeleteRecipe(Guid id)
         {
             string sql = "DELETE FROM recipe OUTPUT DELETED.* WHERE id = @id;";
-            return DBConnector.QueryDatabase<Recipe>(sql, new { id = id }).Any();
+            var test = DBConnector.QueryDatabase<Recipe>(sql, new { id = id }).Any();
+            return test;
         }
 
         /// <inheritdoc/>

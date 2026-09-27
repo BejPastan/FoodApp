@@ -25,6 +25,11 @@ namespace FoodApp.Services.Interfaces
         Recipe? GetRecipeById(Guid id);
         Recipe? CreateRecipe(RecipeCreateRequest request);
         Recipe? UpdateRecipe(Guid recipeId, RecipeUpdateRequest request);
+        /// <summary>
+        /// Delete given recipe from database
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         bool DeleteRecipe(Guid id);
         RecipeRecord[] GetRecipeToChoose(Guid mealId, Guid userId, int excludedWeeks, int chooseSize);
     }
