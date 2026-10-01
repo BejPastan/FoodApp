@@ -136,7 +136,7 @@ namespace FoodApp.Services
             {
                 Console.WriteLine(ex);
                 _repo.DeleteUser(user.id);
-                throw;
+                throw ex;
             }
 
             return true;
