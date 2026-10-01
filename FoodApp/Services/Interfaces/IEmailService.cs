@@ -62,7 +62,7 @@ namespace FoodApp.Services.Interfaces
                 smtp.Send(email);
                 smtp.Disconnect(true);
             }
-            catch(Exception ex) {
+            catch(Exception ex)
             {
                 throw new Exception($"error sending email, {ex.Message}");
             }
