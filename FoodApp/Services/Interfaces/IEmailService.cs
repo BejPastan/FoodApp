@@ -1,4 +1,4 @@
-using FoodApp.Repositories;
+using FoodApp.Repositories.Interfaces;
 using FoodApp.Utilities;
 using MailKit.Net.Smtp;
 using MimeKit;
@@ -27,30 +27,45 @@ namespace FoodApp.Services.Interfaces
                 throw new ArgumentException("Email template not found");
 
             string body = template.template;
-            foreach (var placeholder in placeholders)
+            try
             {
-                body = body.Replace($"{placeholder.Key}", placeholder.Value);
-            }
+                foreach (var placeholder in placeholders)
+                {
+                    body = body.Replace($"{placeholder.Key}", placeholder.Value);
+                }
 
+                
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("error when replacing values");
+            }
             SendGmailEmail(recipientEmail, template.subject, body);
         }
 
         private void SendGmailEmail(string recipientEmail, string subject, string body)
         {
-            string sender = SecretController.GetSmtpEmail();
-            string pass = SecretController.GetSmtpPass();
+            try
+            {
+                string sender = SecretController.GetSmtpEmail();
+                string pass = SecretController.GetSmtpPass();
 
-            var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse(sender));
-            email.To.Add(MailboxAddress.Parse(recipientEmail));
-            email.Subject = subject;
-            email.Body = new TextPart("html") { Text = body };
+                var email = new MimeMessage();
+                email.From.Add(MailboxAddress.Parse(sender));
+                email.To.Add(MailboxAddress.Parse(recipientEmail));
+                email.Subject = subject;
+                email.Body = new TextPart("html") { Text = body };
 
-            using var smtp = new SmtpClient();
-            smtp.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-            smtp.Authenticate(sender, pass);
-            smtp.Send(email);
-            smtp.Disconnect(true);
+                using var smtp = new SmtpClient();
+                smtp.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                smtp.Authenticate(sender, pass);
+                smtp.Send(email);
+                smtp.Disconnect(true);
+            }
+            catch
+            {
+                throw new Exception("error sending email");
+            }
         }
     }
 }

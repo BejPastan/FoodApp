@@ -1,5 +1,5 @@
 using FoodApp.Models;
-using FoodApp.Repositories;
+using FoodApp.Repositories.Interfaces;
 using FoodApp.Services;
 using FoodApp.Utilities;
 using Microsoft.AspNetCore.Mvc;

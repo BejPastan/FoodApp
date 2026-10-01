@@ -1,6 +1,6 @@
 ﻿
 using FoodApp.Models;
-using FoodApp.Repositories;
+using FoodApp.Repositories.Interfaces;
 using FoodApp.Utilities;
 
 public class EmailTemplateRepository : IEmailTemplateRepository
@@ -19,6 +19,10 @@ public class EmailTemplateRepository : IEmailTemplateRepository
             sql += " name = @Name;";
         }
         var emailTemplate = DBConnector.QueryDatabase<EmailTemplate>(sql, parameters);
+        if(emailTemplate != null )
+        {
+            throw new Exception("cannot find emial template");
+        }
         return emailTemplate.FirstOrDefault();
     }
 

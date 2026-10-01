@@ -1,6 +1,6 @@
 using FoodApp.Models;
 
-namespace FoodApp.Repositories
+namespace FoodApp.Repositories.Interfaces
 {
     public interface IEmailTemplateRepository
     {
