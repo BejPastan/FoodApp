@@ -66,7 +66,7 @@ namespace FoodApp.Utilities
                 ),
                 _ => (
                     statusCode: (int)HttpStatusCode.InternalServerError,
-                    errorResponse: new ErrorResponse("An unexpected error occurred", "INTERNAL_SERVER_ERROR")
+                    errorResponse: new ErrorResponse($"An unexpected error occurred: {exception.Message}", "INTERNAL_SERVER_ERROR")
                 )
             };
         }
