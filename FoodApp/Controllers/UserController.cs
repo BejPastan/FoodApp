@@ -131,14 +131,8 @@ namespace FoodApp.Controllers
             {
                 throw new ArgumentException("Cannot find this user");
             }
-            var resp = new UserWithKitchen(user); 
-            var kitchen = _kitchenService.GetKitchensForUser(userId.Value).First();
-            var kitchenUser = _kitchenUsersService.GetKitchenUsers(kitchen.Id, userId.Value, Guid.Empty).FirstOrDefault();
 
-            resp.kitchen = kitchen;
-            resp.kitchenUser = kitchenUser;
-
-            return Ok(resp);
+            return Ok(user);
         }
 
         /// <summary>
