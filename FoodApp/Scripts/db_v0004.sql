@@ -1,0 +1,1 @@
+﻿ALTER TABLE Kitchens ADD accessCode varchar(50);

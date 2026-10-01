@@ -42,7 +42,7 @@ namespace FoodApp.Controllers
         /// Results are sorted by recipe ID in ascending order.
         /// </remarks>
         [HttpGet("api/recipes")]
-        public IActionResult GetRecipesAPI([FromQuery] string[] mealNames, [FromQuery] string[]? tags, [FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
+        public IActionResult GetRecipes([FromQuery] string[] mealNames, [FromQuery] string[]? tags, [FromQuery] string name = "", [FromQuery] int page = 1, [FromQuery] int perPage = 25)
         {
                 Authentication.ValidateToken(Request);
                 return Ok(_service.GetRecipes(mealNames, tags, name, page, perPage));
@@ -187,6 +187,7 @@ namespace FoodApp.Controllers
         [HttpGet("api/recipes/choices")]
         public IActionResult GetRecipeToChoose([FromQuery] Guid mealId, [FromQuery] int excludeWeeks)
         {
+            throw new Exception("This is obsolete function");
                 Guid? userId = Authentication.GetUserIdFromHeader(Request);
                 if(userId==null)
                 {

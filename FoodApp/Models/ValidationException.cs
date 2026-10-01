@@ -7,7 +7,16 @@ namespace FoodApp.Models
     /// </summary>
     public class ValidationException : Exception
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
         public ValidationException(string message) : base(message) { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="innerException"></param>
         public ValidationException(string message, Exception innerException) : base(message, innerException) { }
     }
 
@@ -16,7 +25,16 @@ namespace FoodApp.Models
     /// </summary>
     public class NotFoundException : Exception
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
         public NotFoundException(string message) : base(message) { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="innerException"></param>
         public NotFoundException(string message, Exception innerException) : base(message, innerException) { }
     }
 
@@ -25,7 +43,16 @@ namespace FoodApp.Models
     /// </summary>
     public class UnauthorizedException : Exception
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
         public UnauthorizedException(string message) : base(message) { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="innerException"></param>
         public UnauthorizedException(string message, Exception innerException) : base(message, innerException) { }
     }
 
@@ -34,7 +61,16 @@ namespace FoodApp.Models
     /// </summary>
     public class BusinessLogicException : Exception
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
         public BusinessLogicException(string message) : base(message) { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="innerException"></param>
         public BusinessLogicException(string message, Exception innerException) : base(message, innerException) { }
     }
 }

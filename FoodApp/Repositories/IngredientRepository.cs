@@ -9,27 +9,45 @@ namespace FoodApp.Repositories
     public interface IIngredientRepository
     {
         IEnumerable<Ingredient> GetIngredients(Guid? recipeId, Guid? foodId, int page, int pageSize);
+        /// <summary>
+        /// Return ingredient with given ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         Ingredient? GetIngredientById(Guid id);
         Ingredient CreateIngredient(Guid foodId, Guid unitId, decimal unitAmount, Guid recipeId);
+        /// <summary>
+        /// Update data of single Ingredient
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="foodId"></param>
+        /// <param name="unitId"></param>
+        /// <param name="unitAmount"></param>
+        /// <param name="recipeId"></param>
+        /// <returns></returns>
         Ingredient? UpdateIngredient(Guid id, Guid? foodId, Guid? unitId, decimal? unitAmount, Guid? recipeId);
         bool DeleteIngredient(Guid id);
     }
 
     public class IngredientRepository : IIngredientRepository
     {
+        ///<inheritdoc/>
         public IEnumerable<Ingredient> GetIngredients(Guid? recipeId, Guid? foodId, int page, int pageSize)
         {
-            var sql = "SELECT * FROM ingredients WHERE 1=1";
+            var sql = "SELECT i.* FROM ingredients i WHERE 1=1";
             if (recipeId.HasValue) sql += " AND recipeId = @recipeId";
             if (foodId.HasValue) sql += " AND foodId = @foodId";
             sql += " ORDER BY id ASC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;";
-            return DBConnector.QueryDatabase<Ingredient>(sql, new { recipeId = recipeId, foodId = foodId, offset = (page - 1) * pageSize, pageSize = pageSize }).ToList();
+            var resp = DBConnector.QueryDatabase<Ingredient>(sql, new { recipeId = recipeId, foodId = foodId, offset = (page - 1) * pageSize, pageSize = pageSize }).ToList();
+            return resp;
         }
         
+        ///<inheritdoc/>
         public Ingredient? GetIngredientById(Guid id)
         {
             var sql = "SELECT * FROM ingredients WHERE id = @id;";
-            return DBConnector.QueryDatabase<Ingredient>(sql, new { id = id }).FirstOrDefault();
+            var resp = DBConnector.QueryDatabase<Ingredient>(sql, new { id = id }).FirstOrDefault();
+            return resp;
         }
 
         public Ingredient CreateIngredient(Guid foodId, Guid unitId, decimal unitAmount, Guid recipeId)
@@ -45,10 +63,13 @@ namespace FoodApp.Repositories
         {
             var sets = new List<string>();
             var parameters = new DynamicParameters();
-            if (foodId.HasValue) { sets.Add("foodId = @foodId"); parameters.Add("foodId", foodId.Value); }
-            if (unitId.HasValue) { sets.Add("unitId = @unitId"); parameters.Add("unitId", unitId.Value); }
+            if (foodId.HasValue && foodId.Value != Guid.Empty) { sets.Add("foodId = @foodId"); parameters.Add("foodId", foodId.Value); }
+            if (unitId.HasValue && unitId.Value != Guid.Empty) { sets.Add("unitId = @unitId"); parameters.Add("unitId", unitId.Value); }
             if (unitAmount.HasValue) { sets.Add("unitAmount = @amt"); parameters.Add("amt", unitAmount.Value); }
-            if (recipeId.HasValue) { sets.Add("recipeId = @recipeId"); parameters.Add("recipeId", recipeId.Value); }
+            if (recipeId.HasValue && recipeId.Value != Guid.Empty) 
+            {
+                sets.Add("recipeId = @recipeId"); parameters.Add("recipeId", recipeId.Value); 
+            }
             if (sets.Count == 0) return null;
             var sql = $"UPDATE ingredients SET {string.Join(", ", sets)} WHERE id = @id; SELECT * FROM ingredients WHERE id = @id;";
             parameters.Add("id", id);

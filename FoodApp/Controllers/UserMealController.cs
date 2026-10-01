@@ -84,7 +84,7 @@ namespace FoodApp.Controllers
         /// This endpoint is used for meal planning and scheduling functionality.
         /// </remarks>
         [HttpPost("api/user_meals")]
-        public IActionResult PostUserMeal([FromBody] UserMealCreateRequest request)
+        public IActionResult PostUserMeal([FromBody] KitchenMealCreateRequest request)
         {
                 var userId = Authentication.GetUserIdFromHeader(Request);
                 if(userId==null)
@@ -102,7 +102,7 @@ namespace FoodApp.Controllers
         /// <returns></returns>
         /// <response code="200">Returns the updated user meal record.</response>
         [HttpPatch("api/user_meals")]
-        public IActionResult ChangeMeal([FromBody] UserMealUpdateRequest request)
+        public IActionResult ChangeMeal([FromBody] KitchenMealUpdateRequest request)
         {
             var userId = Authentication.GetUserIdFromHeader(Request);
             if (userId == null)

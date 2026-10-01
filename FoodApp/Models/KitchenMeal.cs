@@ -3,7 +3,7 @@
     /// <summary>
     /// DTO of user_meal table
     /// </summary>
-    public class UserMeal
+    public class KitchenMeal
     {
         /// <summary>
         /// id of user_meal record
@@ -12,7 +12,7 @@
         /// <summary>
         /// id of user
         /// </summary>
-        public Guid userId { get; set; }
+        public Guid kitchenId { get; set; }
         /// <summary>
         /// id of recipe
         /// </summary>
@@ -32,14 +32,14 @@
         /// <returns></returns>
         public override string ToString()
         {
-            return $"UserMeal {{ id = {id}, userId = {userId}, recipeId = {recipeId}, mealId = {mealId}, mealDate = {mealDate} }}";
+            return $"UserMeal {{ id = {id}, kitchenId = {kitchenId}, recipeId = {recipeId}, mealId = {mealId}, mealDate = {mealDate} }}";
         }
     }
 
     /// <summary>
     /// Model with data for user meal list
     /// </summary>
-    public class UserMealWithData
+    public class KitchenMealWithData
     {
 
         /// <summary>
@@ -77,16 +77,16 @@
         }
     }
 
-    public class UserMealCreateRequest
+    public class KitchenMealCreateRequest
     {
         public Guid recipeId { get; set; }
         public Guid mealId { get; set; }
         public DateOnly mealDate { get; set; }
     }
 
-    public class UserMealUpdateRequest
+    public class KitchenMealUpdateRequest
     {
-        public Guid userMealId { get; set; }
+        public Guid kitchenMealId { get; set; }
         public Guid recipeId { get; set; }
     }
 }

@@ -15,9 +15,11 @@ namespace FoodApp.Controllers
     /// </remarks>
     /// <param name="service">The user service for data operations.</param>
     [ApiController]
-    public class UserController(IUserService service) : ControllerBase
+    public class UserController(IUserService service, IKitchenUsersService kitchenUsersService, IKitchenService kitchenService) : ControllerBase
     {
         private readonly IUserService _service = service;
+        private readonly IKitchenUsersService _kitchenUsersService = kitchenUsersService;
+        private readonly IKitchenService _kitchenService = kitchenService;
 
         #region signup
         /// <summary>
@@ -125,7 +127,18 @@ namespace FoodApp.Controllers
             Console.WriteLine(userId);
             
             ExtendedUser? user = _service.GetCurrentUser(userId.Value);
-            return Ok(user);
+            if(user == null)
+            {
+                throw new ArgumentException("Cannot find this user");
+            }
+            var resp = new UserWithKitchen(user); 
+            var kitchen = _kitchenService.GetKitchensForUser(userId.Value).First();
+            var kitchenUser = _kitchenUsersService.GetKitchenUsers(kitchen.Id, userId.Value, Guid.Empty).FirstOrDefault();
+
+            resp.kitchen = kitchen;
+            resp.kitchenUser = kitchenUser;
+
+            return Ok(resp);
         }
 
         /// <summary>
@@ -151,6 +164,11 @@ namespace FoodApp.Controllers
             }
         }
 
+        /// <summary>
+        /// logout user
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPost("api/auth/logout")]
         public IActionResult Logout()
         {

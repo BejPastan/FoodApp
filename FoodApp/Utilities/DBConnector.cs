@@ -3,6 +3,7 @@ using Dapper;
 
 namespace FoodApp.Utilities
 {
+
     /// <summary>
     /// Utility class for managing database connections and executing queries using Dapper.
     /// </summary>

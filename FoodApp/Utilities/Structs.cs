@@ -28,4 +28,24 @@
         inactive,
         timeout
     }
+
+    public enum KitchenRoles
+    {
+        /// <summary>
+        /// Owner of the Kitchen, full controll
+        /// </summary>
+        owner,
+        /// <summary>
+        /// Administrator of the kitchen, allow to grant other roles
+        /// </summary>
+        admin,
+        /// <summary>
+        /// Editor, allow to change meals
+        /// </summary>
+        editor,
+        /// <summary>
+        /// Allow only for view of recipes
+        /// </summary>
+        inspector,
+    }
 }

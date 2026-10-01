@@ -6,10 +6,34 @@ namespace FoodApp.Services
 {
     public interface IIngredientService
     {
+        /// <summary>
+        /// Return list of ingredients matching given requirements
+        /// </summary>
+        /// <param name="recipeId"></param>
+        /// <param name="foodId"></param>
+        /// <param name="page"></param>
+        /// <param name="perPage"></param>
+        /// <returns></returns>
         IEnumerable<Ingredient> GetIngredients(Guid? recipeId, Guid? foodId, int page = 1, int perPage = 25);
         Ingredient? GetIngredientById(Guid id);
+        /// <summary>
+        /// Create ingredient record, if food or unit is not exist, it will create new food or unit record
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         Ingredient CreateIngredient(IngredientCreateRequest request);
+        /// <summary>
+        /// Update ingredient record, if food or unit is not exist, it will create new food or unit record
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
         Ingredient? UpdateIngredient(Guid id, IngredientUpdateRequest request);
+        /// <summary>
+        /// Delete ingredient record
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         bool DeleteIngredient(Guid id);
     }
 
@@ -25,6 +49,7 @@ namespace FoodApp.Services
             _unitServ = unitServ;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<Ingredient> GetIngredients(Guid? recipeId, Guid? foodId, int page = 1, int perPage = 25)
         {
             Ingredient[] ingredients = _repo.GetIngredients(recipeId, foodId, page, perPage).ToArray();
@@ -53,11 +78,11 @@ namespace FoodApp.Services
 
             // Ensure food exists
             Guid foodId = Guid.Empty;
-            if ((!request.foodId.HasValue || request.foodId != Guid.Empty) && request.food != null)
+            if ((!request.foodId.HasValue || request.foodId == Guid.Empty) && request.food != null)
             {
                 var createdFood = _foodServ.CreateFood(request.food);
                 foodId = createdFood.id;
-            }else if(request.foodId.HasValue && request.foodId.Value == Guid.Empty)
+            }else if(request.foodId.HasValue && request.foodId.Value != Guid.Empty)
             {
                 foodId = request.foodId.Value;
             }
@@ -68,12 +93,12 @@ namespace FoodApp.Services
 
             // Ensure unit exists
             Guid unitId = Guid.Empty;
-            if ((!request.unitId.HasValue || request.unitId != Guid.Empty) && request.unit != null)
+            if ((!request.unitId.HasValue || request.unitId == Guid.Empty) && request.unit != null)
             {
                 var createdUnit = _unitServ.CreateUnit(request.unit);
                 unitId = createdUnit.id;
             }
-            else if (request.unitId.HasValue && request.unitId.Value == Guid.Empty)
+            else if (request.unitId.HasValue && request.unitId.Value != Guid.Empty)
             {
                 unitId = request.unitId.Value;
             }

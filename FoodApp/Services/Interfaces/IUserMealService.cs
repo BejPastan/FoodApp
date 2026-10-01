@@ -11,15 +11,15 @@ namespace FoodApp.Services.Interfaces
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <returns></returns>
-        IEnumerable<UserMealWithData> GetUserMeals(Guid userId, DateOnly? startDate, DateOnly? endDate);
+        IEnumerable<KitchenMealWithData> GetUserMeals(Guid userId, DateOnly? startDate, DateOnly? endDate);
         /// <summary>
         /// return user meal record
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        UserMeal? GetUserMealById(Guid id);
-        UserMeal CreateUserMeal(UserMealCreateRequest toCreate, Guid userId);
-        UserMeal UpdateUserMeal(UserMealUpdateRequest toUpdate, Guid userId);
+        KitchenMeal? GetUserMealById(Guid id);
+        KitchenMeal CreateUserMeal(KitchenMealCreateRequest toCreate, Guid userId);
+        KitchenMeal UpdateUserMeal(KitchenMealUpdateRequest toUpdate, Guid userId);
         bool DeleteUserMeal(Guid id);
     }
 

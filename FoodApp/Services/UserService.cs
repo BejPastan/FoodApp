@@ -10,13 +10,14 @@ namespace FoodApp.Services
     /// Default implementation of IUserService
     /// </summary>
     /// <inheritdoc/>
-    public class UserService(IUserRepository repo, IRoleRepository roleRepo, IUserTokenRepository userTokenRepository, IEmailService emailService, IRefreshTokenRepo refreshTokenRepo) : IUserService
+    public class UserService(IUserRepository repo, IRoleRepository roleRepo, IUserTokenRepository userTokenRepository, IEmailService emailService, IRefreshTokenRepo refreshTokenRepo, IKitchenService kitchenService) : IUserService
     {
         private readonly IUserRepository _repo = repo;
         private readonly IRoleRepository _roleRepository = roleRepo;
         private readonly IUserTokenRepository _userTokenRepository = userTokenRepository;
         private readonly IEmailService _emailService = emailService;
         private readonly IRefreshTokenRepo _refreshTokenRepo = refreshTokenRepo;
+        private readonly IKitchenService _kitchenService = kitchenService;
 
         /// <inheritdoc/>
         public User? GetUserDataById(Guid id) => _repo.GetUserDataById(id);
@@ -163,6 +164,10 @@ namespace FoodApp.Services
             }
             // Mark token as used
             _userTokenRepository.MarkTokenAsUsed(validToken.id);
+
+            // create new kitchen for user
+            KitchenCreateRequest request = new() { Name = user.name + "'s Kitchen" };
+            _kitchenService.CreateKitchen(request, user.id);
 
             return true;
         }

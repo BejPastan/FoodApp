@@ -5,6 +5,16 @@ using FoodApp.Utilities;
 
 namespace FoodApp.Services
 {
+    /// <summary>
+    /// Basic Implementation of IRecipeService
+    /// </summary>
+    /// <param name="recipeRepo"></param>
+    /// <param name="mealService"></param>
+    /// <param name="stepService"></param>
+    /// <param name="ingredientServ"></param>
+    /// <param name="recipeMealService"></param>
+    /// <param name="recipeTagService"></param>
+    /// <param name="tagService"></param>
     public class RecipeService(IRecipeRepo recipeRepo, IMealService mealService, IStepService stepService, IIngredientService ingredientServ, IRecipeMealService recipeMealService, IRecipeTagService recipeTagService, ITagService tagService) : IRecipeService
     {
         private readonly IRecipeRepo _recipeRepo = recipeRepo;
@@ -21,6 +31,7 @@ namespace FoodApp.Services
             return recipes;
         }
 
+        /// <inheritdoc/>
         public Recipe? GetRecipeById(Guid id)
         {
             var recipe = _recipeRepo.GetRecipeById(id);
@@ -28,6 +39,7 @@ namespace FoodApp.Services
             return FormatRecipe(recipe, FormatMode.full);
         }
 
+        /// <inheritdoc/>
         public Recipe? CreateRecipe(RecipeCreateRequest request)
         {
             Recipe created = _recipeRepo.CreateRecipe(request.name, request.portion, request.time);
@@ -58,6 +70,7 @@ namespace FoodApp.Services
             return FormatRecipe(_recipeRepo.GetRecipeById(recipeId), FormatMode.full);
         }
 
+        /// <inheritdoc/>
         public Recipe? UpdateRecipe(Guid recipeId, RecipeUpdateRequest request)
         {
             Console.WriteLine($"Updating recipe {recipeId} with name: {request.name}, portion: {request.portion}, time: {request.time}");
@@ -159,7 +172,7 @@ namespace FoodApp.Services
                     {
                         toFormat.meals = _mealService.GetMeals(null, toFormat.id).ToArray();
                         toFormat.ingredients = _ingredientServ.GetIngredients(toFormat.id, null).ToArray();
-                        toFormat.tags = _tagService.GetTags(null, toFormat.id).ToArray();
+                        toFormat.tags = _tagService.GetTags("", toFormat.id).ToArray();
                         break;
                     }
                 case FormatMode.full:
@@ -168,7 +181,7 @@ namespace FoodApp.Services
                         toFormat.meals = _mealService.GetMeals(null, toFormat.id).ToArray();
                         toFormat.steps = _stepService.GetSteps(toFormat.id).ToArray();
                         toFormat.ingredients = _ingredientServ.GetIngredients(toFormat.id, null).ToArray();
-                        toFormat.tags = _tagService.GetTags(null, toFormat.id).ToArray();
+                        toFormat.tags = _tagService.GetTags("", toFormat.id).ToArray();
                         break;
                     }
             }
