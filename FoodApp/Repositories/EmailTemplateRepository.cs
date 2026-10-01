@@ -9,7 +9,7 @@ public class EmailTemplateRepository : IEmailTemplateRepository
     {
         var parameters = new { Id = id, Name = name ?? string.Empty };
 
-        var sql = @"SELECT * FROM email_template WHERE ";
+        var sql = "SELECT * FROM email_template WHERE ";
         if (id != null && id.Value != Guid.Empty)
         {
             sql += " id = @Id;";
@@ -19,9 +19,9 @@ public class EmailTemplateRepository : IEmailTemplateRepository
             sql += " name = @Name;";
         }
         var emailTemplate = DBConnector.QueryDatabase<EmailTemplate>(sql, parameters);
-        if(emailTemplate != null )
+        if(emailTemplate == null )
         {
-            throw new Exception($"cannot find email template, sql:{sql}");
+            throw new Exception($"cannot find email template");
         }
         return emailTemplate.FirstOrDefault();
     }
