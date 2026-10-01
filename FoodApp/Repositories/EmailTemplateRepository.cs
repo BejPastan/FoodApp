@@ -21,7 +21,7 @@ public class EmailTemplateRepository : IEmailTemplateRepository
         var emailTemplate = DBConnector.QueryDatabase<EmailTemplate>(sql, parameters);
         if(emailTemplate != null )
         {
-            throw new Exception("cannot find emial template");
+            throw new Exception($"cannot find email template, sql:{sql}");
         }
         return emailTemplate.FirstOrDefault();
     }
