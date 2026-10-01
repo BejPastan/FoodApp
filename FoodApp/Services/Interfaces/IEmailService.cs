@@ -57,7 +57,8 @@ namespace FoodApp.Services.Interfaces
                 email.Body = new TextPart("html") { Text = body };
 
                 using var smtp = new SmtpClient();
-                smtp.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                smtp.Connect("smtp.gmail.com", 465, MailKit.Security.SecureSocketOptions.SslOnConnect);
+                //smtp.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
                 smtp.Authenticate(sender, pass);
                 smtp.Send(email);
                 smtp.Disconnect(true);
