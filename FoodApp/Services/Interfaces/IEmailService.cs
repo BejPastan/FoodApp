@@ -3,7 +3,7 @@ using FoodApp.Utilities;
 using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace FoodApp.Services
+namespace FoodApp.Services.Interfaces
 {
     public interface IEmailService
     {
