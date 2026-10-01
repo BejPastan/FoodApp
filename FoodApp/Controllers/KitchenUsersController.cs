@@ -10,7 +10,7 @@ namespace FoodApp.Controllers
     /// API controller for managing members/users of a kitchen
     /// </summary>
     [ApiController]
-    [Route("api/kitchen/{kitchenId}/users")]
+    [Route("api/kitchen/")]
     public class KitchenUsersController : ControllerBase
     {
         private readonly IKitchenUsersService _kitchenUsersService;
@@ -29,7 +29,7 @@ namespace FoodApp.Controllers
         /// <param name="kitchenId">Kitchen ID</param>
         /// <response code="200">List of kitchen members</response>
         /// <response code="401">Unauthorized</response>
-        [HttpGet]
+        [HttpGet("{kitchenId}/users")]
         public IActionResult GetKitchenUsers([FromRoute] Guid kitchenId, [FromQuery] Guid? requestedUserId)
         {
             var userId = Authentication.GetUserIdFromHeader(Request);
@@ -50,9 +50,9 @@ namespace FoodApp.Controllers
         /// Adds a user to the kitchen. Required access code, to locate kitchen and grant access as inspector to it
         /// </summary>
         /// <param name="request">User and role assignment data</param>
-        /// <response code="200">User added to kitchen</response>
+        /// <response code="200"></response>
         /// <response code="401">Unauthorized</response>
-        [HttpPost]
+        [HttpPost("users")]
         public IActionResult AddUserToKitchen([FromBody] KitchenUserAddRequest request)
         {
             var requestingUserId = Authentication.GetUserIdFromHeader(Request)
@@ -75,7 +75,7 @@ namespace FoodApp.Controllers
         /// <param name="request">New role</param>
         /// <response code="200">Role updated</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPatch("{userId}/role")]
+        [HttpPatch("{kitchenId}/users/{userId}/role")]
         public IActionResult ChangeUserRole([FromRoute] Guid kitchenId, [FromRoute] Guid userId, [FromBody] KitchenUserRoleUpdateRequest request)
         {
             var requester = Authentication.GetUserIdFromHeader(Request);
@@ -100,7 +100,7 @@ namespace FoodApp.Controllers
         /// <param name="userId">Member user ID</param>
         /// <response code="200">User removed from kitchen</response>
         /// <response code="401">Unauthorized</response>
-        [HttpDelete("{userId}")]
+        [HttpDelete("{kitchenId}/users/{userId}")]
         public IActionResult RemoveUserFromKitchen([FromRoute] Guid kitchenId, [FromRoute] Guid userId)
         {
             var requestingUserId = Authentication.GetUserIdFromHeader(Request)
