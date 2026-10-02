@@ -10,10 +10,6 @@ namespace FoodApp.Controllers
     /// login, and retrieving current user information. This controller handles the core authentication functionality
     /// of the FoodApp application.
     /// </summary>
-    /// <remarks>
-    /// Initializes a new instance of the <see cref="UserController"/> class.
-    /// </remarks>
-    /// <param name="service">The user service for data operations.</param>
     [ApiController]
     public class UserController(IUserService service, IKitchenUsersService kitchenUsersService, IKitchenService kitchenService) : ControllerBase
     {
@@ -136,9 +132,11 @@ namespace FoodApp.Controllers
         }
 
         /// <summary>
-        /// exchange refresh token for auth token
+        /// Exchanges the refresh token cookie for a new auth token and rotated refresh token.
         /// </summary>
-        /// <returns>return empty response with header with new Auth token, and refresh token</returns>
+        /// <returns>An empty success response; the new auth and refresh tokens are set as response cookies.</returns>
+        /// <response code="200">Returns a <see cref="SuccessResponse"/> with the refreshed token cookies set.</response>
+        /// <response code="401">Unauthorized - the refresh token cookie is missing, invalid, or expired.</response>
         [HttpGet("api/auth/refresh")]
         public IActionResult RefreshToken()
         {
@@ -159,10 +157,12 @@ namespace FoodApp.Controllers
         }
 
         /// <summary>
-        /// logout user
+        /// Logs out the currently authenticated user and clears the session cookies.
         /// </summary>
-        /// <returns></returns>
-        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <returns>A <see cref="SuccessResponse"/> indicating the logout completed.</returns>
+        /// <response code="200">The user was logged out successfully.</response>
+        /// <response code="401">Unauthorized - valid authentication token required.</response>
+        /// <exception cref="UnauthorizedAccessException">Thrown when the user is not authenticated.</exception>
         [HttpPost("api/auth/logout")]
         public IActionResult Logout()
         {
@@ -249,10 +249,11 @@ namespace FoodApp.Controllers
         }
 
         /// <summary>
-        /// Delete user data from database
+        /// Deletes user data from the database.
         /// </summary>
-        /// <param name="userId">id of user to delete</param>
-        /// <returns>when successfull return message</returns>
+        /// <param name="userId">The ID of the user to delete.</param>
+        /// <returns>A <see cref="SuccessResponse"/> confirming the user was removed.</returns>
+        /// <response code="200">The user was removed successfully.</response>
         [HttpPost("api/users/delete/{userId}")]
         public IActionResult DeleteUser(int userId)
         {

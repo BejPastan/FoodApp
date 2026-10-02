@@ -31,6 +31,9 @@ namespace FoodApp.Controllers
         /// Retrieves a list of tags with optional filtering.
         /// </summary>
         /// <param name="name">Optional name to search for (partial match, case-insensitive).</param>
+        /// <param name="page">Page number for pagination (default: 1).</param>
+        /// <param name="perPage">Number of items per page (default: 25, max: 100).</param>
+        /// <param name="recipeId">Optional recipe ID to only return tags associated with that recipe.</param>
         /// <returns>A list of tags matching the search criteria.</returns>
         /// <response code="200">Returns the list of matching tags.</response>
         /// <response code="401">Unauthorized - valid authentication token required.</response>
@@ -49,7 +52,7 @@ namespace FoodApp.Controllers
         /// <summary>
         /// Retrieves a specific tag by its ID.
         /// </summary>
-        /// <param name="id">The unique identifier of the tag.</parameter>
+        /// <param name="id">The unique identifier of the tag.</param>
         /// <returns>The tag if found; otherwise returns 404 Not Found.</returns>
         /// <response code="200">Returns the requested tag.</response>
         /// <response code="401">Unauthorized - valid authentication token required.</response>

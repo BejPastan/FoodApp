@@ -20,6 +20,9 @@ namespace FoodApp.Controllers
         /// <summary>
         /// Initializes a new instance of KitchenController
         /// </summary>
+        /// <param name="kitchenService">The kitchen service for data operations.</param>
+        /// <param name="logger">The logger used for diagnostic logging.</param>
+        /// <param name="kitchenUsersService">The kitchen users service for permission checks.</param>
         public KitchenController(IKitchenService kitchenService, ILogger<KitchenController> logger, IKitchenUsersService kitchenUsersService)
         {
             _kitchenService = kitchenService;
@@ -30,9 +33,9 @@ namespace FoodApp.Controllers
         /// <summary>
         /// Return kitchens accessible by this user
         /// </summary>
-        /// <param name="name">name filter for searching kitchens</param>
-        /// <returns></returns>
-        /// <exception cref="UnauthorizedAccessException"></exception>
+        /// <param name="name">Name filter for searching kitchens (partial match).</param>
+        /// <returns>A list of kitchens the authenticated user has access to.</returns>
+        /// <exception cref="UnauthorizedAccessException">Thrown when the request is not authenticated.</exception>
 
         [HttpGet]
         public IActionResult GetUserKitchens([FromQuery] string name="")

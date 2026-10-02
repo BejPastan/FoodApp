@@ -77,7 +77,6 @@ namespace FoodApp.Controllers
         /// Creates a new ingredient record.
         /// </summary>
         /// <param name="request">The ingredient data to create. Must include valid foodId, unitId, unitAmount, and recipeId.</param>
-        /// <param name="authorization">The authorization header containing the bearer token.</param>
         /// <returns>The created ingredient with its assigned ID.</returns>
         /// <response code="200">Returns the created ingredient.</response>
         /// <response code="400">Bad Request - invalid ingredient data or missing required fields.</response>
@@ -101,7 +100,6 @@ namespace FoodApp.Controllers
         /// </summary>
         /// <param name="id">The ID of the ingredient to update (must match the ingredient's ID in the request body).</param>
         /// <param name="ingredient">The updated ingredient data. The ID in the body must match the route parameter.</param>
-        /// <param name="authorization">The authorization header containing the bearer token.</param>
         /// <returns>The updated ingredient, or 400 Bad Request if no valid fields to update or ingredient not found.</returns>
         /// <response code="200">Returns the updated ingredient.</response>
         /// <response code="400">Bad Request - no valid fields provided for update or ingredient not found.</response>
@@ -128,7 +126,6 @@ namespace FoodApp.Controllers
         /// Deletes an ingredient by its ID.
         /// </summary>
         /// <param name="id">The unique identifier of the ingredient to delete.</param>
-        /// <param name="authorization">The authorization header containing the bearer token.</param>
         /// <returns>Success status of the deletion operation.</returns>
         /// <response code="200">Returns deletion status (true if successful, false if not found).</response>
         /// <response code="401">Unauthorized - valid authentication token required.</response>

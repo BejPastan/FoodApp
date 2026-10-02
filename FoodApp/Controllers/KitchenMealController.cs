@@ -19,9 +19,10 @@ namespace FoodApp.Controllers
         private readonly IKitchenUsersService _kitchenUsers;
         
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserMealController"/> class.
+        /// Initializes a new instance of the <see cref="KitchenMealController"/> class.
         /// </summary>
-        /// <param name="service">The user meal service for data operations.</param>
+        /// <param name="service">The kitchen meal service for data operations.</param>
+        /// <param name="kitchenUsers">The kitchen users service used for permission checks.</param>
         public KitchenMealController(IKitchenMealService service, IKitchenUsersService kitchenUsers) 
         {
             _kitchenUsers = kitchenUsers;
@@ -121,11 +122,18 @@ namespace FoodApp.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Changes the recipe assigned to an existing kitchen meal record.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
+        /// <param name="kitchen_id">The unique identifier of the kitchen.</param>
+        /// <param name="request">The update data containing the kitchen meal ID and the new recipe ID.</param>
+        /// <returns>The updated kitchen meal record.</returns>
         /// <response code="200">Returns the updated kitchen meal record.</response>
+        /// <response code="401">Unauthorized - valid authentication token required.</response>
+        /// <response code="403">Forbidden - user does not have editor role on this kitchen.</response>
+        /// <remarks>
+        /// Requires authentication and editor (or higher) permission on the kitchen.
+        /// The kitchenMealId must reference an existing kitchen meal record and recipeId must reference an existing recipe.
+        /// </remarks>
         [HttpPatch("{kitchen_id}/meal")]
         public IActionResult ChangeMeal([FromRoute] Guid kitchen_id, [FromBody] KitchenMealUpdateRequest request)
         {

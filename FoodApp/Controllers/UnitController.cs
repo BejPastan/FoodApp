@@ -18,12 +18,6 @@ namespace FoodApp.Controllers
         private readonly IAuthService _auth = auth;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnitController"/> class.
-        /// </summary>
-        /// <param name="service">The unit service for data operations.</param>
-        /// <param name="auth">The authentication service for permission checks.</param>
-
-        /// <summary>
         /// Retrieves a list of units with optional filtering and pagination.
         /// </summary>
         /// <param name="ids">Optional array of unit IDs to filter by. If provided, only units with these IDs are returned.</param>

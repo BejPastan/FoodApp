@@ -96,11 +96,16 @@ namespace FoodApp.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Changes the recipe assigned to an existing user meal record.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
+        /// <param name="request">The update data containing the user meal ID and the new recipe ID.</param>
+        /// <returns>The updated user meal record.</returns>
         /// <response code="200">Returns the updated user meal record.</response>
+        /// <response code="401">Unauthorized - valid authentication token required.</response>
+        /// <remarks>
+        /// Requires user authentication. The user can only update their own meal records.
+        /// The kitchenMealId must reference an existing user meal record and recipeId must reference an existing recipe.
+        /// </remarks>
         [HttpPatch("api/user_meals")]
         public IActionResult ChangeMeal([FromBody] KitchenMealUpdateRequest request)
         {

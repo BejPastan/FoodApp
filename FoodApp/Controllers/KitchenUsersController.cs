@@ -18,6 +18,7 @@ namespace FoodApp.Controllers
         /// <summary>
         /// Initializes a new instance of KitchenUsersController
         /// </summary>
+        /// <param name="kitchenUsersService">The kitchen users service for data operations and permission checks.</param>
         public KitchenUsersController(IKitchenUsersService kitchenUsersService)
         {
             _kitchenUsersService = kitchenUsersService;
@@ -27,6 +28,7 @@ namespace FoodApp.Controllers
         /// Retrieves all users/members belonging to this kitchen
         /// </summary>
         /// <param name="kitchenId">Kitchen ID</param>
+        /// <param name="requestedUserId">Optional user ID to only return that specific member of the kitchen.</param>
         /// <response code="200">List of kitchen members</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet("{kitchenId}/users")]
@@ -50,7 +52,7 @@ namespace FoodApp.Controllers
         /// Adds a user to the kitchen. Required access code, to locate kitchen and grant access as inspector to it
         /// </summary>
         /// <param name="request">User and role assignment data</param>
-        /// <response code="200"></response>
+        /// <response code="200">The user was added to the kitchen.</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost("users")]
         public IActionResult AddUserToKitchen([FromBody] KitchenUserAddRequest request)

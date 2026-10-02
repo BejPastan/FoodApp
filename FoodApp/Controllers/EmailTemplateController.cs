@@ -30,14 +30,14 @@ namespace FoodApp.Controllers
         /// <summary>
         /// Retrieves a single email template by identifier.
         /// </summary>
-        /// <param name="identifier">Either the numeric ID or the unique name of the template.</param>
+        /// <param name="id">The unique identifier (GUID) of the template.</param>
         /// <returns>The requested email template if found.</returns>
         /// <response code="200">Returns the requested email template.</response>
         /// <response code="401">Unauthorized - valid authentication token required.</response>
         /// <response code="403">Forbidden - user does not have admin role required for this operation.</response>
-        /// <response code="404">Not Found - template with the specified identifier does not exist.</response>
+        /// <response code="404">Not Found - template with the specified ID does not exist.</response>
         /// <remarks>
-        /// Requires admin role authentication. Identifier can be either the integer ID or the template name.
+        /// Requires admin role authentication. Returns the template matching the supplied GUID.
         /// </remarks>
         [HttpGet("api/email-templates/{id}")]
         public IActionResult GetTemplate(Guid id)

@@ -11,11 +11,6 @@ namespace FoodApp.Controllers
     /// including ingredients, steps, and meal associations. Also provides functionality for recipe selection
     /// to avoid repetition in meal planning.
     /// </summary>
-    /// <remarks>
-    /// Initializes a new instance of the <see cref="RecipeController"/> class.
-    /// </remarks>
-    /// <param name="service">The recipe service for data operations.</param>
-    /// <param name="authService">The authentication service for permission checks.</param>
     [ApiController]
     public class RecipeController(IRecipeService service, IAuthService authService) : Controller
     {
@@ -30,8 +25,8 @@ namespace FoodApp.Controllers
         /// <param name="name">Optional name to search for (partial match, case-insensitive).</param>
         /// <param name="page">Page number for pagination (default: 1).</param>
         /// <param name="perPage">Number of items per page (default: 25, max: 100).</param>
-        /// <param name="mealNames"></param>
-        /// <param name="tags"></param>
+        /// <param name="mealNames">Optional array of meal type names to filter recipes by.</param>
+        /// <param name="tags">Optional array of tag names to filter recipes by.</param>
         /// <returns>A list of recipes matching the search criteria with full details including ingredients, steps, and associated meals.</returns>
         /// <response code="200">Returns the list of matching recipes.</response>
         /// <response code="401">Unauthorized - valid authentication token required.</response>
