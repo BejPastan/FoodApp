@@ -12,3 +12,6 @@
 launchSettings.json
 FoodApp/appsettings.json
 /publish
+/FoodAppTests/bin
+/FoodAppTests/obj
+/FoodAppTests/obj

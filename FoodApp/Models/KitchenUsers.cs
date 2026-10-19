@@ -37,8 +37,8 @@ namespace FoodApp.Models
         /// <summary>
         /// User ID to add to kitchen
         /// </summary>
-        public Guid UserId { get; set; }
-        public string AccessCode { get; set; }
+        public Guid userId { get; set; }
+        public string accessCode { get; set; }
     }
 
     /// <summary>

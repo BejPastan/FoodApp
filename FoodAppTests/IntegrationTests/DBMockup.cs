@@ -12,6 +12,8 @@ namespace FoodAppTests.IntegrationTests
     {
         public MsSqlContainer _container;
 
+        public string ConnectionString;
+
         public async Task DisposeAsync()
         {
             await _container.DisposeAsync();
@@ -22,21 +24,39 @@ namespace FoodAppTests.IntegrationTests
             _container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04").Build();
             await _container.StartAsync();
             string connectionString = _container.GetConnectionString();
-            SetupDB(connectionString);
+            ConnectionString = SetupDB(connectionString);
         }
 
-        private void SetupDB(string connectionString)
+        private string SetupDB(string baseConnectionString)
         {
-            EnsureDatabase.For.SqlDatabase(connectionString);
+            var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(baseConnectionString)
+            {
+                InitialCatalog = "free-sql-db-2905813"
+            };
+            string targetConnectionString = builder.ConnectionString;
+
+            EnsureDatabase.For.SqlDatabase(targetConnectionString);
 
             var upgrader = DeployChanges.To
-                .SqlDatabase(connectionString)
+                .SqlDatabase(targetConnectionString)
                 .WithScriptsEmbeddedInAssembly(System.Reflection.Assembly.GetExecutingAssembly())
                 .WithTransactionPerScript()
                 .LogToConsole()
                 .Build();
 
             var result = upgrader.PerformUpgrade();
+
+            if (!result.Successful)
+            {
+                throw result.Error;
+            }
+            return builder.ConnectionString;
         }
+    }
+
+    [CollectionDefinition("Database collection")]
+    public class DatabaseCollection : ICollectionFixture<DBMockup>
+    {
+
     }
 }

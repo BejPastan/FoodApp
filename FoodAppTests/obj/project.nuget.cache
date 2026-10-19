@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "lFolSP0RYGQ=",
+  "dgSpecHash": "nPi9y7AiBf4=",
   "success": true,
   "projectFilePath": "C:\\Users\\BejPastan\\Documents\\Projekty\\Programowanie\\FoodApp\\FoodAppTests\\FoodAppTests.csproj",
   "expectedPackageFiles": [
@@ -19,6 +19,7 @@
     "C:\\Users\\BejPastan\\.nuget\\packages\\docker.dotnet.enhanced.npipe\\4.3.3\\docker.dotnet.enhanced.npipe.4.3.3.nupkg.sha512",
     "C:\\Users\\BejPastan\\.nuget\\packages\\docker.dotnet.enhanced.unix\\4.3.3\\docker.dotnet.enhanced.unix.4.3.3.nupkg.sha512",
     "C:\\Users\\BejPastan\\.nuget\\packages\\docker.dotnet.enhanced.x509\\4.3.3\\docker.dotnet.enhanced.x509.4.3.3.nupkg.sha512",
+    "C:\\Users\\BejPastan\\.nuget\\packages\\fluentassertions\\8.11.0\\fluentassertions.8.11.0.nupkg.sha512",
     "C:\\Users\\BejPastan\\.nuget\\packages\\mailkit\\4.15.1\\mailkit.4.15.1.nupkg.sha512",
     "C:\\Users\\BejPastan\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\9.0.14\\microsoft.aspnetcore.authentication.jwtbearer.9.0.14.nupkg.sha512",
     "C:\\Users\\BejPastan\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.10\\microsoft.aspnetcore.openapi.9.0.10.nupkg.sha512",

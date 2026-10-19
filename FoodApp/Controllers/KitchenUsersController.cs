@@ -60,12 +60,12 @@ namespace FoodApp.Controllers
             var requestingUserId = Authentication.GetUserIdFromHeader(Request)
                 ?? throw new UnauthorizedAccessException("Authentication required");
 
-            if(request.AccessCode == "")
+            if(request.accessCode == "")
             {
                 throw new ArgumentException("access code cannot be empty");
             }
 
-            var added = _kitchenUsersService.JoinKitchen(request.UserId, request.AccessCode);
+            var added = _kitchenUsersService.JoinKitchen(request.userId, request.accessCode);
             return Ok(added);
         }
 

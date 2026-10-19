@@ -242,6 +242,19 @@
           "lib/net9.0/Microsoft.Net.Http.Client.dll": {}
         }
       },
+      "FluentAssertions/8.11.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/FluentAssertions.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/FluentAssertions.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
       "MailKit/4.15.1": {
         "type": "package",
         "dependencies": {
@@ -1881,6 +1894,31 @@
         "lib/netstandard2.1/Docker.DotNet.X509.dll",
         "lib/netstandard2.1/Docker.DotNet.X509.xml",
         "lib/netstandard2.1/Microsoft.Net.Http.Client.dll"
+      ]
+    },
+    "FluentAssertions/8.11.0": {
+      "sha512": "dZqOxys9uY/0vO5BAwFtDECkFNSr9vWGwHa1fwZyuM1xAMbI4wiPTUBR2nH5e6R2/bQkXegxFY1B/oU1yqNNOw==",
+      "type": "package",
+      "path": "fluentassertions/8.11.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "FluentAssertions.png",
+        "LICENSE",
+        "fluentassertions.8.11.0.nupkg.sha512",
+        "fluentassertions.nuspec",
+        "lib/net47/FluentAssertions.dll",
+        "lib/net47/FluentAssertions.pdb",
+        "lib/net47/FluentAssertions.xml",
+        "lib/net6.0/FluentAssertions.dll",
+        "lib/net6.0/FluentAssertions.pdb",
+        "lib/net6.0/FluentAssertions.xml",
+        "lib/netstandard2.0/FluentAssertions.dll",
+        "lib/netstandard2.0/FluentAssertions.pdb",
+        "lib/netstandard2.0/FluentAssertions.xml",
+        "lib/netstandard2.1/FluentAssertions.dll",
+        "lib/netstandard2.1/FluentAssertions.pdb",
+        "lib/netstandard2.1/FluentAssertions.xml"
       ]
     },
     "MailKit/4.15.1": {
@@ -3928,6 +3966,7 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "FluentAssertions >= 8.11.0",
       "FoodApp >= 1.0.0",
       "Microsoft.NET.Test.Sdk >= 17.12.0",
       "Testcontainers.MsSql >= 4.15.0",
@@ -3992,6 +4031,10 @@
       "net9.0": {
         "targetAlias": "net9.0",
         "dependencies": {
+          "FluentAssertions": {
+            "target": "Package",
+            "version": "[8.11.0, )"
+          },
           "Microsoft.NET.Test.Sdk": {
             "target": "Package",
             "version": "[17.12.0, )"

@@ -4,6 +4,7 @@ namespace FoodApp.Models
     {
         public Guid id { get; set; }
         public string name { get; set; } = string.Empty;
+        public DateTime update_at { get; set; }
 
         public override string ToString()
         {

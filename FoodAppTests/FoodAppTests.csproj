@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\db_v0000.sql" />
     <EmbeddedResource Include="Scripts\db_v0001.sql" />
     <EmbeddedResource Include="Scripts\db_v0002.sql" />
     <EmbeddedResource Include="Scripts\db_v0003.sql" />
@@ -18,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
     <PackageReference Include="dbup-sqlserver" Version="6.0.16" />
+    <PackageReference Include="FluentAssertions" Version="8.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="Testcontainers.MsSql" Version="4.15.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
@@ -25,7 +25,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\FoodApp\FoodApp.csproj"/>
+		<ProjectReference Include="..\FoodApp\FoodApp.csproj" />
 	</ItemGroup>
 
   <ItemGroup>

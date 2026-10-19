@@ -31,7 +31,7 @@ namespace FoodApp.Repositories
         public FoodType CreateFoodType(string name)
         {
             var sql = "INSERT INTO food_type (name) OUTPUT INSERTED.* VALUES (@name);";
-            var list = DBConnector.QueryDatabase<FoodType>(sql, new { name = name ?? string.Empty }).ToList();
+            var list = DBConnector.QueryDatabase<FoodType>(sql, new { name = name }).ToList();
             if (list.Count > 0) return list[0];
             throw new Exception("Insert failed for food_type");
         }
