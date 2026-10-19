@@ -71,7 +71,7 @@ namespace FoodApp.Repositories
 
         public Kitchen? GetKitchenByAccessCode(string accessCode)
         {
-            string sql = "SELECT * FROM Kitchen k WHERE k.accessCode = @accessCode";
+            string sql = "SELECT * FROM Kitchens k WHERE k.accessCode = @accessCode";
             var resp = DBConnector.QueryDatabase<Kitchen>(sql, new { accessCode }).FirstOrDefault();
             if(resp != null)
             {
