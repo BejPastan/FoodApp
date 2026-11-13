@@ -67,11 +67,11 @@ namespace FoodApp.Repositories
         }
 
         /// <inheritdoc/>
-        public RecipeRecord[] GetRecipesToChoose(Guid userId, Guid mealId, int excludedWeeks)
+        public RecipeRecord[] GetRecipesToChoose(Guid kitchenId, Guid mealId, int excludedWeeks)
         {
             DateTime cutOffDate = DateTime.Now.AddDays(-excludedWeeks * 7);
-            string sql = "With recipe_usage AS (Select rm.recipeId, COUNT(um.recipeId) eaten from recipe_meal rm JOIN meal ON meal.id = rm.mealId LEFT JOIN user_meals um ON um.recipeId = rm.recipeId AND um.mealDate >= @cutDate AND um.userId = @userId WHERE meal.id = @mealId GROUP BY rm.recipeId),ranked_recipes AS (SELECT TOP(3) ROW_NUMBER() OVER(ORDER BY ru.eaten asc, NEWID()) as rank_order, ru.recipeId as recipeId FROM recipe_usage ru ORDER BY rank_order) SELECT * FROM recipe WHERE recipe.id IN(SELECT ranked_recipes.recipeId FROM ranked_recipes);";
-            Recipe[] recipes = DBConnector.QueryDatabase<Recipe>(sql, new { cutDate = cutOffDate, mealId = mealId, userId = userId }).ToArray();
+            string sql = "With recipe_usage AS (Select rm.recipeId, COUNT(um.recipeId) eaten from recipe_meal rm JOIN meal ON meal.id = rm.mealId LEFT JOIN user_meals um ON um.recipeId = rm.recipeId AND um.mealDate >= @cutDate AND um.kitchenId = @kitchenId WHERE meal.id = @mealId GROUP BY rm.recipeId),ranked_recipes AS (SELECT TOP(3) ROW_NUMBER() OVER(ORDER BY ru.eaten asc, NEWID()) as rank_order, ru.recipeId as recipeId FROM recipe_usage ru ORDER BY rank_order) SELECT * FROM recipe WHERE recipe.id IN(SELECT ranked_recipes.recipeId FROM ranked_recipes);";
+            Recipe[] recipes = DBConnector.QueryDatabase<Recipe>(sql, new { cutDate = cutOffDate, mealId = mealId, kitchenId = kitchenId }).ToArray();
             Console.WriteLine($"recipeCount in repo: {recipes.Length}");
             return recipes;
         }
