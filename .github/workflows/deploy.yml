@@ -3,7 +3,7 @@ name: Build and Deploy .NET App to AlwaysData
 on:
   push:
     branches:
-      - backend  # Runs automatically whenever you push code to main
+      - main  # Runs automatically whenever you push code to main
 
 jobs:
   build-and-deploy:
