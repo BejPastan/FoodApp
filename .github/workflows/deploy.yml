@@ -35,16 +35,12 @@ jobs:
       # Remove appsettings.Development.json before deployment
       - name: Clean unnecessary files
         run: rm -f ./publish/appsettings.Development.json
-      - name: Add AlwaysData to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.B_FTP_URL }} >> ~/.ssh/known_hosts
       
       - name: Deploy via SFTP
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.B_FTP_PASS }}
-          ARGS: "-avz --delete -e 'ssh -o IdentitiesOnly=yes'"
+          ARGS: "-avz --delete"
           SOURCE: "publish/"
           REMOTE_HOST: ${{ secrets.B_FTP_URL }}
           REMOTE_USER: ${{ secrets.B_FTP_USER }}
