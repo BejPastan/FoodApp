@@ -22,7 +22,7 @@ jobs:
           dotnet-version: '9.0.x'
       # 3 install tools
       - name: Restore Dependencies
-        run: dotnet restore food_app/Food_App.csproj
+        run: dotnet restore FoodApp/FoodApp.csproj
         
         # 0. Migrate database
       - name: Clean Output Directory
@@ -30,7 +30,7 @@ jobs:
 
       # 3. Publish as a Self-Contained Linux App
       - name: Publish App
-        run: dotnet publish food_app/Food_App.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o ./publish
+        run: dotnet publish FoodApp/FoodApp.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o ./publish
 
 
       # Remove appsettings.Development.json before deployment
