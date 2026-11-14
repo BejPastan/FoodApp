@@ -48,6 +48,6 @@ jobs:
           SOURCE: "publish/"
           REMOTE_HOST: ${{ secrets.B_FTP_URL }}
           REMOTE_USER: ${{ secrets.B_FTP_USER }}
-          TARGET: "www/larp_website/"
+          TARGET: "www/food_app/"
           SCRIPT_AFTER: |
-            chmod +x www/larp_website/Larp_Website
+            chmod +x www/food_app/FoodApp
