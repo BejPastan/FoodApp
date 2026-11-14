@@ -20,9 +20,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
-      # 3 install tools
-      - name: Install EF Tool
-        run: dotnet tool install --global dotnet-ef
 
       - name: Restore Dependencies
         run: dotnet restore FoodApp/FoodApp.csproj
