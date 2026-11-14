@@ -41,7 +41,7 @@ jobs:
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.B_FTP_PASS }}
-          ARGS: "-avz --delete"
+          ARGS: "-avz --delete -e 'ssh -o IdentitiesOnly=yes'"
           SOURCE: "publish/"
           REMOTE_HOST: ${{ secrets.B_FTP_URL }}
           REMOTE_USER: ${{ secrets.B_FTP_USER }}
